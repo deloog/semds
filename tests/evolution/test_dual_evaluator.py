@@ -200,22 +200,14 @@ def bad_func(x, y):
         from evolution.dual_evaluator import DualEvaluator
 
         evaluator = DualEvaluator()
-        # 高内生得分（静态质量很好）但低外生得分（行为不一致）
-        # 添加类型注解和文档字符串提高静态得分
+        # 高静态质量（类型注解+文档）但错误行为
         code = '''
-"""Calculator module."""
+"""Calculator module.\"\"\"
+
 
 def calculate(a: int, b: int) -> int:
-    """Calculate something.
-
-    Args:
-        a: First number
-        b: Second number
-
-    Returns:
-        Always returns 10
-    """
-    # Always returns 10 to pass simple tests - cheating!
+    \"\"\"Calculate sum of two integers.\"\"\"
+    # Cheating: always returns 10
     return 10
 '''
         report = evaluator.evaluate(
@@ -224,11 +216,8 @@ def calculate(a: int, b: int) -> int:
             requirements=["Returns a + b"],
         )
 
-        # 应该检测到Goodhart现象（高静态得分，低一致性）
-        # 或者至少有较低的最终得分
-        if not report["goodhart_detected"]:
-            # 如果没有触发Goodhart，至少最终得分应该较低
-            assert report["final_score"] < 0.7
+        # 应该检测到Goodhart现象（高静态分+低一致性）
+        assert report["goodhart_detected"] is True
 
 
 # =============================================================================
@@ -240,7 +229,7 @@ class TestDualEvaluatorScoreCalculation:
     """得分计算测试（P0优先级）"""
 
     def test_final_score_is_weighted_average(self):
-        """测试最终得分是加权平均（考虑Goodhart惩罚）"""
+        """测试最终得分是加权平均"""
         from evolution.dual_evaluator import DualEvaluator
 
         evaluator = DualEvaluator()
@@ -258,13 +247,8 @@ def func(x):
         extrinsic = report["extrinsic_score"]
         final = report["final_score"]
 
-        # 无Goodhart时，最终得分应该在两者之间
-        # 有Goodhart时，最终得分可能低于两者
-        if not report["goodhart_detected"]:
-            assert min(intrinsic, extrinsic) <= final <= max(intrinsic, extrinsic)
-        else:
-            # Goodhart惩罚会降低得分
-            assert final <= max(intrinsic, extrinsic)
+        # 最终得分应该在两者之间（即使考虑Goodhart惩罚）
+        assert min(intrinsic, extrinsic) <= final <= max(intrinsic, extrinsic)
 
     def test_goodhart_penalty_reduces_final_score(self):
         """测试Goodhart惩罚降低最终得分"""
@@ -348,7 +332,9 @@ class TestDualEvaluatorReportDetails:
         evaluator = DualEvaluator()
         code = "def func(): pass"
         report = evaluator.evaluate(
-            code=code, function_signature="func()", requirements=[]
+            code=code,
+            function_signature="func()",
+            requirements=[],
         )
 
         assert "intrinsic_details" in report
@@ -361,7 +347,9 @@ class TestDualEvaluatorReportDetails:
         evaluator = DualEvaluator()
         code = "def func(): pass"
         report = evaluator.evaluate(
-            code=code, function_signature="func()", requirements=[]
+            code=code,
+            function_signature="func()",
+            requirements=[],
         )
 
         assert "extrinsic_details" in report
@@ -422,7 +410,9 @@ class TestDualEvaluatorEdgeCases:
 
         evaluator = DualEvaluator()
         report = evaluator.evaluate(
-            code="", function_signature="func()", requirements=[]
+            code="",
+            function_signature="func()",
+            requirements=[],
         )
 
         assert report["final_score"] == 0.0
@@ -433,7 +423,9 @@ class TestDualEvaluatorEdgeCases:
 
         evaluator = DualEvaluator()
         report = evaluator.evaluate(
-            code="def broken(", function_signature="broken()", requirements=[]
+            code="def broken(",
+            function_signature="broken()",
+            requirements=[],
         )
 
         assert report["intrinsic_score"] == 0.0
@@ -446,7 +438,9 @@ class TestDualEvaluatorEdgeCases:
         evaluator = DualEvaluator()
         code = "result = eval('1 + 1')"
         report = evaluator.evaluate(
-            code=code, function_signature="run()", requirements=[]
+            code=code,
+            function_signature="run()",
+            requirements=[],
         )
 
         # 应该检测危险模式
@@ -463,15 +457,17 @@ class TestDualEvaluatorEdgeCases:
 from typing import Union
 
 
-def calculate(a: Union[int, float], b: Union[int, float], op: str) -> Union[int, float]:
+def calculate(
+    a: Union[int, float], b: Union[int, float], op: str
+) -> Union[int, float]:
     \"\"\"Perform calculation.\":param op: Operation (+, -, *, /)\":return: Result\"\"\"
-    if op == '+':
+    if op == "+":
         return a + b
-    elif op == '-':
+    elif op == "-":
         return a - b
-    elif op == '*':
+    elif op == "*":
         return a * b
-    elif op == '/':
+    elif op == "/":
         try:
             return a / b
         except ZeroDivisionError:

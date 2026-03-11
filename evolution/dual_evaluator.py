@@ -48,7 +48,10 @@ class DualEvaluator:
     评分权重：
     - 内生评估：40%
     - 外生评估：40%
-    - Goodhart惩罚：根据置信度调整
+    - Goodhart惩罚：在范围内降低得分
+
+    约束：
+    - 最终得分必须在 [min(内生,外生), max(内生,外生)] 范围内
 
     Example:
         >>> evaluator = DualEvaluator()
@@ -66,9 +69,6 @@ class DualEvaluator:
     WEIGHT_INTRINSIC = 0.4
     WEIGHT_EXTRINSIC = 0.4
     WEIGHT_GOODHART_PENALTY = 0.2  # 当检测到Goodhart时应用的惩罚权重
-
-    # Goodhart惩罚系数
-    GOODHART_PENALTY_FACTOR = 0.5  # Goodhart检测后最终得分乘以这个系数
 
     def __init__(
         self,
@@ -118,7 +118,9 @@ class DualEvaluator:
 
         # 2. 外生评估（行为一致性）
         extrinsic_result = self.extrinsic_evaluator.evaluate(
-            code=code, function_signature=function_signature, requirements=requirements
+            code=code,
+            function_signature=function_signature,
+            requirements=requirements,
         )
         extrinsic_score = extrinsic_result["score"]
 
@@ -173,8 +175,10 @@ class DualEvaluator:
         """计算最终得分
 
         计算逻辑：
-        1. 基础得分 = 内生 × 权重 + 外生 × 权重
-        2. 如果检测到Goodhart，应用惩罚
+        1. 基础得分 = 加权平均（内生40% + 外生40%）/ 80%
+        2. 如果检测到Goodhart，在有效范围内应用惩罚
+
+        约束：最终得分必须在 [min(内生,外生), max(内生,外生)] 范围内
 
         Args:
             intrinsic_score: 内生评估得分
@@ -184,27 +188,29 @@ class DualEvaluator:
         Returns:
             最终得分 (0-1)
         """
+        # 计算有效范围
+        score_min = min(intrinsic_score, extrinsic_score)
+        score_max = max(intrinsic_score, extrinsic_score)
+
         # 基础加权得分（归一化到0-1）
-        # 内生和外生各占40%，剩余20%由Goodhart检测影响
         base_score = (
             self.WEIGHT_INTRINSIC * intrinsic_score
             + self.WEIGHT_EXTRINSIC * extrinsic_score
         ) / (self.WEIGHT_INTRINSIC + self.WEIGHT_EXTRINSIC)
 
         if not goodhart_result.is_goodhart:
-            return base_score
+            # 无Goodhart，直接返回加权得分（限制在范围内）
+            return max(score_min, min(score_max, base_score))
 
-        # 检测到Goodhart，应用惩罚
+        # 检测到Goodhart，应用惩罚（在范围内降低）
         # 惩罚程度基于置信度
         penalty_factor = 1.0 - (
             goodhart_result.confidence * self.WEIGHT_GOODHART_PENALTY
         )
         penalized_score = base_score * penalty_factor
 
-        # 确保惩罚后的得分不超过基础得分
-        final_score = min(penalized_score, base_score * self.GOODHART_PENALTY_FACTOR)
-
-        return max(0.0, min(1.0, final_score))
+        # 确保惩罚后的得分在有效范围内
+        return max(score_min, min(score_max, penalized_score))
 
     def _create_zero_report(self, reason: str) -> Dict[str, Any]:
         """创建零分报告
