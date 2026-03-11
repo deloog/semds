@@ -14,7 +14,7 @@ Test coverage targets:
 import ast
 import os
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -50,12 +50,12 @@ class TestGetTimestamp:
 
     def test_timestamp_is_recent(self):
         """Test that timestamp is close to current time."""
-        before = datetime.utcnow()
+        before = datetime.now(timezone.utc)
         result = _get_timestamp()
-        after = datetime.utcnow()
+        after = datetime.now(timezone.utc)
 
-        # Parse the result (remove Z suffix)
-        result_time = datetime.fromisoformat(result.replace("Z", ""))
+        # Parse the result (replace Z with +00:00 for ISO format)
+        result_time = datetime.fromisoformat(result.replace("Z", "+00:00"))
 
         assert before <= result_time <= after
 
@@ -557,9 +557,9 @@ class TestAppendAuditLog:
         audit_file = tmp_path / "audit.log"
         monkeypatch.setattr("core.kernel.AUDIT_LOG_PATH", audit_file)
 
-        before = datetime.utcnow()
+        before = datetime.now(timezone.utc)
         append_audit_log("/path/file.py", "content", "WRITE", True)
-        after = datetime.utcnow()
+        after = datetime.now(timezone.utc)
 
         log_content = audit_file.read_text()
         # Timestamp should be in brackets at start

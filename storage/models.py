@@ -10,7 +10,7 @@ SQLAlchemy数据模型定义，对应规格文档第六章。
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     JSON,
@@ -35,7 +35,7 @@ def generate_uuid() -> str:
 
 def get_current_timestamp() -> datetime:
     """获取当前UTC时间。"""
-    return datetime.utcnow()
+    return datetime.now(timezone.utc)
 
 
 class Task(Base):  # type: ignore[misc, valid-type]

@@ -3,7 +3,7 @@
 测试Task, Generation, StrategyState模型。
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 import pytest
@@ -52,8 +52,10 @@ class TestUUIDAndTimestamp:
 
     def test_get_current_timestamp_is_utc(self):
         """测试get_current_timestamp返回UTC时间"""
+        from datetime import timezone
+
         ts = get_current_timestamp()
-        assert ts.tzinfo is None  # utcnow()返回naive datetime
+        assert ts.tzinfo == timezone.utc  # 返回带时区的datetime
 
 
 class TestTaskModel:
@@ -362,7 +364,7 @@ class TestStrategyStateModel:
         self, db_session: "Session", sample_task: Task
     ):
         """测试使用所有字段创建StrategyState"""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         state = StrategyState(
             task_id=sample_task.id,
             strategy_key="model_claude_temp_0.5",

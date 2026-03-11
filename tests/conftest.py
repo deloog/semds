@@ -220,3 +220,12 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "docker: marks tests that require Docker")
     config.addinivalue_line("markers", "api: marks tests that test API endpoints")
     config.addinivalue_line("markers", "evolution: marks tests for evolution logic")
+
+
+# 忽略非测试类的警告
+def pytest_collection_modifyitems(config, items):
+    """修改测试项，忽略特定警告"""
+    for item in items:
+        # 忽略TestRunner和TestResult的收集警告
+        if item.name in ("TestRunner", "TestResult"):
+            item.add_marker(pytest.mark.skip(reason="Not a test class"))

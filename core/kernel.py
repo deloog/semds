@@ -13,7 +13,7 @@ import ast
 import hashlib
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -23,7 +23,7 @@ AUDIT_LOG_PATH = Path(__file__).parent / "audit.log"
 
 def _get_timestamp() -> str:
     """获取ISO格式时间戳。"""
-    return datetime.utcnow().isoformat() + "Z"
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _validate_python_syntax(content: str) -> tuple[bool, Optional[str]]:
@@ -228,7 +228,7 @@ def safe_write(filepath: str, content: str) -> dict:
     # Layer 1: 备份
     backup_path = None
     if filepath_obj.exists():
-        timestamp_str = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+        timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
         backup_path = str(filepath_obj) + f".bak.{timestamp_str}"
         try:
             shutil.copy2(filepath, backup_path)
