@@ -36,8 +36,8 @@
 | **P3-IMPL-02** | StrategyOptimizer 实现 | 实现 | 3h | P3-TEST-02 | ✅ |
 | **P3-TEST-03** | 内生评估测试 | 测试 | 2h | - | ✅ |
 | **P3-IMPL-03** | IntrinsicEvaluator 实现 | 实现 | 2h | P3-TEST-03 | ✅ |
-| **P3-TEST-04** | 外生评估测试 | 测试 | 3h | - | ⬜ |
-| **P3-IMPL-04** | ExtrinsicEvaluator 实现 | 实现 | 3h | P3-TEST-04 | ⬜ |
+| **P3-TEST-04** | 外生评估测试 | 测试 | 3h | - | ✅ |
+| **P3-IMPL-04** | ExtrinsicEvaluator 实现 | 实现 | 3h | P3-TEST-04 | ✅ |
 | **P3-TEST-05** | Goodhart检测测试 | 测试 | 2h | - | ✅ |
 | **P3-IMPL-05** | GoodhartDetector 实现 | 实现 | 2h | P3-TEST-05 | ✅ |
 | **P3-TEST-06** | 双轨评估器集成测试 | 测试 | 2h | P3-IMPL-03~05 | ⬜ |
