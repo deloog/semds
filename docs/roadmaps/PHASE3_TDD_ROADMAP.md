@@ -19,6 +19,7 @@
 ❌ 先写实现后补测试
 ❌ 测试覆盖率 < 100%（新代码）
 ❌ 提交前不运行完整检查
+❌ 测试不通过时禁止修改测试文件，确须修改，应请示并给出诚实且充分理由。
 ```
 
 ---
@@ -29,12 +30,12 @@
 
 | ID | 任务名称 | 类型 | 估算 | 依赖 | 状态 |
 |----|----------|------|------|------|------|
-| **P3-TEST-01** | Thompson Sampling 策略臂测试 | 测试 | 2h | - | ⬜ |
-| **P3-IMPL-01** | StrategyArm 实现 | 实现 | 2h | P3-TEST-01 | ⬜ |
-| **P3-TEST-02** | 策略优化器测试 | 测试 | 2h | P3-IMPL-01 | ⬜ |
-| **P3-IMPL-02** | StrategyOptimizer 实现 | 实现 | 3h | P3-TEST-02 | ⬜ |
-| **P3-TEST-03** | 内生评估测试 | 测试 | 2h | - | ⬜ |
-| **P3-IMPL-03** | IntrinsicEvaluator 实现 | 实现 | 2h | P3-TEST-03 | ⬜ |
+| **P3-TEST-01** | Thompson Sampling 策略臂测试 | 测试 | 2h | - | ✅ |
+| **P3-IMPL-01** | StrategyArm 实现 | 实现 | 2h | P3-TEST-01 | ✅ |
+| **P3-TEST-02** | 策略优化器测试 | 测试 | 2h | P3-IMPL-01 | ✅ |
+| **P3-IMPL-02** | StrategyOptimizer 实现 | 实现 | 3h | P3-TEST-02 | ✅ |
+| **P3-TEST-03** | 内生评估测试 | 测试 | 2h | - | ✅ |
+| **P3-IMPL-03** | IntrinsicEvaluator 实现 | 实现 | 2h | P3-TEST-03 | ✅ |
 | **P3-TEST-04** | 外生评估测试 | 测试 | 3h | - | ⬜ |
 | **P3-IMPL-04** | ExtrinsicEvaluator 实现 | 实现 | 3h | P3-TEST-04 | ⬜ |
 | **P3-TEST-05** | Goodhart检测测试 | 测试 | 2h | - | ⬜ |
@@ -736,6 +737,6 @@ make check-strict  # 运行完整检查
 
 | 日期 | 完成任务 | 进度 | 备注 |
 |------|----------|------|------|
-| | | 0% | | |
+| 2026-03-11 | P3-TEST-01~P3-IMPL-03 | 27% | StrategyArm, StrategyOptimizer, IntrinsicEvaluator 完成 |
 
 **最后更新**: 2026-03-11
