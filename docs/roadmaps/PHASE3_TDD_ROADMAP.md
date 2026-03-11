@@ -38,8 +38,8 @@
 | **P3-IMPL-03** | IntrinsicEvaluator 实现 | 实现 | 2h | P3-TEST-03 | ✅ |
 | **P3-TEST-04** | 外生评估测试 | 测试 | 3h | - | ⬜ |
 | **P3-IMPL-04** | ExtrinsicEvaluator 实现 | 实现 | 3h | P3-TEST-04 | ⬜ |
-| **P3-TEST-05** | Goodhart检测测试 | 测试 | 2h | - | ⬜ |
-| **P3-IMPL-05** | GoodhartDetector 实现 | 实现 | 2h | P3-TEST-05 | ⬜ |
+| **P3-TEST-05** | Goodhart检测测试 | 测试 | 2h | - | ✅ |
+| **P3-IMPL-05** | GoodhartDetector 实现 | 实现 | 2h | P3-TEST-05 | ✅ |
 | **P3-TEST-06** | 双轨评估器集成测试 | 测试 | 2h | P3-IMPL-03~05 | ⬜ |
 | **P3-IMPL-06** | DualEvaluator 集成实现 | 实现 | 2h | P3-TEST-06 | ⬜ |
 | **P3-TEST-07** | 终止条件测试 | 测试 | 2h | - | ⬜ |
@@ -738,5 +738,6 @@ make check-strict  # 运行完整检查
 | 日期 | 完成任务 | 进度 | 备注 |
 |------|----------|------|------|
 | 2026-03-11 | P3-TEST-01~P3-IMPL-03 | 27% | StrategyArm, StrategyOptimizer, IntrinsicEvaluator 完成 |
+| 2026-03-11 | P3-TEST-04~P3-IMPL-05 | 45% | ExtrinsicEvaluator, GoodhartDetector 完成 |
 
 **最后更新**: 2026-03-11
