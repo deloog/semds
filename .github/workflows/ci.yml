@@ -134,13 +134,17 @@ jobs:
           # 存储模块必须≥85%
           coverage report --include="storage/*" --fail-under=85 || exit 1
 
+      # Codecov上传（可选，需要设置CODECOV_TOKEN）
       - name: Upload coverage report
         uses: codecov/codecov-action@v4
         if: matrix.python-version == '3.11'
+        continue-on-error: true  # 不阻断CI
         with:
           file: ./coverage.xml
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # ============================================================================
   # 阶段4: 安全扫描
