@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # SEMDS 主服务
+  semds:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: semds-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=sqlite:///app/storage/semds.db
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - PYTHONPATH=/app
+      - UVICORN_RELOAD=true
+    env_file:
+      - .env
+    depends_on:
+      - sandbox
+      - db
+    networks:
+      - semds-network
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # 代码执行沙盒
+  sandbox:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.sandbox
+    container_name: semds-sandbox
+    image: semds-sandbox:latest
+    # 不自动启动，由程序控制
+    entrypoint: ["tail", "-f", "/dev/null"]
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    network_mode: none
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    mem_limit: 128m
+    cpus: 1.0
+    networks:
+      - semds-network
+
+  # SQLite 数据库（用于数据持久化）
+  db:
+    image: busybox:latest
+    container_name: semds-db-holder
+    volumes:
+      - semds-data:/data
+    command: "true"
+    networks:
+      - semds-network
+
+  # 监控前端（可选）
+  monitor:
+    image: nginx:alpine
+    container_name: semds-monitor
+    ports:
+      - "8080:80"
+    volumes:
+      - ./monitor:/usr/share/nginx/html:ro
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - semds
+    networks:
+      - semds-network
+
+  # Redis（Phase 5 多任务并发时使用）
+  redis:
+    image: redis:7-alpine
+    container_name: semds-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - semds-network
+    profiles:
+      - phase5
+
+volumes:
+  semds-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  semds-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

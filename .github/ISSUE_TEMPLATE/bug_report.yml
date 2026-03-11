@@ -1,0 +1,85 @@
+name: 🐛 Bug 报告
+description: 报告一个问题或缺陷
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢报告问题！请填写以下信息帮助我们快速定位和修复。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 清晰简洁地描述问题
+      placeholder: 发生了什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 提供详细的复现步骤
+      placeholder: |
+        1. 执行 '...'
+        2. 输入 '...'
+        3. 看到错误
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+      description: 清晰描述你期望发生什么
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 清晰描述实际发生了什么
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 错误日志
+      description: 粘贴相关的错误日志或堆栈跟踪
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本信息
+      description: 运行的SEMDS版本
+      placeholder: v1.1.0
+
+  - type: input
+    id: python
+    attributes:
+      label: Python版本
+      placeholder: 3.11.4
+
+  - type: input
+    id: os
+    attributes:
+      label: 操作系统
+      placeholder: Ubuntu 22.04 / Windows 11 / macOS 14
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 自查清单
+      description: 提交前请确认
+      options:
+        - label: 我已搜索现有Issue，确认这不是重复问题
+          required: true
+        - label: 我已尝试最新版本，问题仍然存在
+          required: true
+        - label: 我已提供最小复现步骤
+          required: true

@@ -1,0 +1,41 @@
+# SEMDS - Self-Evolving Meta-Development System
+# Python 3.11+ required
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+
+# Data & Storage
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+pydantic>=2.5.0
+
+# Docker & Sandbox
+docker>=7.0.0
+
+# AI/LLM
+anthropic>=0.8.0
+openai>=1.0.0
+
+# Utilities
+jinja2>=3.1.0
+python-dotenv>=1.0.0
+click>=8.1.0
+rich>=13.7.0
+numpy>=1.26.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+httpx>=0.25.0
+
+# Code Quality (development)
+# Install with: pip install -e ".[dev]"
+# black>=23.0.0
+# isort>=5.12.0
+# mypy>=1.7.0
+# flake8>=6.0.0
+# pylint>=3.0.0
+# pre-commit>=3.5.0

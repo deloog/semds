@@ -1,0 +1,60 @@
+name: 🔧 开发任务
+description: 创建一个开发或重构任务（供开发团队使用）
+title: "[Task] "
+labels: ["task"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 任务描述
+      description: 清晰描述需要完成的任务
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      description: 任务完成的验收条件（必须可验证）
+      placeholder: |
+        - [ ] 条件1
+        - [ ] 条件2
+        - [ ] 测试覆盖率≥X%
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级
+      options:
+        - P0: 阻塞（必须立即处理）
+        - P1: 高（本周内完成）
+        - P2: 中（两周内完成）
+        - P3: 低（可延期）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: layer
+    attributes:
+      label: 目标架构层
+      options:
+        - Layer 0: Core Kernel
+        - Layer 1: Evolution Engine
+        - Layer 1: Skills Library
+        - Layer 2: Application Factory
+        - 跨层
+        - 基础设施
+
+  - type: input
+    id: estimate
+    attributes:
+      label: 预估工作量
+      placeholder: 例如：2天，4小时
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 依赖项
+      description: 此任务依赖的其他任务或Issue

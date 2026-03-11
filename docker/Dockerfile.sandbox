@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+LABEL maintainer="SEMDS Team"
+LABEL description="SEMDS Code Execution Sandbox"
+
+# 创建非 root 用户
+RUN useradd -m -s /bin/bash sandbox
+
+# 安装最小依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 pytest
+RUN pip install --no-cache-dir pytest==7.4.0 pytest-timeout==2.2.0
+
+# 设置工作目录
+WORKDIR /workspace
+
+# 创建必要的目录
+RUN mkdir -p /workspace/code /workspace/tests /workspace/output \
+    && chown -R sandbox:sandbox /workspace
+
+# 切换到非 root 用户
+USER sandbox
+
+# 默认命令（保持容器运行）
+CMD ["tail", "-f", "/dev/null"]

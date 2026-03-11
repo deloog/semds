@@ -1,0 +1,56 @@
+{
+  "summary": {
+    "total_experiments": 2,
+    "timestamp": "2026-03-06T14:13:11.320062"
+  },
+  "results": [
+    {
+      "experiment_id": "A-141047",
+      "group": "A",
+      "backend": "deepseek",
+      "consilium": false,
+      "timestamp": "2026-03-06T14:10:47.455837",
+      "generation": {
+        "success": true,
+        "time_sec": 4.96,
+        "code_length": 337
+      },
+      "testing": {
+        "success": false,
+        "error": "pytest not found. Please install pytest: pip install pytest"
+      },
+      "generated_code": "def calculate(a: float, b: float, op: str) -> float:\n    if op == '+':\n        return a + b\n    elif op == '-':\n        return a - b\n    elif op == '*':\n        return a * b\n    elif op == '/':\n        if b == 0:\n            raise ValueError(\"Division by zero\")\n        return a / b\n    else:\n        raise ValueError(\"Invalid operator\")"
+    },
+    {
+      "experiment_id": "B-141055",
+      "group": "B",
+      "backend": "deepseek",
+      "consilium": true,
+      "timestamp": "2026-03-06T14:10:55.506089",
+      "deliberation": {
+        "recommendation": "proceed_with_caution",
+        "safety_level": "medium",
+        "time_sec": 65.36,
+        "approved_actions": [
+          "基于明确的PRD（限定输入输出、错误处理）进行开发。",
+          "采用安全的手动表达式解析技术方案（如双栈法）。"
+        ]
+      },
+      "generation": {
+        "success": true,
+        "time_sec": 5.16,
+        "code_length": 337
+      },
+      "review": {
+        "safety_level": "low",
+        "risk_level": "low",
+        "time_sec": 65.22
+      },
+      "testing": {
+        "success": false,
+        "error": "pytest not found. Please install pytest: pip install pytest"
+      },
+      "generated_code": "def calculate(a: float, b: float, op: str) -> float:\n    if op == '+':\n        return a + b\n    elif op == '-':\n        return a - b\n    elif op == '*':\n        return a * b\n    elif op == '/':\n        if b == 0:\n            raise ValueError(\"Division by zero\")\n        return a / b\n    else:\n        raise ValueError(\"Invalid operator\")"
+    }
+  ]
+}

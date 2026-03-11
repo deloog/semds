@@ -1,0 +1,17 @@
+{
+  "experiment_id": "A-141047",
+  "group": "A",
+  "backend": "deepseek",
+  "consilium": false,
+  "timestamp": "2026-03-06T14:10:47.455837",
+  "generation": {
+    "success": true,
+    "time_sec": 4.96,
+    "code_length": 337
+  },
+  "testing": {
+    "success": false,
+    "error": "pytest not found. Please install pytest: pip install pytest"
+  },
+  "generated_code": "def calculate(a: float, b: float, op: str) -> float:\n    if op == '+':\n        return a + b\n    elif op == '-':\n        return a - b\n    elif op == '*':\n        return a * b\n    elif op == '/':\n        if b == 0:\n            raise ValueError(\"Division by zero\")\n        return a / b\n    else:\n        raise ValueError(\"Invalid operator\")"
+}

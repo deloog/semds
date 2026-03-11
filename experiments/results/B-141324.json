@@ -1,0 +1,30 @@
+{
+  "experiment_id": "B-141324",
+  "group": "B",
+  "backend": "deepseek",
+  "consilium": true,
+  "timestamp": "2026-03-06T14:13:24.440349",
+  "consilium_deliberation": {
+    "recommendation": "proceed_with_caution",
+    "safety_level": "medium",
+    "time_seconds": 57.2
+  },
+  "generation": {
+    "success": true,
+    "time_seconds": 5.23,
+    "code_length": 337
+  },
+  "consilium_review": {
+    "safety_level": "low",
+    "time_seconds": 74.7
+  },
+  "testing": {
+    "pass_rate": 1.0,
+    "passed_count": 9,
+    "failed_count": 0,
+    "total_count": 9,
+    "failed_tests": [],
+    "time_seconds": 0.01
+  },
+  "generated_code": "def calculate(a: float, b: float, op: str) -> float:\n    if op == '+':\n        return a + b\n    elif op == '-':\n        return a - b\n    elif op == '*':\n        return a * b\n    elif op == '/':\n        if b == 0:\n            raise ValueError(\"Division by zero\")\n        return a / b\n    else:\n        raise ValueError(\"Invalid operator\")"
+}

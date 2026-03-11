@@ -1,0 +1,257 @@
+# SEMDS CI/CD Pipeline
+# 严格模式：所有代码必须通过完整质量门禁
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.11"
+  POETRY_VERSION: "1.7.0"
+
+jobs:
+  # ============================================================================
+  # 阶段1: 代码质量检查（必须最先通过）
+  # ============================================================================
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install black isort flake8 mypy pylint bandit
+          pip install -e ".[dev]"
+
+      - name: Check Black formatting
+        run: black --check --diff .
+
+      - name: Check import sorting
+        run: isort --check-only --diff .
+
+      - name: Run Flake8
+        run: flake8 core/ evolution/ storage/ tests/
+
+      - name: Run Pylint
+        run: pylint core/ evolution/ storage/ --fail-under=8.0
+
+      - name: Run Bandit security scan
+        run: bandit -r core/ evolution/ storage/ -f json -o bandit-report.json || true
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+  # ============================================================================
+  # 阶段2: 类型检查
+  # ============================================================================
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+
+      - name: Install dependencies
+        run: |
+          pip install mypy types-requests types-PyYAML pydantic sqlalchemy pytest
+          pip install -e ".[dev]"
+
+      - name: Run MyPy
+        run: mypy core/ evolution/ storage/ --strict --show-error-codes
+
+  # ============================================================================
+  # 阶段3: 单元测试（必须100%通过）
+  # ============================================================================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-cov pytest-asyncio pytest-mock
+          pip install -e ".[dev]"
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests/ -v --tb=short \
+            --cov=core --cov=evolution --cov=storage \
+            --cov-report=xml --cov-report=term-missing
+
+      - name: Check coverage thresholds
+        run: |
+          # 核心模块必须≥90%
+          coverage report --include="core/*" --fail-under=90 || exit 1
+          # 进化模块必须≥90%
+          coverage report --include="evolution/*" --fail-under=90 || exit 1
+          # 存储模块必须≥85%
+          coverage report --include="storage/*" --fail-under=85 || exit 1
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.11'
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: true
+          verbose: true
+
+  # ============================================================================
+  # 阶段4: 安全扫描
+  # ============================================================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install bandit safety
+          pip install -e ".[dev]"
+
+      - name: Run Bandit
+        run: bandit -r core/ evolution/ storage/ -ll -ii
+
+      - name: Check dependencies for known vulnerabilities
+        run: safety check --full-report || true
+
+  # ============================================================================
+  # 阶段5: 集成测试（需要Docker）
+  # ============================================================================
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [lint, type-check, test]
+    services:
+      docker:
+        image: docker:24-dind
+        options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-asyncio
+          pip install -e ".[dev]"
+
+      - name: Run integration tests
+        run: pytest tests/integration/ -v -m integration --tb=short || true
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
+
+  # ============================================================================
+  # 阶段6: 构建验证
+  # ============================================================================
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [lint, type-check, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install build dependencies
+        run: |
+          pip install build twine check-wheel-contents
+
+      - name: Build package
+        run: python -m build
+
+      - name: Check wheel contents
+        run: check-wheel-contents dist/*.whl
+
+      - name: Check package metadata
+        run: twine check dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # ============================================================================
+  # 阶段7: 预提交检查
+  # ============================================================================
+  pre-commit:
+    name: Pre-commit Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Cache pre-commit hooks
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure

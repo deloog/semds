@@ -1,0 +1,69 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.extraPaths": ["${workspaceFolder}"],
+
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestArgs": ["tests", "-v"],
+
+  "python.formatting.provider": "black",
+  "python.formatting.blackPath": "${workspaceFolder}/.venv/Scripts/black.exe",
+  "python.formatting.blackArgs": ["--line-length", "88"],
+
+  "python.sortImports.path": "${workspaceFolder}/.venv/Scripts/isort.exe",
+  "python.sortImports.args": ["--profile", "black"],
+
+  "python.linting.enabled": true,
+  "python.linting.mypyEnabled": true,
+  "python.linting.mypyPath": "${workspaceFolder}/.venv/Scripts/mypy.exe",
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Path": "${workspaceFolder}/.venv/Scripts/flake8.exe",
+  "python.linting.pylintEnabled": true,
+  "python.linting.pylintPath": "${workspaceFolder}/.venv/Scripts/pylint.exe",
+
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "editor.rulers": [88],
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.mypy_cache": true,
+    "**/*.pyc": true,
+    "**/.coverage": true,
+    "**/htmlcov": true,
+    "**/.venv": true,
+    "**/node_modules": true
+  },
+
+  "search.exclude": {
+    "**/__pycache__": true,
+    "**/.venv": true,
+    "**/htmlcov": true,
+    "**/dist": true,
+    "**/build": true
+  },
+
+  "terminal.integrated.env.windows": {
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  },
+
+  "emmet.includeLanguages": {
+    "jinja-html": "html"
+  },
+
+  "yaml.schemas": {
+    "https://json.schemastore.org/docker-compose.json": "docker-compose.yml"
+  },
+  "python-envs.defaultEnvManager": "ms-python.python:system"
+}

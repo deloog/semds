@@ -1,0 +1,64 @@
+{
+  "summary": {
+    "total_experiments": 2,
+    "timestamp": "2026-03-06T14:16:49.163055"
+  },
+  "results": [
+    {
+      "experiment_id": "A-141417",
+      "group": "A",
+      "backend": "deepseek",
+      "consilium": false,
+      "timestamp": "2026-03-06T14:14:17.869976",
+      "generation": {
+        "success": true,
+        "time_sec": 5.03,
+        "code_length": 337
+      },
+      "testing": {
+        "success": true,
+        "pass_rate": 1.0,
+        "passed": 10,
+        "failed": 0,
+        "total": 10,
+        "failed_tests": []
+      },
+      "generated_code": "def calculate(a: float, b: float, op: str) -> float:\n    if op == '+':\n        return a + b\n    elif op == '-':\n        return a - b\n    elif op == '*':\n        return a * b\n    elif op == '/':\n        if b == 0:\n            raise ValueError(\"Division by zero\")\n        return a / b\n    else:\n        raise ValueError(\"Invalid operator\")"
+    },
+    {
+      "experiment_id": "B-141425",
+      "group": "B",
+      "backend": "deepseek",
+      "consilium": true,
+      "timestamp": "2026-03-06T14:14:25.961675",
+      "deliberation": {
+        "recommendation": "proceed_with_caution",
+        "safety_level": "low",
+        "time_sec": 63.81,
+        "approved_actions": [
+          "基于澄清后的PRD（参数化输入，非字符串表达式）进行开发",
+          "实现包含基本错误处理的四则运算函数"
+        ]
+      },
+      "generation": {
+        "success": true,
+        "time_sec": 5.1,
+        "code_length": 337
+      },
+      "review": {
+        "safety_level": "low",
+        "risk_level": "low",
+        "time_sec": 74.22
+      },
+      "testing": {
+        "success": true,
+        "pass_rate": 1.0,
+        "passed": 10,
+        "failed": 0,
+        "total": 10,
+        "failed_tests": []
+      },
+      "generated_code": "def calculate(a: float, b: float, op: str) -> float:\n    if op == '+':\n        return a + b\n    elif op == '-':\n        return a - b\n    elif op == '*':\n        return a * b\n    elif op == '/':\n        if b == 0:\n            raise ValueError(\"Division by zero\")\n        return a / b\n    else:\n        raise ValueError(\"Invalid operator\")"
+    }
+  ]
+}

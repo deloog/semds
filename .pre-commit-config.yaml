@@ -1,0 +1,231 @@
+# SEMDS Pre-commit Configuration
+# 严格模式：所有检查必须通过后方能提交
+# 参见: https://pre-commit.com
+
+minimum_pre_commit_version: "3.5.0"
+default_stages: [pre-commit]
+
+repos:
+  # ============================================================================
+  # 基础文件检查（最轻量，最先运行）
+  # ============================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: "Trim trailing whitespace"
+        exclude: "\.md$|\.svg$"
+      - id: end-of-file-fixer
+        name: "Fix end of files"
+        exclude: "\.svg$"
+      - id: check-yaml
+        name: "Check YAML syntax"
+      - id: check-toml
+        name: "Check TOML syntax"
+      - id: check-json
+        name: "Check JSON syntax"
+      - id: check-added-large-files
+        name: "Check for large files"
+        args: ["--maxkb=500"]
+      - id: check-merge-conflict
+        name: "Check for merge conflicts"
+      - id: check-case-conflict
+        name: "Check for case conflicts"
+      - id: mixed-line-ending
+        name: "Fix line endings"
+        args: ["--fix=lf"]
+      - id: detect-private-key
+        name: "Detect private keys"
+      - id: debug-statements
+        name: "Check for debug statements"
+      - id: check-executables-have-shebangs
+        name: "Check shebangs"
+      - id: check-shebang-scripts-are-executable
+        name: "Check executable permissions"
+
+  # ============================================================================
+  # Python 代码格式化（Black - 不容错）
+  # ============================================================================
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        name: "Black formatter"
+        language_version: python3.11
+        args: ["--line-length=88", "--check"]
+        exclude: "(migrations/|tests/fixtures/|\.venv/|venv/)"
+        # 注意：使用 --check 确保只检查不自动修改，强制开发者手动运行格式化
+
+  # ============================================================================
+  # Python 导入排序（isort - 不容错）
+  # ============================================================================
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: "isort import sorting"
+        args: ["--profile=black", "--line-length=88", "--check-only"]
+        exclude: "(migrations/|\.venv/|venv/)"
+
+  # ============================================================================
+  # Python 类型检查（MyPy - 严格模式）
+  # ============================================================================
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        name: "MyPy type check"
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
+          - pydantic>=2.5.0
+          - sqlalchemy>=2.0.0
+          - pytest>=7.4.0
+          - anthropic>=0.8.0
+          - docker>=7.0.0
+        args:
+          - --strict
+          - --show-error-codes
+          - --show-column-numbers
+          - --ignore-missing-imports
+        exclude: "(tests/|migrations/|demo_|\.venv/|venv/)"
+        # 严格模式：不允许任何类型错误
+
+  # ============================================================================
+  # Python 代码风格检查（Flake8）
+  # ============================================================================
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        name: "Flake8 style check"
+        additional_dependencies:
+          - flake8-docstrings
+          - flake8-bugbear
+          - flake8-comprehensions
+          - flake8-import-order
+          - flake8-broken-line
+          - flake8-return
+          - pep8-naming
+        args:
+          - --max-line-length=88
+          - --extend-ignore=E203,W503
+          # E203: whitespace before ':' (与black冲突)
+          # W503: line break before binary operator (与black冲突)
+          - --max-complexity=10
+          - --max-function-length=50
+        exclude: "(tests/|migrations/|demo_|\.venv/|venv/)"
+
+  # ============================================================================
+  # Python 静态分析（Pylint - 高阈值）
+  # ============================================================================
+  - repo: https://github.com/PyCQA/pylint
+    rev: v3.0.3
+    hooks:
+      - id: pylint
+        name: "Pylint static analysis"
+        args:
+          - --fail-under=9.0
+          - --max-line-length=88
+          - --disable=C0114,C0115,C0116,R0903,R0913,W0511
+          # 禁用说明：
+          # C0114: missing-module-docstring
+          # C0115: missing-class-docstring
+          # C0116: missing-function-docstring
+          # R0903: too-few-public-methods
+          # R0913: too-many-arguments
+          # W0511: fixme
+        exclude: "(tests/|migrations/|demo_|\.venv/|venv/)"
+
+  # ============================================================================
+  # Python 安全扫描（Bandit - 不容错）
+  # ============================================================================
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        name: "Bandit security scan"
+        args:
+          - -c
+          - pyproject.toml
+          - -ll
+          - -ii
+          # -ll: 报告中危和高危
+          # -ii: 报告中危和高危内置函数
+        additional_dependencies: ["bandit[toml]"]
+        exclude: "(tests/|migrations/|demo_|\.venv/|venv/)"
+
+  # ============================================================================
+  # 测试运行（快速单元测试）
+  # ============================================================================
+  - repo: local
+    hooks:
+      - id: pytest-check
+        name: "Pytest quick check"
+        entry: python -m pytest tests/unit -x -q --tb=line
+        language: system
+        pass_filenames: false
+        always_run: true
+        # 只在有Python文件变更时运行
+        files: '\.(py)$'
+
+  # ============================================================================
+  # 文档格式检查
+  # ============================================================================
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: "Prettier formatting"
+        types_or: [markdown, yaml, json]
+        args: ["--prose-wrap=always", "--print-width=88", "--check"]
+
+  # ============================================================================
+  # 提交信息规范
+  # ============================================================================
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+        name: "Commit message check"
+        stages: [commit-msg]
+        # 提交信息格式：
+        # feat: 新功能
+        # fix: 修复
+        # docs: 文档
+        # style: 格式（不影响代码逻辑）
+        # refactor: 重构
+        # test: 测试
+        # chore: 构建/工具
+        # ci: CI/CD
+        # perf: 性能优化
+        # security: 安全修复
+
+  # ============================================================================
+  # 自定义钩子：项目特定检查
+  # ============================================================================
+  - repo: local
+    hooks:
+      - id: check-version-consistency
+        name: "Check version consistency"
+        entry: python scripts/check_version.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        files: '(pyproject.toml|__init__\.py)'
+
+      - id: check-layer-architecture
+        name: "Check layer architecture"
+        entry: python scripts/check_architecture.py
+        language: system
+        pass_filenames: false
+        always_run: false
+        files: '^core/.*\.py$'
+        # 检查是否违反Layer 0不可修改原则
+
+      - id: check-todo-format
+        name: "Check TODO format"
+        entry: grep -n "TODO\|FIXME\|XXX" --include="*.py" -r . || true
+        language: system
+        pass_filenames: false
+        always_run: true

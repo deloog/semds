@@ -1,0 +1,43 @@
+{
+  "recommendations": [
+    // Python 开发
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "ms-python.isort",
+    "ms-python.mypy-type-checker",
+    
+    // 代码质量
+    "ms-python.flake8",
+    "ms-python.pylint",
+    
+    // 测试
+    "hbenl.vscode-test-explorer",
+    "LittleFoxTeam.vscode-python-test-adapter",
+    
+    // Docker
+    "ms-azuretools.vscode-docker",
+    
+    // 编辑增强
+    "eamodio.gitlens",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    
+    // REST API 测试
+    "humao.rest-client",
+    
+    // 前端（监控界面开发）
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "formulahendry.auto-rename-tag",
+    
+    // 文件图标
+    "PKief.material-icon-theme",
+    
+    // 主题
+    "zhuangtongfa.material-theme"
+  ],
+  "unwantedRecommendations": [
+    "ms-python.autopep8",
+    "ms-python.yapf"
+  ]
+}

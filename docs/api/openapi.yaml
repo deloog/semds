@@ -1,0 +1,555 @@
+openapi: 3.0.3
+info:
+  title: SEMDS API
+  description: |
+    自进化元开发系统 (Self-Evolving Meta-Development System) API
+    
+    提供任务管理、进化控制、监控数据等功能。
+  version: 1.1.0
+  contact:
+    name: SEMDS Team
+    url: https://github.com/semds/semds
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: 本地开发服务器
+  - url: http://localhost:8000/api
+    description: API 前缀路径
+
+paths:
+  /health:
+    get:
+      summary: 健康检查
+      description: 检查服务是否正常运行
+      operationId: health_check
+      tags:
+        - system
+      responses:
+        "200":
+          description: 服务正常
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/tasks:
+    get:
+      summary: 列出所有任务
+      description: 获取任务列表，支持按状态过滤
+      operationId: list_tasks
+      tags:
+        - tasks
+      parameters:
+        - name: status
+          in: query
+          description: 按状态过滤
+          schema:
+            $ref: "#/components/schemas/TaskStatus"
+        - name: limit
+          in: query
+          description: 返回数量限制
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+        - name: offset
+          in: query
+          description: 分页偏移
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 成功返回任务列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskResponse"
+
+    post:
+      summary: 创建新任务
+      description: 提交一个新的代码进化任务
+      operationId: create_task
+      tags:
+        - tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCreate"
+      responses:
+        "201":
+          description: 任务创建成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskResponse"
+        "400":
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/tasks/{task_id}:
+    get:
+      summary: 获取任务详情
+      description: 获取单个任务的详细信息
+      operationId: get_task
+      tags:
+        - tasks
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          description: 任务 ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功返回任务详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskDetailResponse"
+        "404":
+          description: 任务不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: 删除任务
+      description: 删除任务及其所有进化历史
+      operationId: delete_task
+      tags:
+        - tasks
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: 删除成功
+        "404":
+          description: 任务不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/tasks/{task_id}/start:
+    post:
+      summary: 启动进化
+      description: 开始执行代码进化任务
+      operationId: start_evolution
+      tags:
+        - evolution
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 进化已启动
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  task_id:
+                    type: string
+        "400":
+          description: 任务已在运行或其他错误
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: 任务不存在
+
+  /api/tasks/{task_id}/pause:
+    post:
+      summary: 暂停进化
+      description: 暂停正在运行的进化任务
+      operationId: pause_evolution
+      tags:
+        - evolution
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 进化已暂停
+        "400":
+          description: 任务未在运行
+        "404":
+          description: 任务不存在
+
+  /api/tasks/{task_id}/resume:
+    post:
+      summary: 恢复进化
+      description: 恢复暂停的进化任务
+      operationId: resume_evolution
+      tags:
+        - evolution
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 进化已恢复
+        "400":
+          description: 任务未暂停
+        "404":
+          description: 任务不存在
+
+  /api/tasks/{task_id}/abort:
+    post:
+      summary: 中止进化
+      description: 强制中止正在运行或暂停的进化任务
+      operationId: abort_evolution
+      tags:
+        - evolution
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 进化已中止
+        "404":
+          description: 任务不存在
+
+  /api/tasks/{task_id}/generations:
+    get:
+      summary: 获取进化历史
+      description: 获取任务的所有进化代记录
+      operationId: get_generations
+      tags:
+        - evolution
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 成功返回进化历史
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GenerationResponse"
+
+  /api/tasks/{task_id}/generations/{gen_id}:
+    get:
+      summary: 获取单代详情
+      description: 获取指定进化代的详细信息
+      operationId: get_generation
+      tags:
+        - evolution
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: gen_id
+          in: path
+          required: true
+          description: 进化代编号
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 成功返回代详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerationDetailResponse"
+
+  /api/tasks/{task_id}/best:
+    get:
+      summary: 获取最佳实现
+      description: 获取任务历史最高分对应的代码实现
+      operationId: get_best_solution
+      tags:
+        - evolution
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 成功返回最佳实现
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BestSolutionResponse"
+
+  /api/tasks/{task_id}/rollback/{gen_id}:
+    post:
+      summary: 回滚到指定代
+      description: 将代码回滚到指定的进化代
+      operationId: rollback_generation
+      tags:
+        - evolution
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: gen_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 回滚成功
+        "404":
+          description: 任务或代不存在
+
+  /api/stats:
+    get:
+      summary: 获取系统统计
+      description: 获取系统整体统计数据
+      operationId: get_system_stats
+      tags:
+        - system
+      responses:
+        "200":
+          description: 成功返回统计信息
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStats"
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "healthy"
+        version:
+          type: string
+          example: "1.1.0"
+        timestamp:
+          type: string
+          format: date-time
+
+    TaskStatus:
+      type: string
+      enum:
+        - pending
+        - running
+        - paused
+        - success
+        - failed
+        - aborted
+
+    TaskCreate:
+      type: object
+      required:
+        - name
+        - description
+        - target_function_signature
+        - test_code
+      properties:
+        name:
+          type: string
+          description: 任务名称
+          example: "calculator_evolution"
+        description:
+          type: string
+          description: 任务描述
+          example: "进化一个四则运算计算器"
+        target_function_signature:
+          type: string
+          description: 目标函数签名
+          example: "def calculate(a: float, b: float, op: str) -> float"
+        test_code:
+          type: string
+          description: 测试代码（pytest 格式）
+        success_criteria:
+          type: object
+          properties:
+            intrinsic_score_threshold:
+              type: number
+              default: 0.95
+            consistency_threshold:
+              type: number
+              default: 0.90
+            max_generations:
+              type: integer
+              default: 50
+        max_generations:
+          type: integer
+          default: 50
+          minimum: 1
+          maximum: 100
+
+    TaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: "#/components/schemas/TaskStatus"
+        current_generation:
+          type: integer
+        best_score:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    TaskDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/TaskResponse"
+        - type: object
+          properties:
+            target_function_signature:
+              type: string
+            test_file_path:
+              type: string
+            success_criteria:
+              type: object
+
+    GenerationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        gen_number:
+          type: integer
+        intrinsic_score:
+          type: number
+          description: 内生分（测试通过率）
+        extrinsic_score:
+          type: number
+          description: 外生分（一致性验证）
+        final_score:
+          type: number
+          description: 综合评分
+        goodhart_flag:
+          type: boolean
+          description: 是否触发 Goodhart 检测
+        created_at:
+          type: string
+          format: date-time
+
+    GenerationDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/GenerationResponse"
+        - type: object
+          properties:
+            code:
+              type: string
+              description: 生成的代码
+            strategy_used:
+              type: object
+              description: 使用的策略配置
+            test_results:
+              type: object
+              description: 各测试用例结果
+            execution_time_ms:
+              type: number
+            sandbox_logs:
+              type: string
+            git_commit_hash:
+              type: string
+
+    BestSolutionResponse:
+      type: object
+      properties:
+        generation:
+          type: integer
+          description: 最佳代数
+        score:
+          type: number
+          description: 最佳得分
+        code:
+          type: string
+          description: 代码实现
+
+    SystemStats:
+      type: object
+      properties:
+        total_tasks:
+          type: integer
+        active_tasks:
+          type: integer
+          description: 运行中的任务数
+        completed_tasks:
+          type: integer
+        total_generations:
+          type: integer
+          description: 所有任务的进化代总数
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+        code:
+          type: string
