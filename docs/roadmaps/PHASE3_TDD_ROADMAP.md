@@ -48,8 +48,8 @@
 | **P3-IMPL-08** | GitManager 实现 | 实现 | 2h | P3-TEST-08 | ✅ |
 | **P3-TEST-09** | 技能库测试 | 测试 | 2h | - | ✅ |
 | **P3-IMPL-09** | Skills Library 实现 | 实现 | 2h | P3-TEST-09 | ✅ |
-| **P3-TEST-10** | Orchestrator集成测试 | 测试 | 3h | P3-IMPL-01~09 | ⬜ |
-| **P3-IMPL-10** | EvolutionOrchestrator 实现 | 实现 | 4h | P3-TEST-10 | ⬜ |
+| **P3-TEST-10** | Orchestrator集成测试 | 测试 | 3h | P3-IMPL-01~09 | ✅ |
+| **P3-IMPL-10** | EvolutionOrchestrator 实现 | 实现 | 4h | P3-TEST-10 | ✅ |
 | **P3-TEST-11** | 端到端进化测试 | 测试 | 2h | P3-IMPL-10 | ⬜ |
 | **P3-DEMO** | 计算器实验运行 | 演示 | 2h | P3-TEST-11 | ⬜ |
 
