@@ -42,8 +42,8 @@
 | **P3-IMPL-05** | GoodhartDetector 实现 | 实现 | 2h | P3-TEST-05 | ✅ |
 | **P3-TEST-06** | 双轨评估器集成测试 | 测试 | 2h | P3-IMPL-03~05 | ✅ |
 | **P3-IMPL-06** | DualEvaluator 集成实现 | 实现 | 2h | P3-TEST-06 | ✅ |
-| **P3-TEST-07** | 终止条件测试 | 测试 | 2h | - | ⬜ |
-| **P3-IMPL-07** | TerminationChecker 实现 | 实现 | 2h | P3-TEST-07 | ⬜ |
+| **P3-TEST-07** | 终止条件测试 | 测试 | 2h | - | ✅ |
+| **P3-IMPL-07** | TerminationChecker 实现 | 实现 | 2h | P3-TEST-07 | ✅ |
 | **P3-TEST-08** | Git管理测试 | 测试 | 2h | - | ⬜ |
 | **P3-IMPL-08** | GitManager 实现 | 实现 | 2h | P3-TEST-08 | ⬜ |
 | **P3-TEST-09** | 技能库测试 | 测试 | 2h | - | ⬜ |
