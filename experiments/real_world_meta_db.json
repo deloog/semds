@@ -1,0 +1,19 @@
+{
+  "patterns": [
+    {
+      "pattern_id": "ac03bfeca608",
+      "task_type": "file_parser",
+      "error_type": "assertion",
+      "error_signature": "assertion:comments and empty lines not handled",
+      "original_code": "\ndef parse_config(filepath: str) -> dict:\n    \"\"\"解析配置文件（有缺陷版本）\"\"\"\n    result = {}\n    with open(filepath, 'r') as f:\n        for line in f:\n            line = line.strip()\n            # 缺陷1: 注释如果包含=会被错误解析\n            # 缺陷2: 不检查是否以#开头\n            if '=' in line:\n                key, value = line.split('=')\n                result[key.strip()] = value.strip()\n    return result\n",
+      "fixed_code": "\ndef parse_config(filepath: str) -> dict:\n    \"\"\"解析配置文件（修复版本）\"\"\"\n    result = {}\n    with open(filepath, 'r') as f:\n        for line in f:\n            line = line.strip()\n            # 修复1: 跳过空行\n            if not line:\n                continue\n            # 修复2: 跳过注释\n            if line.startswith('#'):\n                continue\n            # 修复3: 正确处理key=value\n            if '=' in line:\n                key, value = line.split('=', 1)\n                result[key.strip()] = value.strip()\n    retu",
+      "fix_description": "Add continue statements to skip empty lines and lines starting with #",
+      "success_rate": 1.0,
+      "usage_count": 1,
+      "created_at": "2026-03-14T18:28:06.181536",
+      "last_used": "2026-03-14T18:28:06.181536"
+    }
+  ],
+  "strategies": [],
+  "updated_at": "2026-03-14T18:28:06.182536"
+}

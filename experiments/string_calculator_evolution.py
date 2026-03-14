@@ -68,14 +68,14 @@ def check_environment():
     from core.env_loader import check_api_key
     ready, message = check_api_key()
     if not ready:
-        print(f"❌ {message}")
+        print(f"[FAIL] {message}")
         return False
     
     if not TEST_FILE_PATH.exists():
-        print(f"❌ 测试文件不存在: {TEST_FILE_PATH}")
+        print(f"[FAIL] 测试文件不存在: {TEST_FILE_PATH}")
         return False
     
-    print(f"✅ {message}")
+    print(f"[OK] {message}")
     return True
 
 
@@ -146,9 +146,9 @@ def run_evolution():
         # 初始化代码生成器
         try:
             code_generator = CodeGenerator()
-            print("✅ 代码生成器初始化成功")
+            print("[OK] 代码生成器初始化成功")
         except Exception as e:
-            print(f"⚠️ 使用Mock模式: {e}")
+            print(f"[WARN] 使用Mock模式: {e}")
             from tests.evolution.test_orchestrator import MockCodeGenerator
             code_generator = MockCodeGenerator()
         
@@ -160,10 +160,10 @@ def run_evolution():
         )
         
         # 测试代码
-        test_code = open(TEST_FILE_PATH).read()
+        test_code = open(TEST_FILE_PATH, encoding='utf-8').read()
         
         # 运行进化
-        print("\n🚀 开始进化...\n")
+        print("\n[START] 开始进化...\n")
         
         result = orchestrator.evolve(
             requirements=TASK_SPEC['requirements'],
@@ -181,7 +181,7 @@ def run_evolution():
         
         # 打印结果
         print("\n" + "="*70)
-        print("📊 实验结果")
+        print("[RESULT] 实验结果")
         print("="*70)
         print(f"总代数: {result.generations}")
         print(f"最佳得分: {result.best_score:.4f}")
@@ -190,7 +190,7 @@ def run_evolution():
         print(f"运行时间: {elapsed_time:.2f} 秒")
         print()
         
-        print("📈 进化轨迹:")
+        print("[HISTORY] 进化轨迹:")
         print("-"*70)
         print(f"{'Gen':<5} {'Score':<10} {'Passed':<10} {'Strategy':<20}")
         print("-"*70)
@@ -205,14 +205,14 @@ def run_evolution():
         
         # 显示最佳代码
         if result.best_code:
-            print("🏆 最佳代码:")
+            print("[BEST] 最佳代码:")
             print("="*70)
             print(result.best_code)
             print("="*70)
         
         # 验证进化路径
         print("\n" + "="*70)
-        print("🔍 进化路径验证")
+        print("[ANALYSIS] 进化路径验证")
         print("="*70)
         
         scores = [h.score for h in result.history]
@@ -226,9 +226,9 @@ def run_evolution():
             print(f"后期平均得分 (Gen 7+):  {late_avg:.4f}")
             
             if early_avg < mid_avg < late_avg:
-                print("\n✅ 观察到渐进式改进！")
+                print("\n[OK] 观察到渐进式改进！")
             else:
-                print("\n⚠️ 改进不明显或冷启动即成功")
+                print("\n[WARN] 改进不明显或冷启动即成功")
         
         # 保存报告
         report_path = PROJECT_ROOT / "experiments" / "results" / f"{task.id}_report.json"
@@ -257,10 +257,10 @@ def run_evolution():
         with open(report_path, 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
         
-        print(f"\n📝 报告已保存: {report_path}")
+        print(f"\n[REPORT] Report saved: {report_path}")
         
     except Exception as e:
-        print(f"\n❌ 实验出错: {e}")
+        print(f"\n[FAIL] 实验出错: {e}")
         import traceback
         traceback.print_exc()
         if task:

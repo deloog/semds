@@ -111,18 +111,18 @@ assert add(-5, -3) == -8, "Two negatives failed"
         gen_check = result.generations >= target_generations
         score_check = result.best_score >= target_score
         
-        print(f"✓ 运行 ≥{target_generations} 代: {result.generations} 代 "
+        print(f"[OK] 运行 ≥{target_generations} 代: {result.generations} 代 "
               f"{'PASS' if gen_check else 'FAIL'}")
-        print(f"✓ 最终得分 ≥{target_score}: {result.best_score:.4f} "
+        print(f"[OK] 最终得分 ≥{target_score}: {result.best_score:.4f} "
               f"{'PASS' if score_check else 'FAIL'}")
         print()
         
         if gen_check and score_check:
-            print("🎉 实验成功！Phase 3 目标达成！")
+            print("[SUCCESS] 实验成功！Phase 3 目标达成！")
         elif gen_check:
-            print("⚠️  实验部分成功：达到代数要求但得分未达标")
+            print("[WARN]  实验部分成功：达到代数要求但得分未达标")
         else:
-            print("⚠️  实验未完全成功：未达到代数或得分要求")
+            print("[WARN]  实验未完全成功：未达到代数或得分要求")
         
         print()
         print(f"结束时间: {datetime.now().isoformat()}")
@@ -132,7 +132,7 @@ assert add(-5, -3) == -8, "Two negatives failed"
         
     except Exception as e:
         elapsed_time = time.time() - start_time
-        print(f"❌ 实验失败: {e}")
+        print(f"[ERROR] 实验失败: {e}")
         print(f"运行时间: {elapsed_time:.2f} 秒")
         import traceback
         traceback.print_exc()

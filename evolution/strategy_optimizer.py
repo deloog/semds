@@ -1,185 +1,283 @@
 """
 SEMDS Strategy Optimizer - Phase 3
 
-Thompson Sampling策略优化器
-使用多臂老虎机算法选择最优生成策略
+Thompson Sampling strategy optimizer using multi-armed bandit algorithm.
 """
 
-import numpy as np
-from dataclasses import dataclass
-from typing import Dict, List
 import json
-import itertools
+import random
+from dataclasses import dataclass, asdict
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Any
 
 
 @dataclass
 class StrategyArm:
     """
-    Thompson Sampling策略臂
-
-    使用Beta分布进行采样，平衡探索与利用
-
+    Thompson Sampling strategy arm.
+    
+    Uses Beta distribution for balancing exploration and exploitation.
+    
     Attributes:
-        key: 策略组合的唯一标识
-        alpha: Beta分布的alpha参数（成功次数+先验）
-        beta: Beta分布的beta参数（失败次数+先验）
-        total_uses: 总使用次数
+        key: Unique identifier for strategy combination
+        name: Human-readable name
+        alpha: Beta distribution alpha (successes + prior)
+        beta: Beta distribution beta (failures + prior)
+        total_uses: Total number of times used
+        total_reward: Sum of all rewards (scores)
     """
-
+    
     key: str
+    name: str
     alpha: float = 1.0
     beta: float = 1.0
     total_uses: int = 0
-
+    total_reward: float = 0.0
+    
     def sample(self) -> float:
         """
-        从Beta分布采样
-
-        使用numpy的beta分布生成0-1之间的随机数。
-        alpha越高，倾向于产生更大的值（更可能选择）
-
+        Sample from Beta distribution.
+        
         Returns:
-            float: 0.0-1.0之间的采样值
+            float: Random value between 0 and 1
         """
-        return float(np.random.beta(self.alpha, self.beta))
-
-    def update(self, success: bool) -> None:
+        # Use random.betavariate for Beta distribution sampling
+        return random.betavariate(self.alpha, self.beta)
+    
+    def update(self, success: bool, reward: float = 0.0) -> None:
         """
-        更新策略性能
-
+        Update arm based on result.
+        
         Args:
-            success: 是否成功（得分超过阈值）
-
-        更新规则:
-        - 成功: alpha += 1
-        - 失败: beta += 1
-        - total_uses += 1
+            success: Whether the strategy succeeded
+            reward: Reward value (e.g., score)
         """
         if success:
             self.alpha += 1.0
         else:
             self.beta += 1.0
+        
         self.total_uses += 1
-
+        self.total_reward += reward
+    
     def expected_value(self) -> float:
         """
-        计算期望性能
-
-        Beta分布的期望值: E[X] = alpha / (alpha + beta)
-
+        Calculate expected value.
+        
         Returns:
-            float: 0.0-1.0之间的期望值
+            float: Expected reward (alpha / (alpha + beta))
         """
         return self.alpha / (self.alpha + self.beta)
-
-
-# =============================================================================
-# Placeholder for StrategyOptimizer (will be implemented in P3-IMPL-02)
-# =============================================================================
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary."""
+        return asdict(self)
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'StrategyArm':
+        """Create from dictionary."""
+        return cls(**data)
 
 
 class StrategyOptimizer:
     """
-    Thompson Sampling策略优化器 - 待实现
-
-    职责:
-    - 管理策略臂集合
-    - 选择下一策略（采样）
-    - 更新策略性能
-    - 任务间策略隔离
+    Thompson Sampling strategy optimizer.
+    
+    Manages a set of strategy arms and selects the best one
+    using Thompson Sampling algorithm.
+    
+    Example:
+        >>> optimizer = StrategyOptimizer("task_123")
+        >>> strategy = optimizer.select_strategy()
+        >>> # Use strategy...
+        >>> optimizer.update_strategy(strategy['key'], success=True, reward=0.95)
     """
-
+    
+    # Strategy configuration space
     STRATEGY_DIMENSIONS = {
         "mutation_type": ["conservative", "aggressive", "hybrid"],
         "validation_mode": ["lightweight", "comprehensive"],
-        "generation_temperature": [0.2, 0.5, 0.8],
+        "temperature": [0.2, 0.5, 0.8],
     }
-
-    def __init__(self, task_id: str):
+    
+    def __init__(self, task_id: str, storage_dir: str = "storage/strategies"):
         """
-        初始化策略优化器
-
+        Initialize strategy optimizer.
+        
         Args:
-            task_id: 任务ID，用于策略隔离
+            task_id: Task identifier for isolation
+            storage_dir: Directory to store strategy state
         """
         self.task_id = task_id
+        self.storage_path = Path(storage_dir) / f"{task_id}_strategies.json"
         self.arms: Dict[str, StrategyArm] = {}
+        
         self._initialize_arms()
-
+        self._load_state()
+    
     def _initialize_arms(self) -> None:
+        """Initialize all strategy arms."""
+        # Generate all combinations
+        for mutation in self.STRATEGY_DIMENSIONS["mutation_type"]:
+            for validation in self.STRATEGY_DIMENSIONS["validation_mode"]:
+                for temp in self.STRATEGY_DIMENSIONS["temperature"]:
+                    key = f"{mutation}_{validation}_{temp}"
+                    name = f"{mutation.title()} mutation, {validation} validation, T={temp}"
+                    
+                    if key not in self.arms:
+                        self.arms[key] = StrategyArm(
+                            key=key,
+                            name=name,
+                            alpha=1.0,  # Prior: 1 success
+                            beta=1.0,   # Prior: 1 failure
+                        )
+    
+    def select_strategy(self) -> Dict[str, Any]:
         """
-        初始化所有策略组合
-
-        生成所有可能的策略组合，为每个组合创建一个StrategyArm
-        """
-        keys = list(self.STRATEGY_DIMENSIONS.keys())
-        values = list(self.STRATEGY_DIMENSIONS.values())
-
-        for combo in itertools.product(*values):
-            strategy = dict(zip(keys, combo))
-            key = self._strategy_to_key(strategy)
-            self.arms[key] = StrategyArm(key=key)
-
-    def select_strategy(self) -> dict:
-        """
-        选择下一个策略
-
-        使用Thompson Sampling:
-        1. 从每个臂的Beta分布采样
-        2. 选择采样值最高的臂
-        3. 返回对应的策略配置
-
+        Select strategy using Thompson Sampling.
+        
+        Samples from each arm's Beta distribution and selects
+        the arm with highest sample value.
+        
         Returns:
-            dict: 策略配置字典
+            Dict with strategy configuration
         """
-        if not self.arms:
-            raise ValueError("No strategy arms initialized")
-
-        # 从每个臂采样，选择最大值
-        best_key = max(self.arms.keys(), key=lambda k: self.arms[k].sample())
-        return self._key_to_strategy(best_key)
-
-    def report_result(self, strategy: dict, success: bool, score: float) -> None:
+        # Sample from each arm
+        samples = {key: arm.sample() for key, arm in self.arms.items()}
+        
+        # Select arm with highest sample
+        selected_key = max(samples, key=samples.get)
+        selected_arm = self.arms[selected_key]
+        
+        # Parse strategy key
+        parts = selected_key.split("_")
+        mutation = parts[0]
+        validation = parts[1]
+        temperature = float(parts[2])
+        
+        return {
+            "key": selected_key,
+            "name": selected_arm.name,
+            "mutation_type": mutation,
+            "validation_mode": validation,
+            "temperature": temperature,
+            "expected_value": selected_arm.expected_value(),
+            "total_uses": selected_arm.total_uses,
+        }
+    
+    def update_strategy(self, key: str, success: bool, reward: float = 0.0) -> None:
         """
-        报告策略执行结果
-
+        Update strategy arm based on result.
+        
         Args:
-            strategy: 使用的策略配置
-            success: 是否成功（得分超过阈值）
-            score: 具体得分（用于日志/调试）
+            key: Strategy key
+            success: Whether the strategy succeeded
+            reward: Reward value (e.g., score)
         """
-        key = self._strategy_to_key(strategy)
         if key in self.arms:
-            self.arms[key].update(success)
-
-    def _strategy_to_key(self, strategy: dict) -> str:
+            self.arms[key].update(success, reward)
+            self._save_state()
+    
+    def report_result(self, strategy: Dict[str, Any], success: bool, score: float = 0.0) -> None:
         """
-        策略字典转字符串键
-
-        使用JSON格式，按键排序确保一致性
+        Report generation result to update strategy.
+        
+        Alias for update_strategy to match Orchestrator interface.
+        
+        Args:
+            strategy: Strategy dict (must contain 'key')
+            success: Whether generation succeeded
+            score: Score value as reward
         """
-        return json.dumps(strategy, sort_keys=True)
-
-    def _key_to_strategy(self, key: str) -> dict:
+        key = strategy.get("key") if isinstance(strategy, dict) else strategy
+        if key:
+            self.update_strategy(key, success, score)
+    
+    def get_best_strategy(self) -> Dict[str, Any]:
         """
-        字符串键转策略字典
-        """
-        return json.loads(key)
-
-    def get_arm_stats(self) -> List[dict]:
-        """
-        获取所有策略臂统计
-
+        Get strategy with highest expected value.
+        
         Returns:
-            List[dict]: 每个臂的统计信息
+            Dict with best strategy configuration
+        """
+        best_key = max(self.arms.keys(), key=lambda k: self.arms[k].expected_value())
+        best_arm = self.arms[best_key]
+        
+        parts = best_key.split("_")
+        return {
+            "key": best_key,
+            "name": best_arm.name,
+            "mutation_type": parts[0],
+            "validation_mode": parts[1],
+            "temperature": float(parts[2]),
+            "expected_value": best_arm.expected_value(),
+            "total_uses": best_arm.total_uses,
+            "total_reward": best_arm.total_reward,
+        }
+    
+    def get_all_strategies(self) -> List[Dict[str, Any]]:
+        """
+        Get all strategies with their stats.
+        
+        Returns:
+            List of strategy dicts
         """
         return [
             {
-                "key": arm.key,
+                "key": key,
+                "name": arm.name,
+                "expected_value": arm.expected_value(),
+                "total_uses": arm.total_uses,
                 "alpha": arm.alpha,
                 "beta": arm.beta,
-                "uses": arm.total_uses,
-                "expected": arm.expected_value(),
             }
-            for arm in self.arms.values()
+            for key, arm in sorted(self.arms.items())
         ]
+    
+    def _save_state(self) -> None:
+        """Save strategy state to file."""
+        try:
+            self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            data = {
+                "task_id": self.task_id,
+                "updated_at": datetime.now().isoformat(),
+                "arms": {key: arm.to_dict() for key, arm in self.arms.items()},
+            }
+            
+            with open(self.storage_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            print(f"[WARN] Failed to save strategy state: {e}")
+    
+    def _load_state(self) -> None:
+        """Load strategy state from file."""
+        if not self.storage_path.exists():
+            return
+        
+        try:
+            with open(self.storage_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Restore arm states
+            for key, arm_data in data.get("arms", {}).items():
+                if key in self.arms:
+                    self.arms[key] = StrategyArm.from_dict(arm_data)
+        
+        except Exception as e:
+            print(f"[WARN] Failed to load strategy state: {e}")
+
+
+# Convenience function
+def create_strategy_optimizer(task_id: str) -> StrategyOptimizer:
+    """
+    Create a strategy optimizer for a task.
+    
+    Args:
+        task_id: Task identifier
+        
+    Returns:
+        StrategyOptimizer instance
+    """
+    return StrategyOptimizer(task_id)

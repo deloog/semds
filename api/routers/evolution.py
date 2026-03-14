@@ -2,10 +2,11 @@
 
 提供进化控制操作：启动、暂停、恢复、中止。
 
-Phase 5: 已添加用户认证和权限控制
+Phase 5: 已添加用户认证和权限控制，以及真实的进化执行
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
+import asyncio
 
 from api.dependencies import get_db_session
 from api.auth.dependencies import get_current_user
@@ -15,7 +16,21 @@ from api.state import active_evolutions
 from api.routers.tasks import require_task_access
 from storage.models import Task
 
+# 导入进化执行器（新添加）
+try:
+    from api.evolution_runner import start_evolution_task, EvolutionRunner
+    EVOLUTION_RUNNER_AVAILABLE = True
+except ImportError as e:
+    import logging
+    logging.warning(f"EvolutionRunner not available: {e}")
+    EVOLUTION_RUNNER_AVAILABLE = False
+    start_evolution_task = None
+    EvolutionRunner = None
+
 router = APIRouter()
+
+# 存储运行中的进化任务 runners（用于暂停/中止）
+evolution_runners: dict[str, 'EvolutionRunner'] = {}
 
 
 def _get_task_or_404(db: Session, task_id: str) -> Task:
@@ -43,6 +58,7 @@ ALLOWED_RESUME_STATES = {TaskStatus.PAUSED, TaskStatus.FAILED}
 @router.post("/{task_id}/start")
 async def start_evolution(
     task_id: str,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ):
@@ -50,6 +66,7 @@ async def start_evolution(
     
     Args:
         task_id: 任务ID
+        background_tasks: FastAPI 后台任务
         db: 数据库会话
         current_user: 当前用户（自动注入）
     
@@ -67,19 +84,46 @@ async def start_evolution(
     if task.status == TaskStatus.RUNNING or task_id in active_evolutions:
         raise HTTPException(status_code=400, detail=ERROR_EVOLUTION_ALREADY_RUNNING)
     
-    # 标记为活跃进化（使用Dict存储以便存储更多信息）
+    # 检查是否有测试文件
+    if not task.test_file_path:
+        raise HTTPException(status_code=400, detail="Task has no test file configured")
+    
+    # 标记为活跃进化
     active_evolutions[task_id] = {
         "status": "running",
-        "started_at": None,  # TODO: 添加时间戳
+        "current_gen": 0,
+        "best_score": 0.0,
+        "progress": 0,
     }
     
     # 更新任务状态
     task.status = TaskStatus.RUNNING
     db.commit()
     
+    # 真正启动进化（关键修复！）
+    if EVOLUTION_RUNNER_AVAILABLE and start_evolution_task:
+        try:
+            runner = await start_evolution_task(task_id, max_generations=50)
+            evolution_runners[task_id] = runner
+        except Exception as e:
+            # 启动失败，清理状态
+            if task_id in active_evolutions:
+                del active_evolutions[task_id]
+            task.status = TaskStatus.FAILED
+            db.commit()
+            raise HTTPException(status_code=500, detail=f"Failed to start evolution: {str(e)}")
+    else:
+        # 进化执行器不可用，返回警告
+        return {
+            "message": "Evolution runner not available - evolution status updated only",
+            "task_id": task_id,
+            "warning": "Evolution runner module not loaded",
+        }
+    
     return {
         "message": MESSAGE_EVOLUTION_STARTED,
-        "task_id": task_id
+        "task_id": task_id,
+        "mode": "real" if EVOLUTION_RUNNER_AVAILABLE else "mock",
     }
 
 
@@ -180,6 +224,12 @@ async def abort_evolution(
     
     # 验证任务访问权限
     require_task_access(task, current_user)
+    
+    # 真正停止进化执行器（关键修复！）
+    if task_id in evolution_runners:
+        runner = evolution_runners[task_id]
+        runner.request_stop()
+        del evolution_runners[task_id]
     
     # 从活跃集合移除
     if task_id in active_evolutions:

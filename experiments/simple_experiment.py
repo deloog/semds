@@ -53,14 +53,14 @@ RESULTS_DIR = PROJECT_ROOT / "experiments" / "results"
 def check_environment():
     ready, message = check_api_key()
     if not ready:
-        print(f"❌ {message}")
+        print(f"[ERROR] {message}")
         return False
-    print(f"✓ {message}")
+    print(f"[OK] {message}")
     
     if not TEST_FILE_PATH.exists():
-        print(f"❌ 测试文件不存在: {TEST_FILE_PATH}")
+        print(f"[ERROR] 测试文件不存在: {TEST_FILE_PATH}")
         return False
-    print(f"✓ 测试文件: {TEST_FILE_PATH}")
+    print(f"[OK] 测试文件: {TEST_FILE_PATH}")
     
     return True
 
@@ -68,7 +68,7 @@ def check_environment():
 def run_single_experiment(group, backend, use_consilium):
     """运行单次实验"""
     print(f"\n{'='*60}")
-    print(f"🧪 Group {group} | Consilium: {'✅' if use_consilium else '❌'}")
+    print(f"🧪 Group {group} | Consilium: {'[DONE]' if use_consilium else '[ERROR]'}")
     print('='*60)
     
     result = {
@@ -135,7 +135,7 @@ def run_single_experiment(group, backend, use_consilium):
         "code_length": len(code)
     }
     
-    print(f"   ✓ 生成成功，长度: {len(code)} 字符")
+    print(f"   [OK] 生成成功，长度: {len(code)} 字符")
     print(f"   耗时: {gen_time:.2f}s")
     
     # Step 3: Consilium Review (仅 B 组)
@@ -171,14 +171,14 @@ def run_single_experiment(group, backend, use_consilium):
             "failed_tests": test_result["failed"],
         }
         
-        emoji = "🌟" if test_result["pass_rate"] >= 0.9 else "⚠️" if test_result["pass_rate"] >= 0.7 else "❌"
+        emoji = "🌟" if test_result["pass_rate"] >= 0.9 else "[WARN]" if test_result["pass_rate"] >= 0.7 else "[ERROR]"
         print(f"   {emoji} 通过: {result['testing']['passed']}/{result['testing']['total']}")
         print(f"   📊 通过率: {test_result['pass_rate']:.0%}")
         if test_result["failed"]:
-            print(f"   ❌ 失败: {', '.join(test_result['failed'][:3])}")
+            print(f"   [ERROR] 失败: {', '.join(test_result['failed'][:3])}")
     else:
         result["testing"] = {"success": False, "error": test_result.get("error")}
-        print(f"   ❌ 测试失败: {test_result.get('error')}")
+        print(f"   [ERROR] 测试失败: {test_result.get('error')}")
     
     result["generated_code"] = code
     return result
@@ -202,19 +202,19 @@ def print_summary(results):
     
     for r in results:
         group = r["group"]
-        consilium = "✅" if r["consilium"] else "❌"
+        consilium = "[DONE]" if r["consilium"] else "[ERROR]"
         testing = r.get("testing", {})
         
         if testing.get("success"):
             pass_rate = testing["pass_rate"]
-            emoji = "🌟" if pass_rate >= 0.9 else "⚠️" if pass_rate >= 0.7 else "❌"
+            emoji = "🌟" if pass_rate >= 0.9 else "[WARN]" if pass_rate >= 0.7 else "[ERROR]"
             print(f"\nGroup {group} {consilium} Consilium:")
             print(f"   {emoji} 通过率: {pass_rate:.0%} ({testing['passed']}/{testing['total']})")
             print(f"   ⏱️  生成时间: {r['generation']['time_sec']}s")
             if r.get("deliberation"):
                 print(f"   🧠 审议建议: {r['deliberation']['recommendation']}")
         else:
-            print(f"\nGroup {group}: ❌ 失败 - {testing.get('error', 'unknown')}")
+            print(f"\nGroup {group}: [ERROR] 失败 - {testing.get('error', 'unknown')}")
     
     # 对比
     print("\n" + "-"*60)
@@ -233,11 +233,11 @@ def print_summary(results):
         
         if b_rate > a_rate:
             improvement = (b_rate - a_rate) / a_rate * 100
-            print(f"\n🎉 Consilium 提升: +{improvement:.0f}%")
+            print(f"\n[SUCCESS] Consilium 提升: +{improvement:.0f}%")
         elif b_rate == a_rate:
             print(f"\n➡️  两组持平")
         else:
-            print(f"\n⚠️  本次实验 Consilium 组略低")
+            print(f"\n[WARN]  本次实验 Consilium 组略低")
     
     # 保存完整报告
     report_path = RESULTS_DIR / f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
@@ -280,7 +280,7 @@ def main():
     print_summary(results)
     
     print("\n" + "="*60)
-    print("🎉 实验完成!")
+    print("[SUCCESS] 实验完成!")
     print("="*60)
 
 

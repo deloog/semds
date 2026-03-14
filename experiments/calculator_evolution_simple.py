@@ -107,7 +107,7 @@ def run_evolution():
         
         if gen > 0:
             print(f"📊 前代得分: {previous_score:.2%}")
-            print(f"❌ 失败测试: {failed_tests}")
+            print(f"[ERROR] 失败测试: {failed_tests}")
         
         # 创建策略
         strategy = create_strategy(gen, previous_score or 0, failed_tests)
@@ -125,18 +125,18 @@ def run_evolution():
         )
         
         if not gen_result["success"]:
-            print(f"❌ 生成失败: {gen_result.get('error')}")
+            print(f"[ERROR] 生成失败: {gen_result.get('error')}")
             continue
         
         code = gen_result["code"]
-        print(f"✅ 生成成功 ({len(code)} 字符)")
+        print(f"[DONE] 生成成功 ({len(code)} 字符)")
         
         # 运行测试
         print(f"\n🧪 运行测试...")
         test_result = run_tests(code)
         
         if not test_result["success"]:
-            print(f"❌ 测试失败: {test_result.get('error')}")
+            print(f"[ERROR] 测试失败: {test_result.get('error')}")
             pass_rate = 0.0
             passed = 0
             failed_list = ["test_error"]
@@ -146,7 +146,7 @@ def run_evolution():
             failed_list = test_result["failed"]
             print(f"📊 通过: {passed}/10 ({pass_rate:.2%})")
             if failed_list:
-                print(f"❌ 失败: {', '.join(failed_list[:5])}")
+                print(f"[ERROR] 失败: {', '.join(failed_list[:5])}")
         
         # 保存结果
         result = {
@@ -173,7 +173,7 @@ def run_evolution():
         
         # 检查终止
         if pass_rate >= TERMINATION_CONFIG["success_threshold"]:
-            print(f"\n🎉 达标！通过率 {pass_rate:.2%}")
+            print(f"\n[SUCCESS] 达标！通过率 {pass_rate:.2%}")
             break
         
         if stagnation_count >= TERMINATION_CONFIG["stagnation_generations"]:
@@ -206,9 +206,9 @@ def generate_report(results, best_score, best_gen, best_code, start_time):
     print(f"目标: {TERMINATION_CONFIG['success_threshold']*100}%")
     
     if best_score >= TERMINATION_CONFIG["success_threshold"]:
-        print(f"\n✅ 实验结果: 成功！达到目标")
+        print(f"\n[DONE] 实验结果: 成功！达到目标")
     else:
-        print(f"\n⚠️  实验结果: 未达标")
+        print(f"\n[WARN]  实验结果: 未达标")
     
     print(f"\n📈 进化轨迹:")
     print("-"*70)

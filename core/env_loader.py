@@ -28,7 +28,7 @@ def load_env(env_file: str = ".env") -> dict:
         env_path = Path(env_file)
 
     if not env_path.exists():
-        print(f"⚠️  未找到 {env_file} 文件，使用系统环境变量")
+        print(f"[WARN]  未找到 {env_file} 文件，使用系统环境变量")
         return {}
 
     loaded = {}
@@ -67,10 +67,10 @@ def check_api_key() -> tuple[bool, str]:
 
     for key in api_keys:
         if os.environ.get(key):
-            return True, f"✓ 已配置: {key}"
+            return True, f"[OK] 已配置: {key}"
 
     return False, (
-        "✗ 未找到 API Key\n"
+        "[FAIL] 未找到 API Key\n"
         "请在 .env 文件中设置以下任一环境变量:\n"
         "  - DEEPSEEK_API_KEY (推荐)\n"
         "  - ANTHROPIC_API_KEY\n"

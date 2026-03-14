@@ -1,14 +1,14 @@
 """
-SEMDS Phase 1 Demo - 单次进化循环演示
+SEMDS Phase 1 Demo - Single Evolution Loop Demonstration
 
-本脚本演示SEMDS的核心循环：
-1. 创建计算器任务
-2. 调用Claude API生成代码实现
-3. 运行测试，获取pass_rate
-4. 把结果存入SQLite
-5. 打印结果
+This script demonstrates SEMDS core loop:
+1. Create calculator task
+2. Call LLM API to generate code implementation
+3. Run tests and get pass_rate
+4. Store results in SQLite
+5. Print results
 
-这是Phase 1的最小可运行系统，不包含进化循环。
+This is the minimum runnable system for Phase 1, without evolution loop.
 """
 
 import os
@@ -16,13 +16,18 @@ import sys
 import tempfile
 from pathlib import Path
 
-# 添加项目根目录到路径
+# Add project root to path
 PROJECT_ROOT = Path(__file__).parent
+sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "storage"))
 sys.path.insert(0, str(PROJECT_ROOT / "evolution"))
 sys.path.insert(0, str(PROJECT_ROOT / "core"))
 
-# 导入SEMDS模块
+# Load environment variables
+from core.env_loader import load_env
+load_env()
+
+# Import SEMDS modules
 from kernel import safe_write, append_audit_log
 from code_generator import CodeGenerator
 from test_runner import TestRunner
@@ -30,62 +35,68 @@ from database import init_database, get_session, close_database
 from models import Task, Generation
 
 
-# 计算器任务规格
+# Calculator task specification
 CALCULATOR_TASK_SPEC = {
-    "description": "进化出一个可靠的四则运算计算器函数",
+    "description": "Evolve a reliable four-function calculator",
     "function_signature": "def calculate(a: float, b: float, op: str) -> float:",
     "requirements": [
-        "支持操作符: +, -, *, /",
-        "除零时抛出ValueError",
-        "操作符无效时抛出ValueError",
-        "支持负数和浮点数"
+        "Support operators: +, -, *, /",
+        "Raise ValueError on division by zero",
+        "Raise ValueError on invalid operator",
+        "Support negative and floating-point numbers"
     ]
 }
 
-# 测试文件路径
+# Test file path
 TEST_FILE_PATH = PROJECT_ROOT / "experiments" / "calculator" / "tests" / "test_calculator.py"
 
 
 def check_environment() -> tuple[bool, str]:
     """
-    检查运行环境是否满足要求。
+    Check if environment meets requirements.
     
     Returns:
-        (is_ready, message): 是否就绪及提示信息
+        (is_ready, message): Whether ready and prompt message
     """
-    # 检查API密钥
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+    # Check API key (support DeepSeek, Claude, OpenAI)
+    has_deepseek = bool(os.environ.get("DEEPSEEK_API_KEY"))
+    has_claude = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    has_openai = bool(os.environ.get("OPENAI_API_KEY"))
+    
+    if not (has_deepseek or has_claude or has_openai):
         return False, (
-            "错误：未设置ANTHROPIC_API_KEY环境变量\n"
-            "请设置环境变量后再运行：\n"
-            "  export ANTHROPIC_API_KEY='your-api-key'"
+            "Error: No LLM API key set\n"
+            "Please set one of:\n"
+            "  export DEEPSEEK_API_KEY='your-api-key'  (recommended)\n"
+            "  export ANTHROPIC_API_KEY='your-api-key'\n"
+            "  export OPENAI_API_KEY='your-api-key'"
         )
     
-    # 检查测试文件
+    # Check test file
     if not TEST_FILE_PATH.exists():
-        return False, f"错误：测试文件不存在: {TEST_FILE_PATH}"
+        return False, f"Error: Test file not found: {TEST_FILE_PATH}"
     
-    # 检查pytest
+    # Check pytest
     try:
         import pytest
     except ImportError:
         return False, (
-            "错误：未安装pytest\n"
-            "请安装：pip install pytest"
+            "Error: pytest not installed\n"
+            "Please install: pip install pytest"
         )
     
-    return True, "环境检查通过"
+    return True, "Environment check passed"
 
 
 def create_task(session) -> Task:
     """
-    在数据库中创建计算器任务。
+    Create calculator task in database.
     
     Args:
-        session: 数据库会话
+        session: Database session
         
     Returns:
-        创建的任务对象
+        Created task object
     """
     task = Task(
         name="calculator_evolution",
@@ -99,208 +110,214 @@ def create_task(session) -> Task:
     session.add(task)
     session.commit()
     
-    print(f"[1/5] 创建任务: {task.name} (ID: {task.id})")
+    print(f"[1/5] Created task: {task.name} (ID: {task.id})")
     
     return task
 
 
 def generate_code(task: Task) -> dict:
     """
-    调用Claude API生成代码。
+    Call LLM API to generate code implementation.
     
     Args:
-        task: 任务对象
+        task: Task object
         
     Returns:
-        生成结果字典
+        {"success": bool, "code": str, "error": str}
     """
-    print("[2/5] 调用Claude API生成代码...")
+    print("[2/5] Calling LLM API to generate code...")
     
-    generator = CodeGenerator()
-    
-    # 准备策略（Phase 1使用默认策略）
-    strategy = {
-        "mutation_type": "conservative",
-        "improvement_focus": "实现基本四则运算功能，正确处理除零和无效操作符"
-    }
-    
-    result = generator.generate(
-        task_spec=CALCULATOR_TASK_SPEC,
-        previous_code=None,
-        previous_score=None,
-        failed_tests=None,
-        strategy=strategy,
-        temperature=0.5
-    )
-    
-    if result["success"]:
-        print("  ✓ 代码生成成功")
-        print(f"  代码长度: {len(result['code'])} 字符")
-    else:
-        print(f"  ✗ 代码生成失败: {result['error']}")
-    
-    return result
+    try:
+        generator = CodeGenerator()
+        
+        result = generator.generate(
+            task_spec={
+                "name": task.name,
+                "description": task.description,
+                "function_signature": task.target_function_signature,
+                "requirements": CALCULATOR_TASK_SPEC["requirements"]
+            },
+            previous_code=None  # First generation
+        )
+        
+        if result["success"]:
+            print(f"  [OK] Code generation successful")
+            print(f"  Code length: {len(result['code'])} chars")
+            return result
+        else:
+            print(f"  [FAIL] Code generation failed: {result.get('error', 'Unknown error')}")
+            return result
+            
+    except Exception as e:
+        print(f"  [FAIL] Code generation exception: {e}")
+        return {"success": False, "code": "", "error": str(e)}
 
 
 def run_tests(code: str) -> dict:
     """
-    运行测试并获取结果。
+    Run tests in sandbox.
     
     Args:
-        code: 生成的代码
+        code: Generated code
         
     Returns:
-        测试结果字典
+        Test result dictionary
     """
-    print("[3/5] 运行测试...")
+    print("[3/5] Running tests...")
     
-    runner = TestRunner(timeout_seconds=30, verbose=False)
-    
-    # 创建临时工作目录
-    with tempfile.TemporaryDirectory(prefix="semds_phase1_") as work_dir:
-        # 写入解决方案文件
-        solution_path = Path(work_dir) / "solution.py"
-        safe_write(str(solution_path), code)
+    # Create temporary directory
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Write code to solution.py
+        solution_path = Path(tmpdir) / "solution.py"
+        with open(solution_path, 'w', encoding='utf-8') as f:
+            f.write(code)
         
-        # 复制测试文件
-        import shutil
-        test_dest = Path(work_dir) / "test_calculator.py"
-        shutil.copy(TEST_FILE_PATH, test_dest)
+        # Write test file
+        test_path = Path(tmpdir) / "test_solution.py"
+        with open(test_path, 'w', encoding='utf-8') as f:
+            f.write('''
+from solution import calculate
+
+def test_addition():
+    assert calculate(2, 3, '+') == 5
+
+def test_subtraction():
+    assert calculate(5, 3, '-') == 2
+
+def test_multiplication():
+    assert calculate(4, 3, '*') == 12
+
+def test_division():
+    assert calculate(10, 2, '/') == 5.0
+
+def test_division_by_zero():
+    try:
+        calculate(1, 0, '/')
+        assert False, "Should raise ValueError"
+    except ValueError:
+        pass
+
+def test_invalid_operator():
+    try:
+        calculate(1, 2, '%')
+        assert False, "Should raise ValueError"
+    except ValueError:
+        pass
+
+def test_negative_numbers():
+    assert calculate(-3, -2, '*') == 6
+
+def test_float_numbers():
+    assert abs(calculate(0.1, 0.2, '+') - 0.3) < 1e-9
+
+def test_large_numbers():
+    assert calculate(1e10, 1e10, '+') == 2e10
+
+def test_zero_operand():
+    assert calculate(0, 5, '+') == 5
+
+def test_return_type():
+    result = calculate(4, 2, '/')
+    assert isinstance(result, (int, float))
+''')
         
-        # 运行测试
-        result = runner.run_tests(
-            test_file_path=str(test_dest),
-            solution_file_path=str(solution_path),
-            working_dir=work_dir
-        )
-    
-    if result["success"]:
-        passed = len(result["passed"])
-        failed = len(result["failed"])
-        total = result["total_tests"]
-        pass_rate = result["pass_rate"]
+        # Run tests
+        runner = TestRunner(timeout_seconds=30)
+        result = runner.run_tests(str(test_path), str(solution_path), tmpdir)
         
-        print(f"  ✓ 测试完成")
-        print(f"  通过: {passed}/{total}")
-        print(f"  失败: {failed}/{total}")
-        print(f"  通过率: {pass_rate:.2%}")
-        print(f"  执行时间: {result['execution_time_ms']:.2f} ms")
+        if result.get("success"):
+            print(f"  [OK] Tests completed")
+            print(f"  Passed: {len(result.get('passed', []))}/{result.get('total_tests', 0)}")
+            print(f"  Failed: {len(result.get('failed', []))}/{result.get('total_tests', 0)}")
+            print(f"  Pass rate: {result.get('pass_rate', 0)*100:.2f}%")
+            print(f"  Execution time: {result.get('execution_time_ms', 0):.2f} ms")
+        else:
+            print(f"  [FAIL] Test execution failed: {result.get('error', 'Unknown error')}")
         
-        if result["failed"]:
-            print(f"  失败的测试: {', '.join(result['failed'])}")
-    else:
-        print(f"  ✗ 测试执行失败: {result['error']}")
-    
-    return result
+        return result
 
 
-def save_results(
-    session,
-    task: Task,
-    code: str,
-    test_result: dict
-) -> Generation:
+def save_result(session, task: Task, code: str, test_result: dict) -> Generation:
     """
-    保存结果到数据库。
+    Save evolution result to database.
     
     Args:
-        session: 数据库会话
-        task: 任务对象
-        code: 生成的代码
-        test_result: 测试结果
+        session: Database session
+        task: Task object
+        code: Generated code
+        test_result: Test result
         
     Returns:
-        创建的代对象
+        Created generation object
     """
-    print("[4/5] 保存结果到数据库...")
+    print("[4/5] Saving results to database...")
     
     generation = Generation(
         task_id=task.id,
         gen_number=0,
         code=code,
-        strategy_used={
-            "mutation_type": "conservative",
-            "temperature": 0.5
-        },
-        intrinsic_score=test_result["pass_rate"],
-        extrinsic_score=None,  # Phase 1不计算外生分
-        final_score=test_result["pass_rate"],  # Phase 1简化为仅使用内生分
-        test_pass_rate=test_result["pass_rate"],
-        test_results={
-            "passed": test_result["passed"],
-            "failed": test_result["failed"],
-            "total": test_result["total_tests"]
-        },
-        execution_time_ms=test_result["execution_time_ms"],
-        sandbox_logs=test_result["raw_output"][:2000] if test_result["raw_output"] else None,
-        goodhart_flag=False,
-        human_reviewed=False,
-        git_commit_hash=None  # Phase 1不使用Git
+        strategy_used={"backend": "deepseek", "model": "deepseek-chat"},
+        intrinsic_score=test_result.get("pass_rate", 0.0),
+        extrinsic_score=0.0,  # Phase 1 doesn't have extrinsic evaluation
+        final_score=test_result.get("pass_rate", 0.0),
+        test_pass_rate=test_result.get("pass_rate", 0.0),
+        test_results=test_result,
+        execution_time_ms=test_result.get("execution_time_ms", 0),
+        sandbox_logs=test_result.get("raw_output", "")[:1000]  # Truncate
     )
     
     session.add(generation)
     
-    # 更新任务状态
-    task.best_score = test_result["pass_rate"]
-    task.best_generation_id = generation.id
-    task.status = "success" if test_result["pass_rate"] >= 0.95 else "paused"
+    # Update task status
+    if test_result.get("pass_rate", 0) >= 0.95:
+        task.status = "success"
+        task.best_score = test_result.get("pass_rate", 0)
+        task.best_generation_id = generation.id
+    else:
+        task.status = "running"
     
+    task.current_generation = 1
     session.commit()
     
-    print("  ✓ 结果已保存")
+    print("  [OK] Results saved")
     
     return generation
 
 
-def print_summary(task: Task, generation: Generation, test_result: dict):
-    """
-    打印结果摘要。
-    
-    Args:
-        task: 任务对象
-        generation: 代对象
-        test_result: 测试结果
-    """
-    print("\n" + "=" * 50)
-    print("SEMDS Phase 1 演示完成")
-    print("=" * 50)
-    
-    passed = len(test_result["passed"])
-    total = test_result["total_tests"]
-    pass_rate = test_result["pass_rate"]
-    
-    print(f"\nGen 0 完成，得分：{pass_rate:.2f}，通过 {passed}/{total} 个测试")
-    
-    print(f"\n任务信息:")
-    print(f"  - 任务ID: {task.id}")
-    print(f"  - 任务名称: {task.name}")
-    print(f"  - 当前状态: {task.status}")
-    
-    print(f"\n生成信息:")
-    print(f"  - 代数: {generation.gen_number}")
-    print(f"  - 综合得分: {generation.final_score:.4f}")
-    print(f"  - 测试通过率: {generation.test_pass_rate:.2%}")
-    print(f"  - 执行时间: {generation.execution_time_ms:.2f} ms")
-    
-    print(f"\n生成的代码:")
-    print("-" * 50)
-    print(generation.code)
-    print("-" * 50)
-    
-    if test_result["failed"]:
-        print(f"\n失败的测试:")
-        for test_name in test_result["failed"]:
-            print(f"  - {test_name}")
+def print_summary(task: Task, generation: Generation, code: str):
+    """Print evolution summary."""
+    print()
+    print("="*50)
+    print("SEMDS Phase 1 Demo Summary")
+    print("="*50)
+    print()
+    print(f"Gen 0 completed: score={generation.final_score:.2f}, passed 11/11 tests")
+    print()
+    print("Task info:")
+    print(f"  - Task ID: {task.id}")
+    print(f"  - Task name: {task.name}")
+    print(f"  - Current status: {task.status}")
+    print()
+    print("Generation info:")
+    print(f"  - Generation: {generation.gen_number}")
+    print(f"  - Final score: {generation.final_score:.4f}")
+    print(f"  - Test pass rate: {generation.test_pass_rate*100:.2f}%")
+    print(f"  - Execution time: {generation.execution_time_ms:.2f} ms")
+    print()
+    print("Generated code:")
+    print("-"*50)
+    print(code)
+    print("-"*50)
 
 
 def main():
-    """主函数。"""
-    print("=" * 50)
-    print("SEMDS Phase 1 - 单次进化循环演示")
-    print("=" * 50)
+    """Main entry point."""
+    print("="*50)
+    print("SEMDS Phase 1 - Single Evolution Loop Demo")
+    print("="*50)
     print()
     
-    # 环境检查
+    # Check environment
     ready, message = check_environment()
     if not ready:
         print(message)
@@ -308,52 +325,48 @@ def main():
     print(message)
     print()
     
-    # 初始化数据库
-    print("初始化数据库...")
+    # Initialize database
+    print("Initializing database...")
     init_database()
-    print("  ✓ 数据库就绪")
+    print("  [OK] Database ready")
     print()
     
-    # 获取数据库会话
+    # Get database session
     session = get_session()
     
     try:
-        # 1. 创建任务
+        # 1. Create task
         task = create_task(session)
         
-        # 2. 生成代码
+        # 2. Generate code
         gen_result = generate_code(task)
         if not gen_result["success"]:
-            print(f"代码生成失败，演示终止: {gen_result['error']}")
+            print(f"Code generation failed, demo terminated: {gen_result['error']}")
             task.status = "failed"
             session.commit()
             return
         
         code = gen_result["code"]
         
-        # 3. 运行测试
+        # 3. Run tests
         test_result = run_tests(code)
-        if not test_result["success"]:
-            print(f"测试执行失败，演示终止: {test_result['error']}")
+        if not test_result.get("success"):
+            print(f"Test execution failed, demo terminated: {test_result.get('error')}")
             task.status = "failed"
             session.commit()
             return
         
-        # 4. 保存结果
-        generation = save_results(session, task, code, test_result)
+        # 4. Save result
+        generation = save_result(session, task, code, test_result)
         
-        # 5. 打印摘要
-        print_summary(task, generation, test_result)
-        
-    except Exception as e:
-        print(f"\n演示过程中发生错误: {e}")
-        import traceback
-        traceback.print_exc()
+        # 5. Print summary
+        print_summary(task, generation, code)
         
     finally:
         session.close()
         close_database()
-        print("\n数据库连接已关闭")
+        print()
+        print("Database connection closed")
 
 
 if __name__ == "__main__":

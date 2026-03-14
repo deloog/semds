@@ -344,12 +344,12 @@ def main():
     if not ready:
         print(f"\n{message}")
         sys.exit(1)
-    print(f"\n✓ {message}")
+    print(f"\n[OK] {message}")
     
     # 初始化数据库
     print("\n初始化数据库...")
     init_database()
-    print("✓ 数据库就绪")
+    print("[OK] 数据库就绪")
     
     # 运行实验
     total_experiments = sum(e["runs"] for e in EXPERIMENTS)

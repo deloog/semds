@@ -63,14 +63,14 @@ def check_environment():
     from env_loader import check_api_key
     ready, message = check_api_key()
     if not ready:
-        print(f"❌ {message}")
+        print(f"[ERROR] {message}")
         return False
     
     if not TEST_FILE_PATH.exists():
-        print(f"❌ 测试文件不存在: {TEST_FILE_PATH}")
+        print(f"[ERROR] 测试文件不存在: {TEST_FILE_PATH}")
         return False
     
-    print(f"✅ {message}")
+    print(f"[DONE] {message}")
     return True
 
 
@@ -178,7 +178,7 @@ def run_evolution():
         )
         session.add(task)
         session.commit()
-        print(f"✅ 任务创建: {task.name} (ID: {task.id})")
+        print(f"[DONE] 任务创建: {task.name} (ID: {task.id})")
         
         # 初始化代码生成器
         generator = CodeGenerator(backend="deepseek")
@@ -219,12 +219,12 @@ def run_evolution():
                     previous_score = prev_gen.test_pass_rate
                     failed_tests = json.loads(prev_gen.test_results).get("failed", [])
                     print(f"📊 前代得分: {previous_score:.2%}")
-                    print(f"❌ 失败测试: {failed_tests}")
+                    print(f"[ERROR] 失败测试: {failed_tests}")
             
             # 创建策略
             strategy = create_strategy(gen, previous_score or 0, failed_tests or [])
             print(f"📋 进化策略: {strategy['mutation_type']}")
-            print(f"🎯 改进重点: {strategy['improvement_focus']}")
+            print(f"[GOAL] 改进重点: {strategy['improvement_focus']}")
             
             # 生成代码
             print(f"\n💻 生成代码 (temperature={strategy['temperature']})...")
@@ -238,18 +238,18 @@ def run_evolution():
             )
             
             if not gen_result["success"]:
-                print(f"❌ 代码生成失败: {gen_result.get('error')}")
+                print(f"[ERROR] 代码生成失败: {gen_result.get('error')}")
                 continue
             
             code = gen_result["code"]
-            print(f"✅ 代码生成成功，长度: {len(code)} 字符")
+            print(f"[DONE] 代码生成成功，长度: {len(code)} 字符")
             
             # 运行测试
             print(f"\n🧪 运行测试...")
             test_result = run_tests(code)
             
             if not test_result["success"]:
-                print(f"❌ 测试执行失败: {test_result.get('error')}")
+                print(f"[ERROR] 测试执行失败: {test_result.get('error')}")
                 pass_rate = 0.0
                 passed = 0
                 failed = 10
@@ -259,7 +259,7 @@ def run_evolution():
                 failed = len(test_result["failed"])
                 print(f"📊 测试结果: {passed}/{passed+failed} 通过 ({pass_rate:.2%})")
                 if test_result["failed"]:
-                    print(f"❌ 失败: {', '.join(test_result['failed'][:5])}")
+                    print(f"[ERROR] 失败: {', '.join(test_result['failed'][:5])}")
             
             # 保存结果到数据库
             generation = Generation(
@@ -299,7 +299,7 @@ def run_evolution():
             
             # 检查终止条件
             if pass_rate >= TERMINATION_CONFIG["success_threshold"]:
-                print(f"\n🎉 达到目标！通过率达到 {pass_rate:.2%} >= {TERMINATION_CONFIG['success_threshold']*100}%")
+                print(f"\n[SUCCESS] 达到目标！通过率达到 {pass_rate:.2%} >= {TERMINATION_CONFIG['success_threshold']*100}%")
                 task.status = "success"
                 break
             
@@ -323,7 +323,7 @@ def run_evolution():
         print_summary(session, task)
         
     except Exception as e:
-        print(f"\n❌ 进化过程中出错: {e}")
+        print(f"\n[ERROR] 进化过程中出错: {e}")
         import traceback
         traceback.print_exc()
         task.status = "failed"
@@ -364,9 +364,9 @@ def print_summary(session, task):
     print("-"*70)
     
     if task.best_score and task.best_score >= TERMINATION_CONFIG["success_threshold"]:
-        print(f"\n✅ 实验成功！达到目标通过率 {TERMINATION_CONFIG['success_threshold']*100}%")
+        print(f"\n[DONE] 实验成功！达到目标通过率 {TERMINATION_CONFIG['success_threshold']*100}%")
     else:
-        print(f"\n⚠️  实验未达标。最高通过率: {task.best_score:.2% if task.best_score else 0}")
+        print(f"\n[WARN]  实验未达标。最高通过率: {task.best_score:.2% if task.best_score else 0}")
     
     # 显示最佳代码
     best_gen = session.query(Generation).filter_by(id=task.best_generation_id).first()

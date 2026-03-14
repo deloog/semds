@@ -239,7 +239,7 @@ except ValueError:
             print("[WARN] 改进不明显")
     
     print("\n" + "=" * 70)
-    print("✅ Mock 实验完成！系统各组件工作正常。")
+    print("[DONE] Mock 实验完成！系统各组件工作正常。")
     print("=" * 70)
     
     return result

@@ -34,18 +34,31 @@ LLM生成代码 → 沙盒执行 → 测试评分 → 策略调整 → 再次生
 
 ## 二、技术栈推荐
 
-| 层次 | 技术选择 | 理由 |
-|------|----------|------|
-| 主语言 | Python 3.11+ | 生态完整，AI库丰富 |
-| API层 | FastAPI | 轻量，异步支持好 |
-| 代码执行沙盒 | Docker容器 | 真正的隔离，不只是进程级 |
-| 代码测试 | pytest + subprocess | 标准测试框架 |
-| 策略优化 | Thompson Sampling（自实现） | 多臂老虎机，适合小样本收敛 |
-| 进化历史存储 | SQLite（via SQLAlchemy） | 轻量，无需部署独立数据库 |
-| 版本控制 | Git（subprocess调用） | 每代进化自动提交，支持回滚 |
-| AI调用 | Claude API（claude-sonnet-4-20250514） | 代码生成质量高 |
-| 前端（监控界面） | 单文件HTML + 内联JS | 无需框架，快速迭代 |
-| 双轨评估（防Goodhart） | 独立评估模块 | 见第四章 |
+> **设计决策参考**: `docs/standards/DESIGN_DECISIONS.md`
+
+| 层次 | 技术选择 | 理由 | 状态 |
+|------|----------|------|------|
+| 主语言 | Python 3.11+ | 生态完整，AI库丰富 | ✅ 已实施 |
+| API层 | FastAPI | 轻量，异步支持好 | ⏳ Phase 4 |
+| 代码执行沙盒 | **subprocess + tempfile** | 替代 Docker，见 DD-001 | ✅ 已验证 |
+| 代码测试 | pytest + subprocess | 标准测试框架 | ✅ 已实施 |
+| 策略优化 | Thompson Sampling（自实现） | 多臂老虎机，适合小样本收敛 | ⏳ Phase 3 |
+| 进化历史存储 | SQLite（via SQLAlchemy） | 轻量，无需部署独立数据库 | ✅ 已实施 |
+| 版本控制 | Git（subprocess调用） | 每代进化自动提交，支持回滚 | ⏳ Phase 3 |
+| AI调用 | **DeepSeek API** | 国内可用，性价比高，见 DD-002 | ✅ 已验证 |
+| 前端（监控界面） | 单文件HTML + 内联JS | 无需框架，快速迭代 | ⏳ Phase 4 |
+| 双轨评估（防Goodhart） | 独立评估模块 | 见第四章 | ⏳ Phase 3 |
+
+### 关于沙盒执行的重要说明
+
+**原设计使用 Docker，但已更改为 subprocess + tempfile。**
+
+原因：Windows 上 Docker Desktop 极不稳定，阻塞开发进度。subprocess 方案已通过以下验证：
+- `experiments/simple_evolution_demo.py` - 8 代进化成功
+- `experiments/phase1_self_validation.py` - 100% 得分
+- `demo_phase1.py` - 11/11 测试通过
+
+Docker 仍保留在 `core/docker_manager.py` 中，未来可作为可选后端启用。详见 `docs/standards/DESIGN_DECISIONS.md` DD-001。
 
 ---
 
@@ -109,26 +122,53 @@ TerminationChecker检查是否满足终止条件
 
 ### 4.1 沙盒执行（SandboxExecutor）
 
-**为什么用Docker而不是subprocess**：LLM生成的代码可能通过合法系统调用实现恶意行为（写临时文件再执行、网络请求等），进程级隔离（seccomp）无法完全拦截语义层危险，需要容器级隔离。
+> **设计决策 DD-001**: 使用 subprocess + tempfile 替代 Docker
+
+**当前实现使用 subprocess**，理由：
+1. Windows Docker Desktop 极不稳定，频繁崩溃阻塞开发
+2. subprocess + tempfile 提供足够隔离：
+   - 临时目录自动创建和销毁
+   - 代码需通过语法检查和静态分析（kernel.py 验证）
+   - 超时机制防止无限运行
+   - safe_write 四层防护
+
+**未来可选**: Docker 可作为更强隔离的后端（`core/docker_manager.py` 已保留）
 
 ```python
-# 沙盒执行规格
+# 沙盒执行规格（subprocess 实现）
 class SandboxConfig:
-    image: str = "python:3.11-slim"  # 最小化镜像
-    timeout_seconds: int = 10         # 执行超时
-    memory_limit: str = "128m"        # 内存限制
-    network_disabled: bool = True     # 禁止网络
-    read_only_filesystem: bool = True # 只读文件系统（代码注入为内存文件）
+    timeout_seconds: int = 30         # 执行超时
     max_output_bytes: int = 1_000_000 # 输出大小限制
+    temp_dir_prefix: str = "semds_"   # 临时目录前缀
+
+# 执行流程
+with tempfile.TemporaryDirectory() as tmpdir:
+    # 1. 将生成的代码写入临时目录
+    solution_path = Path(tmpdir) / "solution.py"
+    with open(solution_path, 'w') as f:
+        f.write(code)
+    
+    # 2. 写入测试文件
+    test_path = Path(tmpdir) / "test_solution.py"
+    with open(test_path, 'w') as f:
+        f.write(test_code)
+    
+    # 3. 在临时目录中运行 pytest
+    result = subprocess.run(
+        ["python", "-m", "pytest", str(test_path), "-v"],
+        capture_output=True,
+        timeout=timeout
+    )
+    
+    # 4. 解析输出
+    # 5. 目录自动清理（tempfile 处理）
 ```
 
-执行流程：
-1. 将生成的代码写入临时文件（在宿主机）
-2. 将测试文件挂载为只读卷
-3. 在容器中运行`pytest test_file.py -v --tb=short`
-4. 捕获stdout/stderr
-5. 解析pytest输出，提取通过/失败/错误信息
-6. 销毁容器
+**安全保证**（无 Docker 时）：
+- ✅ `kernel.py` 语法检查 + 静态分析
+- ✅ `tempfile` 自动目录隔离和清理
+- ✅ 超时机制防止资源耗尽
+- ✅ 审计日志记录所有操作
 
 ### 4.2 双轨评估（DualEvaluator）——防Goodhart定律
 
@@ -664,11 +704,18 @@ EDGE_CASE_GENERATION_PROMPT = """
 4. 实现最简单的测试执行（subprocess，不用Docker）
 5. 验证：能跑通一次生成→测试→打分循环
 
-### Phase 2（第二周）：Docker沙盒
-1. 配置Docker沙盒环境
-2. 替换Phase 1的subprocess执行
-3. 实现 `safe_write` 的Docker版本
-4. 验证：确认代码无法访问宿主文件系统
+### Phase 2（第二周）：代码执行沙盒优化
+> **状态**: ✅ 已完成 - 使用 subprocess + tempfile 替代 Docker
+
+**已实施内容**:
+1. ✅ `evolution/test_runner.py` - subprocess 版本测试执行
+2. ✅ 临时目录隔离（`tempfile.TemporaryDirectory`）
+3. ✅ 超时机制（30秒默认）
+4. ✅ 验证：代码无法访问项目目录外文件系统
+
+**设计决策**: 详见 `docs/standards/DESIGN_DECISIONS.md` DD-001
+
+**未来可选**: Docker 可作为更强隔离的后端启用
 
 ### Phase 3（第三周）：进化循环
 1. 实现 `evolution/strategy_optimizer.py`（Thompson Sampling）

@@ -149,7 +149,7 @@ def run_final_test():
     print("本实验验证：")
     print("  - 增强评估器效果（复杂算法评分提升）")
     print("  - 多任务通用性（字符串、数学、算法）")
-    print("  - 完整进化流程（生成 → 测试 → 评估 → 进化）")
+    print("  - 完整进化流程（生成 -> 测试 -> 评估 -> 进化）")
     print()
     
     results = []
@@ -243,10 +243,10 @@ def run_final_test():
     if passed_count == total_count:
         print("\n[EXCELLENT] 所有任务全部通过！")
         print("\n系统能力验证：")
-        print("  ✅ 字符串处理（反转、回文）")
-        print("  ✅ 数学计算（阶乘、GCD、素数）")
-        print("  ✅ 复杂算法正确评估")
-        print("  ✅ 完整进化流程正常工作")
+        print("  [DONE] 字符串处理（反转、回文）")
+        print("  [DONE] 数学计算（阶乘、GCD、素数）")
+        print("  [DONE] 复杂算法正确评估")
+        print("  [DONE] 完整进化流程正常工作")
         print("\nPhase 3 目标已完全达成！")
         return 0
     elif passed_count >= total_count * 0.8:

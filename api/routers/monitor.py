@@ -242,7 +242,7 @@ async def evolution_websocket(websocket: WebSocket, task_id: str):
 
 async def send_progress_updates(task_id: str, websocket: WebSocket):
     """
-    发送进度更新
+    发送进度更新（修复版：推送真实进化数据）
 
     如果任务在活跃进化中，定期推送进度信息。
 
@@ -250,33 +250,55 @@ async def send_progress_updates(task_id: str, websocket: WebSocket):
         task_id: 任务ID
         websocket: WebSocket连接对象
     """
-    while task_id in connections:
-        try:
-            # 如果任务在活跃进化中，推送进度
-            if task_id in active_evolutions:
-                progress = {
-                    "task_id": task_id,
-                    "status": "running",
-                    "progress": active_evolutions[task_id].get("progress", 0),
-                    "current_gen": active_evolutions[task_id].get("current_gen", 0),
-                    "best_score": active_evolutions[task_id].get("best_score", 0.0),
-                }
-                await websocket.send_json(progress)
-            else:
-                # 任务不在活跃状态，发送心跳或状态查询
-                progress = {
-                    "task_id": task_id,
-                    "status": "idle",
-                    "message": "Task not actively evolving",
-                }
-                await websocket.send_json(progress)
+    from sqlalchemy.orm import Session
+    from api.dependencies import get_db_session
+    
+    db: Session = next(get_db_session())
+    
+    try:
+        while task_id in connections:
+            try:
+                # 从活跃进化状态获取真实数据（由 EvolutionRunner 更新）
+                if task_id in active_evolutions:
+                    evo_state = active_evolutions[task_id]
+                    progress = {
+                        "type": "progress",
+                        "task_id": task_id,
+                        "status": evo_state.get("status", "unknown"),
+                        "current_gen": evo_state.get("current_gen", 0),
+                        "best_score": round(evo_state.get("best_score", 0.0), 4),
+                        "progress": evo_state.get("progress", 0),
+                        "timestamp": evo_state.get("updated_at"),
+                    }
+                    await websocket.send_json(progress)
+                else:
+                    # 任务不在活跃状态，查询数据库获取最新状态
+                    task = db.query(Task).filter(Task.id == task_id).first()
+                    if task:
+                        progress = {
+                            "type": "status",
+                            "task_id": task_id,
+                            "status": task.status,
+                            "current_gen": task.current_generation,
+                            "best_score": round(task.best_score, 4) if task.best_score else None,
+                            "message": f"Task status: {task.status}",
+                        }
+                        await websocket.send_json(progress)
+                    else:
+                        await websocket.send_json({
+                            "type": "error",
+                            "message": "Task not found",
+                        })
+                        break
 
-            # 按配置间隔更新
-            await asyncio.sleep(PROGRESS_UPDATE_INTERVAL)
+                # 按配置间隔更新
+                await asyncio.sleep(PROGRESS_UPDATE_INTERVAL)
 
-        except Exception as e:
-            logger.error(f"Error sending progress: {e}")
-            break
+            except Exception as e:
+                logger.error(f"Error sending progress: {e}")
+                break
+    finally:
+        db.close()
 
 
 @router.get("/stats")

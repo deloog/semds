@@ -190,8 +190,8 @@ def run_single_experiment(group: str, backend: str, use_consilium: bool) -> dict
             "time_seconds": round(elapsed, 2)
         }
         
-        print(f"  ✓ 审议完成: {deliberation_result.get('recommendation')}")
-        print(f"  ✓ 耗时: {elapsed:.2f}s")
+        print(f"  [OK] 审议完成: {deliberation_result.get('recommendation')}")
+        print(f"  [OK] 耗时: {elapsed:.2f}s")
     
     # 步骤 2: 生成代码
     print("\n[2/4] 生成代码...")
@@ -225,9 +225,9 @@ def run_single_experiment(group: str, backend: str, use_consilium: bool) -> dict
         return result_data
     
     code = gen_result["code"]
-    print(f"  ✓ 代码生成成功")
-    print(f"  ✓ 长度: {len(code)} 字符")
-    print(f"  ✓ 耗时: {elapsed:.2f}s")
+    print(f"  [OK] 代码生成成功")
+    print(f"  [OK] 长度: {len(code)} 字符")
+    print(f"  [OK] 耗时: {elapsed:.2f}s")
     
     # 步骤 3: Consilium 审查 (仅 B 组)
     if use_consilium:
@@ -243,9 +243,9 @@ def run_single_experiment(group: str, backend: str, use_consilium: bool) -> dict
             "time_seconds": round(elapsed, 2)
         }
         
-        print(f"  ✓ 审查完成")
-        print(f"  ✓ 安全级别: {review_result.get('guardian_review', {}).get('safety_level')}")
-        print(f"  ✓ 耗时: {elapsed:.2f}s")
+        print(f"  [OK] 审查完成")
+        print(f"  [OK] 安全级别: {review_result.get('guardian_review', {}).get('safety_level')}")
+        print(f"  [OK] 耗时: {elapsed:.2f}s")
     
     # 步骤 4: 运行测试
     print("\n[4/4] 运行测试...")
@@ -263,9 +263,9 @@ def run_single_experiment(group: str, backend: str, use_consilium: bool) -> dict
         "time_seconds": round(elapsed, 2)
     }
     
-    print(f"  ✓ 测试完成")
-    print(f"  ✓ 通过率: {test_result['pass_rate']:.1%}")
-    print(f"  ✓ 通过: {len(test_result.get('passed', []))}/{test_result.get('total_tests', 0)}")
+    print(f"  [OK] 测试完成")
+    print(f"  [OK] 通过率: {test_result['pass_rate']:.1%}")
+    print(f"  [OK] 通过: {len(test_result.get('passed', []))}/{test_result.get('total_tests', 0)}")
     
     # 保存代码
     result_data["generated_code"] = code
@@ -298,8 +298,8 @@ def print_summary(results: list):
         gen = r.get("generation", {})
         test = r.get("testing", {})
         
-        print(f"\n📝 Group {group} (Consilium: {consilium}):")
-        print(f"   代码生成: {'✓' if gen.get('success') else '✗'}")
+        print(f"\n[NOTE] Group {group} (Consilium: {consilium}):")
+        print(f"   代码生成: {'[OK]' if gen.get('success') else '[FAIL]'}")
         print(f"   测试通过率: {test.get('pass_rate', 0):.1%}")
         print(f"   通过/总计: {test.get('passed_count', 0)}/{test.get('total_count', 0)}")
         
@@ -321,9 +321,9 @@ def print_summary(results: list):
         
         if b_pass > a_pass:
             improvement = (b_pass - a_pass) * 100
-            print(f"   🎉 Consilium 提升: +{improvement:.1f}%")
+            print(f"   [SUCCESS] Consilium 提升: +{improvement:.1f}%")
         elif b_pass < a_pass:
-            print(f"   ⚠️  本次实验 Consilium 组表现较低")
+            print(f"   [WARN]  本次实验 Consilium 组表现较低")
         else:
             print(f"   = 两组表现相同")
 
@@ -340,7 +340,7 @@ def main():
     if not ready:
         print(f"\n{message}")
         sys.exit(1)
-    print(f"\n✓ {message}")
+    print(f"\n[OK] {message}")
     
     # 运行实验
     results = []
@@ -361,7 +361,7 @@ def main():
     print_summary(results)
     
     print("\n" + "="*60)
-    print("✅ 实验完成!")
+    print("[DONE] 实验完成!")
     print("="*60)
 
 

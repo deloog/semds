@@ -461,7 +461,7 @@ KEY_WITH_MULTIPLE=equals=signs=here
 
         env_content = """
 UNICODE_KEY=中文值
-EMOJI_KEY=🚀🎉
+EMOJI_KEY=🚀[SUCCESS]
 """
         temp_env = Path(".env.test.unicode")
         temp_env.write_text(env_content, encoding="utf-8")
@@ -473,7 +473,7 @@ EMOJI_KEY=🚀🎉
             result = load_env(".env.test.unicode")
 
             assert result["UNICODE_KEY"] == "中文值"
-            assert result["EMOJI_KEY"] == "🚀🎉"
+            assert result["EMOJI_KEY"] == "🚀[SUCCESS]"
         finally:
             if temp_env.exists():
                 temp_env.unlink()

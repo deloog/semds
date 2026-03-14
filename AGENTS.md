@@ -23,6 +23,15 @@
 1. **[SEMDS_v1.1_SPEC.md](./SEMDS_v1.1_SPEC.md)** - 系统规格（理解我们要构建什么）
 2. **[docs/standards/AI_CONDUCT.md](./docs/standards/AI_CONDUCT.md)** - AI行为约束（理解如何工作）
 3. **[docs/standards/ARCHITECTURE_GUIDE.md](./docs/standards/ARCHITECTURE_GUIDE.md)** - 架构指南（理解系统结构）
+4. **[docs/standards/DESIGN_DECISIONS.md](./docs/standards/DESIGN_DECISIONS.md)** - 设计决策（关键架构选择）
+
+### 关键设计决策（必读）
+
+- **DD-001**: 使用 subprocess + tempfile 替代 Docker
+- **DD-002**: 使用 DeepSeek API 作为默认 LLM
+- **DD-003**: 使用 SQLite 作为默认数据库
+
+**⚠️ 警告**: 任何涉及 Docker 的方案必须先阅读 DD-001，当前项目使用 subprocess 方案！
 
 ### 环境检查
 
