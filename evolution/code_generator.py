@@ -12,12 +12,19 @@ import os
 import re
 from typing import Any, Optional, Type, Union
 
-# 尝试导入anthropic库，如果不存在则提供错误提示
-Anthropic: Optional[Type[Any]]
+# 尝试导入LLM库
+Anthropic: Optional[Type[Any]] = None
+OpenAI: Optional[Type[Any]] = None
+
 try:
     from anthropic import Anthropic
 except ImportError:
-    Anthropic = None
+    pass
+
+try:
+    from openai import OpenAI
+except ImportError:
+    pass
 
 
 # 代码生成提示模板
@@ -63,35 +70,87 @@ CODE_EXTRACTION_PATTERN = r"```python\n(.*?)\n```"
 
 class CodeGenerator:
     """
-    代码生成器，使用Claude API生成Python代码实现。
+    代码生成器，支持多种LLM API生成Python代码实现。
+
+    支持的LLM:
+    - Deepseek (默认, 推荐)
+    - Anthropic Claude
+    - OpenAI GPT
 
     Attributes:
-        client: Anthropic API客户端
+        client: API客户端
         model: 使用的模型名称
         default_temperature: 默认温度参数
+        backend: LLM后端类型
     """
 
-    # 默认模型（根据规格文档）
-    DEFAULT_MODEL = "claude-sonnet-4-20250514"
+    # 默认模型
+    DEFAULT_MODEL = "deepseek-chat"
+    DEFAULT_BACKEND = "deepseek"
 
     def __init__(
         self,
         api_key: Optional[str] = None,
         model: str = DEFAULT_MODEL,
         default_temperature: float = 0.5,
+        backend: str = None,
+        base_url: Optional[str] = None,
     ):
         """
         初始化代码生成器。
 
         Args:
-            api_key: Anthropic API密钥，默认从环境变量ANTHROPIC_API_KEY读取
-            model: 使用的Claude模型名称
+            api_key: API密钥，默认从环境变量读取
+            model: 使用的模型名称
             default_temperature: 默认温度参数（0.0-1.0）
+            backend: LLM后端 (deepseek/anthropic/openai)
+            base_url: API基础URL（用于自定义端点）
 
         Raises:
-            ValueError: 如果API密钥未提供且环境变量不存在
-            ImportError: 如果anthropic库未安装
+            ValueError: 如果API密钥未提供
+            ImportError: 如果所需库未安装
         """
+        self.backend = backend or os.environ.get("LLM_BACKEND", self.DEFAULT_BACKEND)
+        self.model = model
+        self.default_temperature = default_temperature
+
+        # 根据后端类型初始化
+        if self.backend == "deepseek":
+            self._init_deepseek(api_key, base_url)
+        elif self.backend == "anthropic":
+            self._init_anthropic(api_key)
+        elif self.backend == "openai":
+            self._init_openai(api_key, base_url)
+        else:
+            raise ValueError(f"Unsupported backend: {self.backend}")
+
+    def _init_deepseek(self, api_key: Optional[str], base_url: Optional[str]):
+        """初始化Deepseek客户端"""
+        if OpenAI is None:
+            raise ImportError(
+                "openai library is required for Deepseek. "
+                "Install it with: pip install openai"
+            )
+
+        self.api_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
+        if not self.api_key:
+            raise ValueError(
+                "Deepseek API key is required. "
+                "Provide it via api_key parameter or "
+                "DEEPSEEK_API_KEY environment variable."
+            )
+
+        # Deepseek使用OpenAI兼容接口
+        base_url = base_url or os.environ.get(
+            "DEEPSEEK_BASE_URL", "https://api.deepseek.com"
+        )
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url=base_url,
+        )
+
+    def _init_anthropic(self, api_key: Optional[str]):
+        """初始化Anthropic客户端"""
         if Anthropic is None:
             raise ImportError(
                 "anthropic library is required. "
@@ -107,8 +166,26 @@ class CodeGenerator:
             )
 
         self.client = Anthropic(api_key=self.api_key)
-        self.model = model
-        self.default_temperature = default_temperature
+
+    def _init_openai(self, api_key: Optional[str], base_url: Optional[str]):
+        """初始化OpenAI客户端"""
+        if OpenAI is None:
+            raise ImportError(
+                "openai library is required. " "Install it with: pip install openai"
+            )
+
+        self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
+        if not self.api_key:
+            raise ValueError(
+                "OpenAI API key is required. "
+                "Provide it via api_key parameter or "
+                "OPENAI_API_KEY environment variable."
+            )
+
+        kwargs = {"api_key": self.api_key}
+        if base_url:
+            kwargs["base_url"] = base_url
+        self.client = OpenAI(**kwargs)
 
     def generate(
         self,
@@ -179,20 +256,38 @@ class CodeGenerator:
         prompt = GENERATION_PROMPT.format(**prompt_params)
 
         try:
-            # 调用Claude API
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=4096,
-                temperature=temperature or self.default_temperature,
-                system="你是一个专业的Python程序员。只输出代码，不输出任何解释。代码必须放在```python代码块中。",
-                messages=[{"role": "user", "content": prompt}],
-            )
-
-            content = response.content[0]
-            if hasattr(content, "text"):
-                raw_response = content.text
+            # 根据后端类型调用API
+            if self.backend == "deepseek" or self.backend == "openai":
+                # OpenAI/Deepseek格式
+                messages = [
+                    {
+                        "role": "system",
+                        "content": "你是一个专业的Python程序员。只输出代码，"
+                        "不输出任何解释。代码必须放在```python代码块中。",
+                    },
+                    {"role": "user", "content": prompt},
+                ]
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    temperature=temperature or self.default_temperature,
+                    max_tokens=4096,
+                )
+                raw_response = response.choices[0].message.content
             else:
-                raw_response = str(content)
+                # Anthropic格式
+                response = self.client.messages.create(
+                    model=self.model,
+                    max_tokens=4096,
+                    temperature=temperature or self.default_temperature,
+                    system="你是一个专业的Python程序员。只输出代码，不输出任何解释。代码必须放在```python代码块中。",
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                content = response.content[0]
+                if hasattr(content, "text"):
+                    raw_response = content.text
+                else:
+                    raw_response = str(content)
 
             # 提取代码
             extracted_code = self.extract_code(raw_response)

@@ -28,7 +28,7 @@ from env_loader import load_env
 load_env()
 
 from kernel import safe_write
-from code_generator_v2 import CodeGenerator
+from code_generator import CodeGenerator
 from test_runner import TestRunner
 from database import init_database, get_session, close_database
 from models import Task, Generation

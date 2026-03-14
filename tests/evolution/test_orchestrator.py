@@ -10,6 +10,12 @@ Evolution Orchestrator 测试模块 - TDD Red Phase
 4. 生成进化报告
 """
 
+import os
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+
 # =============================================================================
 # Test EvolutionOrchestrator Initialization
 # =============================================================================
@@ -18,7 +24,8 @@ Evolution Orchestrator 测试模块 - TDD Red Phase
 class TestEvolutionOrchestratorInitialization:
     """EvolutionOrchestrator 初始化测试"""
 
-    def test_initializes_with_all_components(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_initializes_with_all_components(self, mock_openai):
         """测试使用所有组件初始化"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.code_generator import CodeGenerator
@@ -28,9 +35,12 @@ class TestEvolutionOrchestratorInitialization:
         from evolution.termination_checker import TerminationChecker
         from core.git_manager import GitManager
 
+        mock_client = MagicMock()
+        mock_openai.return_value = mock_client
+
         orchestrator = EvolutionOrchestrator(
             task_id="test_task",
-            code_generator=CodeGenerator(),
+            code_generator=CodeGenerator(api_key="test-key"),
             test_runner=TestRunner(),
             dual_evaluator=DualEvaluator(),
             strategy_optimizer=StrategyOptimizer("test_task"),
@@ -41,11 +51,16 @@ class TestEvolutionOrchestratorInitialization:
         assert orchestrator.task_id == "test_task"
         assert orchestrator.code_generator is not None
 
-    def test_initializes_with_minimal_config(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_initializes_with_minimal_config(self, mock_openai):
         """测试使用最小配置初始化"""
         from evolution.orchestrator import EvolutionOrchestrator
 
-        orchestrator = EvolutionOrchestrator(task_id="test_task")
+        mock_client = MagicMock()
+        mock_openai.return_value = mock_client
+
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(task_id="test_task")
 
         assert orchestrator.task_id == "test_task"
         assert orchestrator.code_generator is not None
@@ -59,11 +74,19 @@ class TestEvolutionOrchestratorInitialization:
 class TestEvolutionOrchestratorSingleGeneration:
     """单代进化测试（P0优先级）"""
 
-    def test_runs_single_generation(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_runs_single_generation(self, mock_openai):
         """测试运行单代进化"""
         from evolution.orchestrator import EvolutionOrchestrator
 
-        orchestrator = EvolutionOrchestrator(task_id="test")
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    return 42\n```"))]
+        )
+        mock_openai.return_value = mock_client
+
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(task_id="test")
 
         result = orchestrator.run_single_generation(
             generation=1,
@@ -75,11 +98,19 @@ class TestEvolutionOrchestratorSingleGeneration:
         assert result.code is not None
         assert result.score is not None
 
-    def test_generation_produces_valid_code(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_generation_produces_valid_code(self, mock_openai):
         """测试代进化产生有效代码"""
         from evolution.orchestrator import EvolutionOrchestrator
 
-        orchestrator = EvolutionOrchestrator(task_id="test")
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    return 42\n```"))]
+        )
+        mock_openai.return_value = mock_client
+
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(task_id="test")
 
         result = orchestrator.run_single_generation(
             generation=1,
@@ -98,11 +129,19 @@ class TestEvolutionOrchestratorSingleGeneration:
 
         assert syntax_valid
 
-    def test_generation_returns_score(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_generation_returns_score(self, mock_openai):
         """测试代进化返回得分"""
         from evolution.orchestrator import EvolutionOrchestrator
 
-        orchestrator = EvolutionOrchestrator(task_id="test")
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+        )
+        mock_openai.return_value = mock_client
+
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(task_id="test")
 
         result = orchestrator.run_single_generation(
             generation=1,
@@ -122,16 +161,24 @@ class TestEvolutionOrchestratorSingleGeneration:
 class TestEvolutionOrchestratorEvolutionLoop:
     """进化循环测试（P0优先级）"""
 
-    def test_runs_evolution_loop_for_multiple_generations(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_runs_evolution_loop_for_multiple_generations(self, mock_openai):
         """测试运行多代进化循环"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.termination_checker import TerminationConfig
 
-        config = TerminationConfig(max_generations=3, success_threshold=1.0)
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            termination_config=config,
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
         )
+        mock_openai.return_value = mock_client
+
+        config = TerminationConfig(max_generations=3, success_threshold=1.0)
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                termination_config=config,
+            )
 
         result = orchestrator.evolve(
             requirements=["Write a simple function"],
@@ -142,16 +189,24 @@ class TestEvolutionOrchestratorEvolutionLoop:
         assert result is not None
         assert result.generations >= 1
 
-    def test_evolution_stores_history(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_evolution_stores_history(self, mock_openai):
         """测试进化存储历史记录"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.termination_checker import TerminationConfig
 
-        config = TerminationConfig(max_generations=2, success_threshold=1.0)
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            termination_config=config,
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
         )
+        mock_openai.return_value = mock_client
+
+        config = TerminationConfig(max_generations=2, success_threshold=1.0)
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                termination_config=config,
+            )
 
         orchestrator.evolve(
             requirements=["Write a function"],
@@ -162,16 +217,24 @@ class TestEvolutionOrchestratorEvolutionLoop:
         # 应该存储历史
         assert len(orchestrator.history) >= 1
 
-    def test_evolution_tracks_best_solution(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_evolution_tracks_best_solution(self, mock_openai):
         """测试进化追踪最佳解决方案"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.termination_checker import TerminationConfig
 
-        config = TerminationConfig(max_generations=3, success_threshold=1.0)
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            termination_config=config,
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
         )
+        mock_openai.return_value = mock_client
+
+        config = TerminationConfig(max_generations=3, success_threshold=1.0)
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                termination_config=config,
+            )
 
         orchestrator.evolve(
             requirements=["Write a function"],
@@ -191,16 +254,24 @@ class TestEvolutionOrchestratorEvolutionLoop:
 class TestEvolutionOrchestratorTermination:
     """终止条件测试（P0优先级）"""
 
-    def test_stops_at_max_generations(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_stops_at_max_generations(self, mock_openai):
         """测试在最大代数时停止"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.termination_checker import TerminationConfig
 
-        config = TerminationConfig(max_generations=2, success_threshold=1.0)
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            termination_config=config,
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
         )
+        mock_openai.return_value = mock_client
+
+        config = TerminationConfig(max_generations=2, success_threshold=1.0)
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                termination_config=config,
+            )
 
         result = orchestrator.evolve(
             requirements=["Write a function"],
@@ -210,17 +281,25 @@ class TestEvolutionOrchestratorTermination:
 
         assert result.generations <= 2
 
-    def test_stops_at_success_threshold(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_stops_at_success_threshold(self, mock_openai):
         """测试在成功阈值时停止"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.termination_checker import TerminationConfig
 
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+        )
+        mock_openai.return_value = mock_client
+
         # 设置一个很低的成功阈值以便测试
         config = TerminationConfig(max_generations=10, success_threshold=0.0)
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            termination_config=config,
-        )
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                termination_config=config,
+            )
 
         result = orchestrator.evolve(
             requirements=["Write a function"],
@@ -230,20 +309,28 @@ class TestEvolutionOrchestratorTermination:
         # 应该成功终止
         assert result.success is True
 
-    def test_respects_stagnation_limit(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_respects_stagnation_limit(self, mock_openai):
         """测试遵守停滞限制"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.termination_checker import TerminationConfig
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+        )
+        mock_openai.return_value = mock_client
 
         config = TerminationConfig(
             max_generations=10,
             success_threshold=1.0,
             stagnation_generations=2,
         )
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            termination_config=config,
-        )
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                termination_config=config,
+            )
 
         result = orchestrator.evolve(
             requirements=["Write a function"],
@@ -264,16 +351,24 @@ class TestEvolutionOrchestratorTermination:
 class TestEvolutionOrchestratorStrategyOptimization:
     """策略优化测试（P1优先级）"""
 
-    def test_uses_strategy_optimizer(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_uses_strategy_optimizer(self, mock_openai):
         """测试使用策略优化器"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.strategy_optimizer import StrategyOptimizer
 
-        optimizer = StrategyOptimizer("test")
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            strategy_optimizer=optimizer,
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
         )
+        mock_openai.return_value = mock_client
+
+        optimizer = StrategyOptimizer("test")
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                strategy_optimizer=optimizer,
+            )
 
         # 运行一代
         result = orchestrator.run_single_generation(
@@ -284,16 +379,24 @@ class TestEvolutionOrchestratorStrategyOptimization:
 
         assert result is not None
 
-    def test_updates_strategy_based_on_result(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_updates_strategy_based_on_result(self, mock_openai):
         """测试根据结果更新策略"""
         from evolution.orchestrator import EvolutionOrchestrator
         from evolution.strategy_optimizer import StrategyOptimizer
 
-        optimizer = StrategyOptimizer("test")
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            strategy_optimizer=optimizer,
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
         )
+        mock_openai.return_value = mock_client
+
+        optimizer = StrategyOptimizer("test")
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                strategy_optimizer=optimizer,
+            )
 
         # 运行并报告结果
         result = orchestrator.run_single_generation(
@@ -316,11 +419,18 @@ class TestEvolutionOrchestratorStrategyOptimization:
 class TestEvolutionOrchestratorGitIntegration:
     """Git集成测试（P1优先级）"""
 
-    def test_commits_each_generation(self, tmp_path):
+    @patch("evolution.code_generator.OpenAI")
+    def test_commits_each_generation(self, mock_openai, tmp_path):
         """测试每代都提交到Git"""
         import subprocess
         from evolution.orchestrator import EvolutionOrchestrator
         from core.git_manager import GitManager
+
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+        )
+        mock_openai.return_value = mock_client
 
         # 创建临时git仓库
         repo_path = tmp_path / "repo"
@@ -352,10 +462,11 @@ class TestEvolutionOrchestratorGitIntegration:
         )
 
         git_manager = GitManager(str(repo_path))
-        orchestrator = EvolutionOrchestrator(
-            task_id="test",
-            git_manager=git_manager,
-        )
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(
+                task_id="test",
+                git_manager=git_manager,
+            )
 
         # 运行一代
         orchestrator.run_single_generation(
@@ -461,11 +572,19 @@ class TestEvolutionResult:
 class TestEvolutionOrchestratorEdgeCases:
     """边界情况测试"""
 
-    def test_handles_empty_requirements(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_handles_empty_requirements(self, mock_openai):
         """测试处理空需求"""
         from evolution.orchestrator import EvolutionOrchestrator
 
-        orchestrator = EvolutionOrchestrator(task_id="test")
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+        )
+        mock_openai.return_value = mock_client
+
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(task_id="test")
 
         # 应该处理空需求而不崩溃
         result = orchestrator.run_single_generation(
@@ -476,11 +595,19 @@ class TestEvolutionOrchestratorEdgeCases:
 
         assert result is not None
 
-    def test_handles_syntax_error_in_test_code(self):
+    @patch("evolution.code_generator.OpenAI")
+    def test_handles_syntax_error_in_test_code(self, mock_openai):
         """测试处理测试代码语法错误"""
         from evolution.orchestrator import EvolutionOrchestrator
 
-        orchestrator = EvolutionOrchestrator(task_id="test")
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+        )
+        mock_openai.return_value = mock_client
+
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(task_id="test")
 
         # 使用有语法错误的测试代码
         result = orchestrator.run_single_generation(
@@ -497,7 +624,8 @@ class TestEvolutionOrchestratorEdgeCases:
         """测试处理零最大代数"""
         from evolution.orchestrator import EvolutionOrchestrator
 
-        orchestrator = EvolutionOrchestrator(task_id="test")
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}):
+            orchestrator = EvolutionOrchestrator(task_id="test")
 
         result = orchestrator.evolve(
             requirements=["Write a function"],

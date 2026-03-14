@@ -21,7 +21,7 @@ class TestCodeGeneratorInit:
         mock_client = MagicMock()
         mock_anthropic_class.return_value = mock_client
 
-        generator = CodeGenerator(api_key="test-api-key-123")
+        generator = CodeGenerator(api_key="test-api-key-123", backend="anthropic")
 
         assert generator.api_key == "test-api-key-123"
         assert generator.model == CodeGenerator.DEFAULT_MODEL
@@ -37,7 +37,7 @@ class TestCodeGeneratorInit:
         mock_anthropic_class.return_value = mock_client
 
         with patch.dict(os.environ, {"ANTHROPIC_API_KEY": "env-api-key-456"}):
-            generator = CodeGenerator()
+            generator = CodeGenerator(backend="anthropic")
             assert generator.api_key == "env-api-key-456"
 
     @patch("evolution.code_generator.Anthropic")
@@ -52,6 +52,7 @@ class TestCodeGeneratorInit:
             api_key="test-key",
             model="claude-opus-4",
             default_temperature=0.8,
+            backend="anthropic",
         )
 
         assert generator.model == "claude-opus-4"
@@ -62,25 +63,25 @@ class TestCodeGeneratorInit:
         from evolution.code_generator import CodeGenerator
 
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="Anthropic API key is required"):
+            with pytest.raises(ValueError, match="Deepseek API key is required"):
                 CodeGenerator()
 
-    def test_init_without_anthropic_lib_raises_error(self):
-        """测试 anthropic 库未安装时抛出 ImportError"""
+    def test_init_without_deepseek_lib_raises_error(self):
+        """测试 openai 库未安装时抛出 ImportError"""
         from evolution import code_generator
 
         # 保存原始值
-        original_anthropic = code_generator.Anthropic
+        original_openai = code_generator.OpenAI
 
         try:
-            # 模拟 anthropic 库不存在
-            code_generator.Anthropic = None
+            # 模拟 openai 库不存在
+            code_generator.OpenAI = None
 
-            with pytest.raises(ImportError, match="anthropic library is required"):
+            with pytest.raises(ImportError, match="openai library is required"):
                 code_generator.CodeGenerator(api_key="test-key")
         finally:
             # 恢复原始值
-            code_generator.Anthropic = original_anthropic
+            code_generator.OpenAI = original_openai
 
 
 class TestFormatRequirements:
@@ -89,7 +90,7 @@ class TestFormatRequirements:
     @pytest.fixture
     def generator(self):
         """创建测试用的 generator"""
-        with patch("evolution.code_generator.Anthropic"):
+        with patch("evolution.code_generator.OpenAI"):
             from evolution.code_generator import CodeGenerator
 
             return CodeGenerator(api_key="test-key")
@@ -263,7 +264,7 @@ class TestGenerate:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key")
+            generator = CodeGenerator(api_key="test-key", backend="anthropic")
             result = generator.generate(task_spec)
 
             assert result["success"] is True
@@ -280,7 +281,7 @@ class TestGenerate:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key")
+            generator = CodeGenerator(api_key="test-key", backend="anthropic")
             previous_code = "def old_add(a, b): return a"
             previous_score = {"intrinsic_score": 0.5, "extrinsic_score": 0.3}
             failed_tests = ["test_add_large_numbers"]
@@ -307,7 +308,7 @@ class TestGenerate:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key")
+            generator = CodeGenerator(api_key="test-key", backend="anthropic")
             result = generator.generate(task_spec, temperature=0.9)
 
             # 验证调用时使用了自定义温度
@@ -325,7 +326,7 @@ class TestGenerate:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key")
+            generator = CodeGenerator(api_key="test-key", backend="anthropic")
             result = generator.generate(task_spec)
 
             assert result["success"] is False
@@ -344,7 +345,7 @@ class TestGenerate:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key")
+            generator = CodeGenerator(api_key="test-key", backend="anthropic")
             result = generator.generate(task_spec)
 
             assert result["success"] is False
@@ -366,7 +367,7 @@ class TestGenerate:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key")
+            generator = CodeGenerator(api_key="test-key", backend="anthropic")
             result = generator.generate(task_spec)
 
             # 应该使用 str() 转换
@@ -383,7 +384,7 @@ class TestGenerate:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key")
+            generator = CodeGenerator(api_key="test-key", backend="anthropic")
             result = generator.generate(task_spec)
 
             assert result["success"] is True
@@ -397,7 +398,7 @@ class TestGenerate:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key")
+            generator = CodeGenerator(api_key="test-key", backend="anthropic")
             result = generator.generate(
                 task_spec,
                 previous_code=None,
@@ -441,7 +442,7 @@ def factorial(n: int) -> int:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key", default_temperature=0.3)
+            generator = CodeGenerator(api_key="test-key", default_temperature=0.3, backend="anthropic")
             result = generator.generate(task_spec)
 
             assert result["success"] is True

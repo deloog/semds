@@ -51,7 +51,7 @@ def load_env(env_file: str = ".env") -> dict:
                     loaded[key] = value
 
     if loaded:
-        print(f"✓ 已从 {env_path} 加载 {len(loaded)} 个环境变量")
+        print(f"[OK] Loaded {len(loaded)} variables from {env_path}")
 
     return loaded
 

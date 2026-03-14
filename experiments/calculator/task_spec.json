@@ -1,0 +1,41 @@
+{
+  "name": "calculator_evolution",
+  "description": "进化出一个可靠的四则运算计算器函数",
+  "target_function_signature": "def calculate(a: float, b: float, op: str) -> float",
+  "requirements": [
+    "支持操作符: +, -, *, /",
+    "除零时抛出ValueError",
+    "操作符无效时抛出ValueError",
+    "支持负数和浮点数"
+  ],
+  "success_criteria": {
+    "intrinsic_score_threshold": 0.95,
+    "extrinsic_score_threshold": 0.90,
+    "max_generations": 20,
+    "max_wall_time_minutes": 30,
+    "stagnation_generations": 5
+  },
+  "evolution_strategy": {
+    "initial_temperature": 0.7,
+    "mutation_types": ["conservative", "aggressive", "hybrid"],
+    "validation_mode": "comprehensive"
+  },
+  "expected_evolution_path": {
+    "gen_0": {
+      "expected_score_range": [0.5, 0.7],
+      "description": "LLM冷启动，生成基础实现"
+    },
+    "gen_1_to_3": {
+      "expected_score_range": [0.75, 0.85],
+      "description": "修复明显错误（除零处理，类型返回）"
+    },
+    "gen_4_to_8": {
+      "expected_score_range": [0.88, 0.95],
+      "description": "边界用例改进（浮点精度，负数）"
+    },
+    "gen_9_plus": {
+      "expected_score_range": [0.95, 1.0],
+      "description": "微调优化或Goodhart检测触发"
+    }
+  }
+}

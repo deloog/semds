@@ -176,7 +176,9 @@ class TestRunner:
         """
         将代码写入临时文件并运行测试。
 
-        这是一个便捷方法，用于Phase 1的快速测试。
+        支持两种测试代码格式：
+        1. pytest格式：包含 def test_xxx() 函数的完整测试文件
+        2. 简单格式：仅包含 assert 语句的代码片段（会自动包装）
 
         Args:
             code: 要测试的解决方案代码
@@ -197,29 +199,70 @@ class TestRunner:
         with open(solution_path, "w", encoding="utf-8") as f:
             f.write(code)
 
+        # 检查测试代码格式，如果不是pytest格式则进行包装
+        formatted_test_code = self._format_test_code(test_code)
+
         # 写入测试文件
         test_path = os.path.join(working_dir, "test_solution.py")
         with open(test_path, "w", encoding="utf-8") as f:
-            f.write(test_code)
+            f.write(formatted_test_code)
 
         # 运行测试
         return self.run_tests(test_path, solution_path, working_dir)
 
+    def _format_test_code(self, test_code: str) -> str:
+        """
+        将测试代码格式化为pytest可识别的格式。
+        
+        如果测试代码不包含 def test_ 函数定义，
+        则将其包装在一个 test_solution() 函数中。
+        
+        Args:
+            test_code: 原始测试代码
+            
+        Returns:
+            格式化后的测试代码
+        """
+        # 检查是否已经是pytest格式
+        if "def test_" in test_code:
+            # 已经是pytest格式，直接返回
+            # 但需要确保有导入语句
+            if "from solution import" not in test_code and "import solution" not in test_code:
+                test_code = "from solution import *\n\n" + test_code
+            return test_code
+        
+        # 简单格式：包装成pytest函数
+        # 移除可能存在的import语句（我们会自动添加）
+        lines = test_code.strip().split("\n")
+        filtered_lines = []
+        for line in lines:
+            if not line.strip().startswith(("from solution import", "import solution")):
+                filtered_lines.append(line)
+        
+        test_body = "\n".join(filtered_lines)
+        
+        formatted = f'''from solution import *
+
+def test_solution():
+    """Auto-generated test function."""
+{self._indent_code(test_body, 4)}
+'''
+        return formatted
+
+    def _indent_code(self, code: str, indent: int = 4) -> str:
+        """为代码添加缩进。"""
+        prefix = " " * indent
+        lines = code.strip().split("\n")
+        indented_lines = [prefix + line if line.strip() else line for line in lines]
+        return "\n".join(indented_lines)
+
     def _check_json_report(self) -> bool:
         """检查是否安装了pytest-json-report插件。"""
         try:
-            subprocess.run(
-                ["python", "-m", "pytest", "--version"],
-                capture_output=True,
-                text=True,
-            )
-            # 简单检查：尝试运行带--json-report的pytest
-            test_result = subprocess.run(
-                ["python", "-m", "pytest", "--json-report", "--help"],
-                capture_output=True,
-                text=True,
-            )
-            return test_result.returncode == 0
+            # 尝试导入插件来检测
+            import importlib.util
+            spec = importlib.util.find_spec("pytest_jsonreport")
+            return spec is not None
         except Exception:
             return False
 

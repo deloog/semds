@@ -3,16 +3,23 @@ Extrinsic Evaluator 模块 - 外生评估（行为一致性验证）
 
 通过生成边界用例并执行来验证代码行为一致性。
 
-评估维度：
+评估维度（整合版）：
 - 静态代码分析（危险模式检测）
 - 边界用例生成与执行
 - 行为一致性评分
+- 运行时性能评估
+- 鲁棒性测试（基于测试代码）
+
+版本说明：
+此文件已整合原 extrinsic_evaluator_enhanced.py 的功能。
+禁止创建 V2/增强版/加强版 等分离文件，所有改进必须在此文件完成。
 """
 
 import ast
 import re
+import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Optional
 
 
 @dataclass
@@ -37,12 +44,14 @@ class EvaluationResult:
 
 
 class ExtrinsicEvaluator:
-    """外生评估器 - 行为一致性验证
+    """外生评估器 - 行为一致性验证（整合增强版）
 
     通过以下方式评估代码：
     1. 静态分析检测危险模式
     2. 生成边界用例
     3. 执行用例验证行为一致性
+    4. 运行时性能评估
+    5. 鲁棒性测试（可选，需 test_code）
 
     Example:
         >>> evaluator = ExtrinsicEvaluator()
@@ -52,11 +61,24 @@ class ExtrinsicEvaluator:
         ...     requirements=["Returns sum"]
         ... )
         >>> print(f"Score: {result['score']:.2f}")
+        
+        >>> # 启用增强评估
+        >>> result = evaluator.evaluate(
+        ...     code=code,
+        ...     function_signature=sig,
+        ...     requirements=reqs,
+        ...     test_code=test_code  # 传入测试代码以评估鲁棒性
+        ... )
     """
 
-    # 权重配置
+    # 权重配置（可自定义）
     WEIGHT_STATIC = 0.4
     WEIGHT_CONSISTENCY = 0.6
+    
+    # 增强模式权重（当传入 test_code 时使用）
+    WEIGHT_ENHANCED_BASE = 0.3
+    WEIGHT_ENHANCED_PERF = 0.4
+    WEIGHT_ENHANCED_ROBUST = 0.3
 
     # 危险模式
     DANGEROUS_PATTERNS = [
@@ -83,19 +105,30 @@ class ExtrinsicEvaluator:
         (r'token\s*=\s*[\'"][^\'"]{3,}[\'"]', "Hardcoded token"),
     ]
 
-    def __init__(self):
-        """初始化评估器"""
-        pass
+    def __init__(self, timeout_seconds: float = 2.0):
+        """
+        初始化评估器。
+        
+        Args:
+            timeout_seconds: 性能测试超时时间（秒）
+        """
+        self.timeout_seconds = timeout_seconds
 
     def evaluate(
-        self, code: str, function_signature: str, requirements: List[str]
+        self, 
+        code: str, 
+        function_signature: str, 
+        requirements: List[str],
+        test_code: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """执行完整外生评估
+        """
+        执行完整外生评估（整合增强版）。
 
         Args:
             code: 要评估的代码字符串
             function_signature: 函数签名（如 "add(a: int, b: int) -> int"）
             requirements: 功能需求描述列表
+            test_code: 可选的测试代码，用于鲁棒性评估
 
         Returns:
             包含以下字段的字典：
@@ -103,47 +136,71 @@ class ExtrinsicEvaluator:
             - consistency_score: 行为一致性得分
             - static_analysis_score: 静态分析得分
             - edge_case_results: 边界用例执行结果列表
+            - performance_score: 性能得分（新增）
+            - robustness_score: 鲁棒性得分（新增，需 test_code）
+            - details: 详细得分构成
         """
         # 空代码或语法错误处理
         if not code or not code.strip():
-            return {
-                "score": 0.0,
-                "consistency_score": 0.0,
-                "static_analysis_score": 0.0,
-                "edge_case_results": [],
-            }
+            return self._create_empty_result()
 
         try:
             ast.parse(code)
         except SyntaxError:
-            return {
-                "score": 0.0,
-                "consistency_score": 0.0,
-                "static_analysis_score": 0.0,
-                "edge_case_results": [],
-            }
+            return self._create_empty_result()
 
-        # 静态分析
+        # 1. 基础评估（静态分析 + 边界用例）
         static_score = self._static_analysis(code)
-
-        # 生成边界用例
         edge_cases = self._generate_edge_cases(function_signature)
-
-        # 执行边界用例并计算一致性得分
         edge_results, consistency_score = self._execute_edge_cases(
             code, function_signature, edge_cases
         )
-
-        # 计算加权总得分
+        
+        # 基础模式：仅使用静态和一致性得分
+        if test_code is None:
+            total_score = (
+                self.WEIGHT_STATIC * static_score
+                + self.WEIGHT_CONSISTENCY * consistency_score
+            )
+            
+            return {
+                "score": round(total_score, 2),
+                "consistency_score": round(consistency_score, 2),
+                "static_analysis_score": round(static_score, 2),
+                "edge_case_results": [
+                    {
+                        "inputs": r.inputs,
+                        "expected": r.expected,
+                        "actual": r.actual,
+                        "passed": r.passed,
+                        "description": r.description,
+                    }
+                    for r in edge_results
+                ],
+            }
+        
+        # 增强模式：添加性能和鲁棒性评估
+        # 2. 性能评估
+        perf_score = self._evaluate_performance(code, function_signature)
+        
+        # 3. 鲁棒性评估
+        robust_score = self._evaluate_robustness(code, test_code)
+        
+        # 4. 综合得分（增强权重）
+        # 基础质量 30% + 性能 40% + 鲁棒性 30%
+        base_quality = (static_score + consistency_score) / 2
         total_score = (
-            self.WEIGHT_STATIC * static_score
-            + self.WEIGHT_CONSISTENCY * consistency_score
+            self.WEIGHT_ENHANCED_BASE * base_quality
+            + self.WEIGHT_ENHANCED_PERF * perf_score
+            + self.WEIGHT_ENHANCED_ROBUST * robust_score
         )
-
+        
         return {
             "score": round(total_score, 2),
             "consistency_score": round(consistency_score, 2),
             "static_analysis_score": round(static_score, 2),
+            "performance_score": round(perf_score, 2),
+            "robustness_score": round(robust_score, 2),
             "edge_case_results": [
                 {
                     "inputs": r.inputs,
@@ -154,8 +211,126 @@ class ExtrinsicEvaluator:
                 }
                 for r in edge_results
             ],
+            "details": {
+                "base_quality": round(base_quality, 2),
+                "performance": round(perf_score, 2),
+                "robustness": round(robust_score, 2),
+            },
         }
 
+    def _create_empty_result(self) -> Dict[str, Any]:
+        """创建空代码/语法错误的结果"""
+        return {
+            "score": 0.0,
+            "consistency_score": 0.0,
+            "static_analysis_score": 0.0,
+            "edge_case_results": [],
+        }
+    
+    def _evaluate_performance(self, code: str, function_signature: str) -> float:
+        """
+        评估代码执行性能（整合自原 enhanced 版本）。
+        
+        通过执行代码并测量运行时间来判断性能。
+        
+        Args:
+            code: 代码字符串
+            function_signature: 函数签名
+            
+        Returns:
+            性能得分 (0-1)
+        """
+        try:
+            namespace = {}
+            exec(code, namespace)
+            
+            func_name = function_signature.split("(")[0].strip()
+            if func_name not in namespace:
+                return 0.5
+            
+            func = namespace[func_name]
+            test_inputs = self._generate_perf_test_inputs(function_signature)
+            
+            total_time = 0
+            for test_input in test_inputs:
+                start = time.perf_counter()
+                try:
+                    if isinstance(test_input, tuple):
+                        func(*test_input)
+                    else:
+                        func(test_input)
+                except:
+                    pass
+                elapsed = time.perf_counter() - start
+                total_time += elapsed
+            
+            avg_time = total_time / len(test_inputs) if test_inputs else 0
+            
+            # 评分：越快越高分
+            if avg_time < 0.001:  # 1ms
+                return 1.0
+            elif avg_time < 0.01:  # 10ms
+                return 0.9
+            elif avg_time < 0.1:  # 100ms
+                return 0.8
+            elif avg_time < self.timeout_seconds:
+                return 0.6
+            else:
+                return 0.3
+                
+        except Exception:
+            return 0.5
+    
+    def _generate_perf_test_inputs(self, function_signature: str) -> list:
+        """
+        生成性能测试输入（整合自原 enhanced 版本）。
+        
+        Args:
+            function_signature: 函数签名
+            
+        Returns:
+            测试输入列表
+        """
+        sig = function_signature.lower()
+        
+        if "sort" in sig or "list" in sig:
+            return [
+                list(range(10)),
+                list(range(100)),
+                list(range(500)),
+            ]
+        elif "fibonacci" in sig or "fib" in sig:
+            return [5, 10, 20]
+        elif "string" in sig or "str" in sig:
+            return [
+                "a" * 10,
+                "a" * 100,
+                "a" * 1000,
+            ]
+        else:
+            return [1, 10, 100]
+    
+    def _evaluate_robustness(self, code: str, test_code: str) -> float:
+        """
+        评估代码鲁棒性（基于测试通过率）。
+        
+        直接运行测试代码，计算通过率。
+        
+        Args:
+            code: 被测代码
+            test_code: 测试代码
+            
+        Returns:
+            鲁棒性得分 (0-1)
+        """
+        from evolution.test_runner import TestRunner
+        
+        try:
+            result = TestRunner().run_tests_with_code(code, test_code)
+            return result.get("pass_rate", 0.0)
+        except:
+            return 0.0
+    
     def _static_analysis(self, code: str) -> float:
         """静态代码分析
 

@@ -622,6 +622,7 @@ class TestModelBase:
             "current_generation",
             "best_score",
             "best_generation_id",
+            "owner_id",
             "created_at",
             "updated_at",
         }

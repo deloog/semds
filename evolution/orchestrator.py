@@ -12,6 +12,7 @@ Evolution Orchestrator 模块 - 进化流程编排器
 生成最终进化报告。
 """
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -24,6 +25,33 @@ from evolution.termination_checker import (
     TerminationConfig,
 )
 from evolution.test_runner import TestRunner
+
+
+def extract_function_signature(code: str) -> str:
+    """
+    从代码中提取函数签名。
+    
+    查找第一个函数定义的签名，如 "def add(a, b)" -> "add(a, b)"
+    
+    Args:
+        code: Python 代码字符串
+        
+    Returns:
+        函数签名字符串，如果没有找到则返回 "solution()"
+    """
+    if not code:
+        return "solution()"
+    
+    # 匹配函数定义: def function_name(args) -> return_type:
+    pattern = r'def\s+(\w+)\s*\(([^)]*)\)'
+    match = re.search(pattern, code)
+    
+    if match:
+        func_name = match.group(1)
+        args = match.group(2).strip()
+        return f"{func_name}({args})"
+    
+    return "solution()"
 
 
 @dataclass
@@ -183,30 +211,47 @@ class EvolutionOrchestrator:
 
         # 2. 生成代码
         try:
-            code = self.code_generator.generate(
-                requirements=requirements,
+            # 构建 task_spec 字典
+            task_spec = {
+                "description": "Implement solution based on requirements",
+                "function_signature": "def solution():",
+                "requirements": requirements,
+            }
+            
+            gen_result = self.code_generator.generate(
+                task_spec=task_spec,
                 temperature=strategy.get("generation_temperature", 0.5),
             )
-        except Exception:
+            # 从返回字典中提取代码
+            code = gen_result.get("code", "") if isinstance(gen_result, dict) else str(gen_result)
+        except Exception as e:
             # 生成失败返回空代码
+            print(f"Code generation error: {e}")
             code = ""
 
         # 3. 运行测试
         try:
-            test_result = self.test_runner.run_tests(test_code, code)
-            passed_tests = test_result.passed > 0 and test_result.failed == 0
-        except Exception:
+            test_result = self.test_runner.run_tests_with_code(code, test_code)
+            passed_tests = (
+                len(test_result.get("passed", [])) > 0 
+                and len(test_result.get("failed", [])) == 0
+            )
+        except Exception as e:
+            print(f"Test execution error: {e}")
             passed_tests = False
 
         # 4. 评估质量
         try:
+            # 从代码中提取实际函数签名
+            func_signature = extract_function_signature(code)
             evaluation = self.dual_evaluator.evaluate(
                 code=code,
-                function_signature="solution()",  # 简化假设
+                function_signature=func_signature,
                 requirements=requirements,
             )
             score = evaluation.get("final_score", 0.0)
-        except Exception:
+        except Exception as e:
+            print(f"Evaluation error: {e}")
             score = 0.0
             evaluation = None
 

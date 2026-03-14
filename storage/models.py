@@ -54,6 +54,7 @@ class Task(Base):  # type: ignore[misc, valid-type]
         current_generation: 当前代数
         best_score: 历史最高分
         best_generation_id: 最高分对应的代ID
+        owner_id: 任务所有者用户ID
         created_at: 创建时间
         updated_at: 更新时间
     """
@@ -74,6 +75,7 @@ class Task(Base):  # type: ignore[misc, valid-type]
     current_generation = Column(Integer, nullable=False, default=0)
     best_score = Column(Float, nullable=True)
     best_generation_id = Column(String(36), nullable=True)
+    owner_id = Column(String(36), nullable=True, index=True, comment="任务所有者用户ID")
     created_at = Column(DateTime, nullable=False, default=get_current_timestamp)
     updated_at = Column(
         DateTime,
@@ -102,6 +104,7 @@ class Task(Base):  # type: ignore[misc, valid-type]
             "current_generation": self.current_generation,
             "best_score": self.best_score,
             "best_generation_id": self.best_generation_id,
+            "owner_id": self.owner_id,
             "created_at": (self.created_at.isoformat() if self.created_at else None),
             "updated_at": (self.updated_at.isoformat() if self.updated_at else None),
         }
@@ -200,6 +203,63 @@ class Generation(Base):  # type: ignore[misc, valid-type]
             "human_reviewed": self.human_reviewed,
             "git_commit_hash": self.git_commit_hash,
             "created_at": (self.created_at.isoformat() if self.created_at else None),
+        }
+
+
+class ApprovalRequest(Base):  # type: ignore[misc, valid-type]
+    """
+    审批请求模型，存储需要人工审批的代码进化请求。
+
+    对应规格文档审批流程章节。
+
+    Attributes:
+        id: UUID主键
+        task_id: 关联的任务ID
+        generation_id: 关联的进化代ID
+        code: 需要审批的代码
+        reason: 需要审批的原因
+        status: 审批状态
+        created_at: 创建时间
+        reviewed_at: 审核时间
+        reviewer_comment: 审核意见
+    """
+
+    __tablename__ = "approval_requests"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    task_id = Column(String(36), nullable=False, index=True)
+    generation_id = Column(String(36), nullable=False, index=True)
+    code = Column(Text, nullable=False)
+    reason = Column(Text, nullable=False)
+    status = Column(
+        String(20),
+        nullable=False,
+        default="pending",
+        comment="pending | approved | rejected",
+    )
+    created_at = Column(DateTime, nullable=False, default=get_current_timestamp)
+    reviewed_at = Column(DateTime, nullable=True)
+    reviewer_comment = Column(Text, nullable=True)
+
+    def __repr__(self) -> str:
+        return (
+            f"<ApprovalRequest(id={self.id}, "
+            f"task_id={self.task_id}, "
+            f"status={self.status})>"
+        )
+
+    def to_dict(self) -> dict:
+        """转换为字典表示。"""
+        return {
+            "id": self.id,
+            "task_id": self.task_id,
+            "generation_id": self.generation_id,
+            "code": self.code,
+            "reason": self.reason,
+            "status": self.status,
+            "created_at": (self.created_at.isoformat() if self.created_at else None),
+            "reviewed_at": (self.reviewed_at.isoformat() if self.reviewed_at else None),
+            "reviewer_comment": self.reviewer_comment,
         }
 
 

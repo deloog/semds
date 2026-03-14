@@ -88,7 +88,11 @@ class DualEvaluator:
         self.goodhart_detector = goodhart_detector or GoodhartDetector()
 
     def evaluate(
-        self, code: str, function_signature: str, requirements: List[str]
+        self, 
+        code: str, 
+        function_signature: str, 
+        requirements: List[str],
+        test_code: str = None,
     ) -> Dict[str, Any]:
         """执行双轨评估
 
@@ -96,6 +100,7 @@ class DualEvaluator:
             code: 要评估的代码字符串
             function_signature: 函数签名
             requirements: 功能需求描述列表
+            test_code: 可选的测试代码，用于计算真实测试通过率
 
         Returns:
             评估报告字典
@@ -117,17 +122,26 @@ class DualEvaluator:
         intrinsic_score = intrinsic_result.total_score
 
         # 2. 外生评估（行为一致性）
+        # 传入 test_code 启用增强评估（性能+鲁棒性测试）
         extrinsic_result = self.extrinsic_evaluator.evaluate(
             code=code,
             function_signature=function_signature,
             requirements=requirements,
+            test_code=test_code,  # 启用增强模式
         )
         extrinsic_score = extrinsic_result["score"]
 
-        # 3. Goodhart检测
-        # 将内生得分视为"通过率"，外生得分视为"一致性"
+        # 3. 计算真实的测试通过率（如果提供了测试代码）
+        pass_rate = intrinsic_score  # 默认使用内生得分作为近似
+        if test_code:
+            from evolution.test_runner import TestRunner
+            test_result = TestRunner().run_tests_with_code(code, test_code)
+            pass_rate = test_result.get("pass_rate", intrinsic_score)
+
+        # 4. Goodhart检测
+        # 使用真实测试通过率（如果有）或内生得分作为回退
         goodhart_result = self.goodhart_detector.detect(
-            pass_rate=intrinsic_score, consistency_score=extrinsic_score
+            pass_rate=pass_rate, consistency_score=extrinsic_score
         )
 
         # 4. 计算最终得分
