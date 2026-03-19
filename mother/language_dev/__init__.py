@@ -6,7 +6,7 @@ from .example_suite import ExampleSuiteGenerator
 
 __all__ = [
     "LanguageLearner",
-    "LanguageSpec", 
+    "LanguageSpec",
     "LanguageAwareGenerator",
     "ExampleSuiteGenerator",
 ]

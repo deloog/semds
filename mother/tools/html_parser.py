@@ -8,46 +8,48 @@ Design Principles Applied:
 - Security: Input validation, no dangerous functions
 - Robustness: Error handling, timeout control
 """
+
 import sys
-sys.path.insert(0, 'D:\semds')
+
+sys.path.insert(0, "D:\semds")
 from mother.core.capability_registry import Capability
 import os
 
 
 class HTMLParserTool(Capability):
     """Parse HTML and extract data. Minimal and robust implementation."""
-    
+
     MAX_HTML_SIZE = 10_000_000  # 10MB safety limit
-    
+
     def __init__(self):
         super().__init__("html_parser", "Parse HTML and extract image URLs")
-    
+
     def execute(self, html: str) -> list:
         """
         Extract image URLs from HTML.
-        
+
         Args:
             html: HTML string to parse
-            
+
         Returns:
             List of image URLs
         """
         import re
-        
+
         # Input validation
         if not isinstance(html, str):
             return []
         if len(html) > self.MAX_HTML_SIZE:
             return []
-        
+
         # Extract URLs with double quotes
         pattern1 = r'<img[^>]+src="([^"]+)"'
         urls = re.findall(pattern1, html, re.IGNORECASE)
-        
+
         # Extract URLs with single quotes
         pattern2 = r"<img[^>]+src='([^']+)'"
         urls.extend(re.findall(pattern2, html, re.IGNORECASE))
-        
+
         # Normalize URLs
         result = []
         for url in urls:
@@ -57,6 +59,5 @@ class HTMLParserTool(Capability):
                 url = "https://example.com" + url
             if url.startswith("http"):
                 result.append(url)
-        
-        return result
 
+        return result

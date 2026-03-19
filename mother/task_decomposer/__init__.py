@@ -7,7 +7,7 @@ from mother.task_decomposer.decomposer import TaskDecomposer, AtomicTask
 from mother.task_decomposer.tdd_executor import TDDExecutor
 
 __all__ = [
-    'TaskDecomposer',
-    'AtomicTask', 
-    'TDDExecutor',
+    "TaskDecomposer",
+    "AtomicTask",
+    "TDDExecutor",
 ]

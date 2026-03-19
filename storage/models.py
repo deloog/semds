@@ -11,6 +11,7 @@ SQLAlchemy数据模型定义，对应规格文档第六章。
 
 import uuid
 from datetime import datetime, timezone
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -92,7 +93,7 @@ class Task(Base):  # type: ignore[misc, valid-type]
     def __repr__(self) -> str:
         return f"<Task(id={self.id}, name={self.name}, status={self.status})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典表示。"""
         return {
             "id": self.id,
@@ -184,7 +185,7 @@ class Generation(Base):  # type: ignore[misc, valid-type]
             f"gen={self.gen_number})>"
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典表示。"""
         return {
             "id": self.id,
@@ -248,7 +249,7 @@ class ApprovalRequest(Base):  # type: ignore[misc, valid-type]
             f"status={self.status})>"
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典表示。"""
         return {
             "id": self.id,
@@ -296,7 +297,7 @@ class StrategyState(Base):  # type: ignore[misc, valid-type]
     def __repr__(self) -> str:
         return f"<StrategyState(task_id={self.task_id}, " f"key={self.strategy_key})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典表示。"""
         return {
             "task_id": self.task_id,
@@ -316,7 +317,7 @@ if __name__ == "__main__":
     init_database()
 
     # 获取会话
-    session = get_session()
+    session = next(get_session())
 
     # 创建测试任务
     task = Task(

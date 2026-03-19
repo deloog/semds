@@ -13,7 +13,7 @@ Supported LLM:
 import os
 import re
 import json
-from typing import Any, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 # Optional imports
 Anthropic: Optional[Type[Any]] = None
@@ -96,9 +96,9 @@ class CodeGenerator:
         api_key: Optional[str] = None,
         model: str = DEFAULT_MODEL,
         default_temperature: float = 0.5,
-        backend: str = None,
+        backend: Optional[str] = None,
         base_url: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize code generator.
 
@@ -125,7 +125,7 @@ class CodeGenerator:
         else:
             raise ValueError(f"Unsupported backend: {self.backend}")
 
-    def _init_deepseek(self, api_key: Optional[str], base_url: Optional[str]):
+    def _init_deepseek(self, api_key: Optional[str], base_url: Optional[str]) -> None:
         """Initialize Deepseek client"""
         if OpenAI is None:
             raise ImportError("openai library required. Install: pip install openai")
@@ -134,13 +134,17 @@ class CodeGenerator:
         if not self.api_key:
             raise ValueError("Deepseek API key required via DEEPSEEK_API_KEY")
 
-        base_url = base_url or os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+        base_url = base_url or os.environ.get(
+            "DEEPSEEK_BASE_URL", "https://api.deepseek.com"
+        )
         self.client = OpenAI(api_key=self.api_key, base_url=base_url)
 
-    def _init_anthropic(self, api_key: Optional[str]):
+    def _init_anthropic(self, api_key: Optional[str]) -> None:
         """Initialize Anthropic client"""
         if Anthropic is None:
-            raise ImportError("anthropic library required. Install: pip install anthropic")
+            raise ImportError(
+                "anthropic library required. Install: pip install anthropic"
+            )
 
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
         if not self.api_key:
@@ -148,7 +152,7 @@ class CodeGenerator:
 
         self.client = Anthropic(api_key=self.api_key)
 
-    def _init_openai(self, api_key: Optional[str], base_url: Optional[str]):
+    def _init_openai(self, api_key: Optional[str], base_url: Optional[str]) -> None:
         """Initialize OpenAI client"""
         if OpenAI is None:
             raise ImportError("openai library required. Install: pip install openai")
@@ -162,21 +166,23 @@ class CodeGenerator:
             kwargs["base_url"] = base_url
         self.client = OpenAI(**kwargs)
 
-    def _init_ollama(self, base_url: Optional[str]):
+    def _init_ollama(self, base_url: Optional[str]) -> None:
         """Initialize Ollama (local model) - no API key needed"""
-        self.base_url = base_url or os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+        self.base_url = base_url or os.environ.get(
+            "OLLAMA_BASE_URL", "http://localhost:11434"
+        )
         self.model = os.environ.get("OLLAMA_MODEL", self.model)
         self.client = None  # Use requests directly for Ollama
 
     def generate(
         self,
-        task_spec: dict,
+        task_spec: Dict[str, Any],
         previous_code: Optional[str] = None,
-        previous_score: Optional[dict] = None,
-        failed_tests: Optional[list] = None,
-        strategy: Optional[dict] = None,
+        previous_score: Optional[Dict[str, Any]] = None,
+        failed_tests: Optional[List[str]] = None,
+        strategy: Optional[Dict[str, Any]] = None,
         temperature: Optional[float] = None,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """
         Generate code implementation.
 
@@ -194,13 +200,31 @@ class CodeGenerator:
         prompt_params = {
             "task_description": task_spec.get("description", ""),
             "function_signature": task_spec.get("function_signature", ""),
-            "requirements": self._format_requirements(task_spec.get("requirements", [])),
+            "requirements": self._format_requirements(
+                task_spec.get("requirements", [])
+            ),
             "previous_code": previous_code or "# First generation, no previous code",
-            "intrinsic_score": previous_score.get("intrinsic_score", "N/A") if previous_score else "N/A",
-            "extrinsic_score": previous_score.get("extrinsic_score", "N/A") if previous_score else "N/A",
+            "intrinsic_score": (
+                previous_score.get("intrinsic_score", "N/A")
+                if previous_score
+                else "N/A"
+            ),
+            "extrinsic_score": (
+                previous_score.get("extrinsic_score", "N/A")
+                if previous_score
+                else "N/A"
+            ),
             "failed_tests": ", ".join(failed_tests) if failed_tests else "None",
-            "mutation_type": strategy.get("mutation_type", "conservative") if strategy else "conservative",
-            "improvement_focus": strategy.get("improvement_focus", "Improve test pass rate") if strategy else "Implement basic functionality",
+            "mutation_type": (
+                strategy.get("mutation_type", "conservative")
+                if strategy
+                else "conservative"
+            ),
+            "improvement_focus": (
+                strategy.get("improvement_focus", "Improve test pass rate")
+                if strategy
+                else "Implement basic functionality"
+            ),
         }
 
         prompt = GENERATION_PROMPT.format(**prompt_params)
@@ -240,7 +264,7 @@ class CodeGenerator:
 
     def _call_ollama(self, prompt: str, temperature: Optional[float]) -> str:
         """Call Ollama API"""
-        import requests
+        import requests  # type: ignore[import-untyped]
 
         url = f"{self.base_url}/api/generate"
         payload = {
@@ -250,12 +274,12 @@ class CodeGenerator:
             "options": {
                 "temperature": temperature or self.default_temperature,
                 "num_predict": 2048,  # Limit output for small models
-            }
+            },
         }
 
         response = requests.post(url, json=payload, timeout=120)
         response.raise_for_status()
-        return response.json().get("response", "")
+        return str(response.json().get("response", ""))
 
     def _call_openai_compatible(self, prompt: str, temperature: Optional[float]) -> str:
         """Call OpenAI/Deepseek API"""
@@ -272,7 +296,7 @@ class CodeGenerator:
             temperature=temperature or self.default_temperature,
             max_tokens=4096,
         )
-        return response.choices[0].message.content
+        return str(response.choices[0].message.content)
 
     def _call_anthropic(self, prompt: str, temperature: Optional[float]) -> str:
         """Call Anthropic API"""
@@ -291,7 +315,7 @@ class CodeGenerator:
         matches = re.findall(CODE_EXTRACTION_PATTERN, response, re.DOTALL)
 
         if matches:
-            code = matches[0].strip()
+            code = str(matches[0]).strip()
             if code.endswith("```"):
                 code = code[:-3].strip()
             return code
@@ -300,7 +324,7 @@ class CodeGenerator:
         fallback_pattern = r"```\n(.*?)\n```"
         fallback_matches = re.findall(fallback_pattern, response, re.DOTALL)
         if fallback_matches:
-            code = fallback_matches[0].strip()
+            code = str(fallback_matches[0]).strip()
             if code.endswith("```"):
                 code = code[:-3].strip()
             return code
@@ -321,18 +345,18 @@ class CodeGenerator:
 
         return None
 
-    def _format_requirements(self, requirements: Union[str, list]) -> str:
+    def _format_requirements(self, requirements: Union[str, List[Any]]) -> str:
         """Format requirements list"""
         if isinstance(requirements, str):
             return requirements
-        if isinstance(requirements, list):
-            return "\n".join(f"- {req}" for req in requirements)
-        return str(requirements)
+        # isinstance(requirements, list)
+        return "\n".join(f"- {req}" for req in requirements)
 
 
 if __name__ == "__main__":
     # Test with Ollama
     import os
+
     os.environ["LLM_BACKEND"] = "ollama"
     os.environ["OLLAMA_MODEL"] = "qwen3.5:4b"
 

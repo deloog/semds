@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.env_loader import load_env
+
 load_env()
 
 from evolution.code_generator import CodeGenerator
@@ -25,8 +26,8 @@ task_spec = {
     "requirements": [
         "支持 +, -, *, / 运算符",
         "除零时抛出 ValueError",
-        "无效操作符时抛出 ValueError"
-    ]
+        "无效操作符时抛出 ValueError",
+    ],
 }
 
 print("Generating code...")
@@ -36,10 +37,10 @@ if result["success"]:
     code = result["code"]
     print(f"\n=== Generated Code ({len(code)} chars) ===")
     print(code)
-    print("="*60)
-    
+    print("=" * 60)
+
     # 测试代码
-    test_code = '''
+    test_code = """
 from solution import calculate
 
 def test_addition():
@@ -50,33 +51,33 @@ def test_subtraction():
 
 def test_multiplication():
     assert calculate(4, 3, '*') == 12
-'''
-    
+"""
+
     # 创建临时文件
     with tempfile.TemporaryDirectory() as tmpdir:
-        solution_path = Path(tmpdir) / 'solution.py'
-        test_path = Path(tmpdir) / 'test_calculator.py'
-        
-        with open(solution_path, 'w') as f:
+        solution_path = Path(tmpdir) / "solution.py"
+        test_path = Path(tmpdir) / "test_calculator.py"
+
+        with open(solution_path, "w") as f:
             f.write(code)
-        
-        with open(test_path, 'w') as f:
+
+        with open(test_path, "w") as f:
             f.write(test_code)
-        
+
         print(f"\nRunning tests from {test_path}")
         print(f"Solution at {solution_path}")
         print(f"Working dir {tmpdir}")
-        
+
         # 运行测试
         test_result = runner.run_tests(str(test_path), str(solution_path), tmpdir)
-        
+
         print("\n=== Test Result ===")
         print(f"Success: {test_result['success']}")
         print(f"Score: {test_result['pass_rate']:.2%}")
         print(f"Total tests: {test_result['total_tests']}")
         print(f"Passed: {len(test_result['passed'])}")
         print(f"Failed: {len(test_result['failed'])}")
-        if test_result['failed']:
+        if test_result["failed"]:
             print(f"Failed tests: {test_result['failed']}")
         print(f"\nRaw output:\n{test_result['raw_output']}")
 else:

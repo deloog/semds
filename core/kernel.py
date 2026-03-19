@@ -15,7 +15,7 @@ import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 # 审计日志文件路径（相对于core目录）
 AUDIT_LOG_PATH = Path(__file__).parent / "audit.log"
@@ -179,7 +179,7 @@ def append_audit_log(
         print(f"[CRITICAL] Failed to write audit log: {e}")
 
 
-def safe_write(filepath: str, content: str) -> dict:
+def safe_write(filepath: str, content: str) -> dict[str, Any]:
     """
     四层防护的安全文件写入机制。
 
@@ -323,7 +323,7 @@ def safe_write(filepath: str, content: str) -> dict:
     return result
 
 
-def read_audit_log(limit: int = 100) -> list[dict]:
+def read_audit_log(limit: int = 100) -> list[dict[str, Any]]:
     """
     读取审计日志内容。
 
@@ -364,15 +364,18 @@ def read_audit_log(limit: int = 100) -> list[dict]:
 
 if __name__ == "__main__":
     # 简单测试
-    test_file = "/tmp/test_kernel.py"
-    test_code = """
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+        test_file = f.name
+        test_code = """
 def hello():
     return "Hello, SEMDS!"
 """
-    result = safe_write(test_file, test_code)
-    print(f"Write result: {result}")
+        result = safe_write(test_file, test_code)
+        print(f"Write result: {result}")
 
-    # 测试语法错误
-    bad_code = "def broken("
-    result2 = safe_write(test_file, bad_code)
-    print(f"Bad code result: {result2}")
+        # 测试语法错误
+        bad_code = "def broken("
+        result2 = safe_write(test_file, bad_code)
+        print(f"Bad code result: {result2}")

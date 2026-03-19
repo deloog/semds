@@ -2,7 +2,7 @@
 Challenge: Matrix Multiplication Optimization
 
 Goal: Find faster 2x2 or 3x3 matrix multiplication algorithm
-Current best: 
+Current best:
 - 2x2: 7 multiplications (Strassen, 1969)
 - 3x3: 23 multiplications (Laderman, 1976)
 
@@ -94,5 +94,5 @@ if __name__ == "__main__":
     print()
     print("To start:")
     print("1. Create task via API with this test code")
-    print("2. Run evolution for 100-500 generations") 
+    print("2. Run evolution for 100-500 generations")
     print("3. Check if solution uses fewer multiplications or runs faster")

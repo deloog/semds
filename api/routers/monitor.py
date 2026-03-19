@@ -252,9 +252,9 @@ async def send_progress_updates(task_id: str, websocket: WebSocket):
     """
     from sqlalchemy.orm import Session
     from api.dependencies import get_db_session
-    
+
     db: Session = next(get_db_session())
-    
+
     try:
         while task_id in connections:
             try:
@@ -280,15 +280,19 @@ async def send_progress_updates(task_id: str, websocket: WebSocket):
                             "task_id": task_id,
                             "status": task.status,
                             "current_gen": task.current_generation,
-                            "best_score": round(task.best_score, 4) if task.best_score else None,
+                            "best_score": (
+                                round(task.best_score, 4) if task.best_score else None
+                            ),
                             "message": f"Task status: {task.status}",
                         }
                         await websocket.send_json(progress)
                     else:
-                        await websocket.send_json({
-                            "type": "error",
-                            "message": "Task not found",
-                        })
+                        await websocket.send_json(
+                            {
+                                "type": "error",
+                                "message": "Task not found",
+                            }
+                        )
                         break
 
                 # 按配置间隔更新

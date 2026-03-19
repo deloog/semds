@@ -42,6 +42,7 @@ def install_ollama():
 def check_ollama_running():
     """Check if Ollama service is running"""
     import urllib.request
+
     try:
         urllib.request.urlopen("http://localhost:11434", timeout=2)
         print("[OK] Ollama service is running")
@@ -66,7 +67,7 @@ def pull_model(model_name="qwen3.5:4b"):
     print(f"\nPulling {model_name}...")
     print("This may take several minutes depending on your internet speed.")
     print("Model size: ~3GB")
-    
+
     success, stdout, stderr = run_command(f"ollama pull {model_name}")
     if success:
         print(f"[OK] {model_name} pulled successfully")
@@ -79,28 +80,30 @@ def pull_model(model_name="qwen3.5:4b"):
 def test_model(model_name="qwen3.5:4b"):
     """Test the model with a simple prompt"""
     print(f"\nTesting {model_name}...")
-    
+
     import urllib.request
     import json
-    
-    data = json.dumps({
-        "model": model_name,
-        "prompt": "Write a Python function to add two numbers. Only output the code.",
-        "stream": False
-    }).encode()
-    
+
+    data = json.dumps(
+        {
+            "model": model_name,
+            "prompt": "Write a Python function to add two numbers. Only output the code.",
+            "stream": False,
+        }
+    ).encode()
+
     try:
         req = urllib.request.Request(
             "http://localhost:11434/api/generate",
             data=data,
             headers={"Content-Type": "application/json"},
-            method="POST"
+            method="POST",
         )
-        
+
         with urllib.request.urlopen(req, timeout=60) as response:
             result = json.loads(response.read().decode())
             code = result.get("response", "")
-            
+
             if "def " in code:
                 print("[OK] Model test passed")
                 print("\nGenerated code sample:")
@@ -111,7 +114,7 @@ def test_model(model_name="qwen3.5:4b"):
             else:
                 print("[X] Model did not generate valid code")
                 return False
-                
+
     except Exception as e:
         print(f"[X] Test failed: {e}")
         return False
@@ -120,15 +123,15 @@ def test_model(model_name="qwen3.5:4b"):
 def update_env_file():
     """Update .env file to enable hybrid LLM"""
     print("\nUpdating .env configuration...")
-    
+
     env_path = ".env"
     if not os.path.exists(env_path):
         print("[X] .env file not found")
         return False
-    
+
     with open(env_path, "r") as f:
         content = f.read()
-    
+
     # Enable hybrid mode
     if "ENABLE_HYBRID_LLM=false" in content:
         content = content.replace("ENABLE_HYBRID_LLM=false", "ENABLE_HYBRID_LLM=true")
@@ -137,7 +140,7 @@ def update_env_file():
         print("[OK] Hybrid LLM mode enabled in .env")
     else:
         print("[INFO] Hybrid LLM already enabled or not found")
-    
+
     return True
 
 
@@ -150,19 +153,19 @@ def main():
     print("- ~3GB disk space for model")
     print("- Internet connection for download")
     print()
-    
+
     # Step 1: Check Ollama installation
     if not check_ollama_installed():
         if not install_ollama():
             print("\n[X] Ollama installation failed")
             return 1
-    
+
     # Step 2: Check Ollama service
     if not check_ollama_running():
         if not start_ollama():
             print("\n[X] Could not start Ollama service")
             return 1
-    
+
     # Step 3: Pull model
     model = "qwen3.5:4b"
     success, stdout, _ = run_command(f"ollama list | findstr {model}")
@@ -172,15 +175,15 @@ def main():
             return 1
     else:
         print(f"[OK] Model {model} already available")
-    
+
     # Step 4: Test model
     if not test_model(model):
         print("\n[X] Model test failed")
         return 1
-    
+
     # Step 5: Update configuration
     update_env_file()
-    
+
     print("\n" + "=" * 60)
     print("Setup Complete!")
     print("=" * 60)
@@ -190,7 +193,7 @@ def main():
     print("3. DeepSeek will be used every 20 generations for major changes")
     print("\nEstimated cost savings: ~90% vs pure DeepSeek")
     print("=" * 60)
-    
+
     return 0
 
 

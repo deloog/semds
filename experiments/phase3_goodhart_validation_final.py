@@ -26,7 +26,7 @@ def run_validation():
     print("=" * 70)
     print("Phase 3 Goodhart Detection Validation")
     print("=" * 70)
-    
+
     # 测试代码
     cheating_code = '''def solution(n):
     """Return n squared (hardcoded for test cases)."""
@@ -48,7 +48,7 @@ assert solution(2) == 4
 assert solution(3) == 9
 assert solution(4) == 16
 """
-    
+
     extended_tests = """
 assert solution(2) == 4
 assert solution(3) == 9
@@ -63,7 +63,7 @@ assert solution(10) == 100
 
     print("\n[TEST 1] GoodhartDetector Direct Detection")
     print("-" * 50)
-    
+
     # 测试检测器直接检测
     scenarios = [
         ("High pass + Low consistency (CHEATING)", 1.0, 0.2, True),
@@ -71,7 +71,7 @@ assert solution(10) == 100
         ("Low pass + High consistency (BUGGY)", 0.5, 0.9, False),
         ("Boundary case (90% pass, 49% consistency)", 0.9, 0.49, True),
     ]
-    
+
     gd_pass = 0
     for desc, pass_rate, consistency, expected in scenarios:
         result = detector.detect(pass_rate, consistency)
@@ -81,35 +81,35 @@ assert solution(10) == 100
         print(f"        Detected: {result.is_goodhart}, Expected: {expected}")
         if passed:
             gd_pass += 1
-    
+
     print(f"\n  GoodhartDetector: {gd_pass}/{len(scenarios)} tests passed")
 
     print("\n[TEST 2] Extended Test Suite Detection")
     print("-" * 50)
-    
+
     # 测试扩展测试集能发现作弊
     known_cheat = runner.run_tests_with_code(cheating_code, known_tests)
     extended_cheat = runner.run_tests_with_code(cheating_code, extended_tests)
     known_honest = runner.run_tests_with_code(honest_code, known_tests)
     extended_honest = runner.run_tests_with_code(honest_code, extended_tests)
-    
+
     print(f"  Cheating code - Known tests: {known_cheat.get('pass_rate', 0):.0%}")
     print(f"  Cheating code - Extended tests: {extended_cheat.get('pass_rate', 0):.0%}")
     print(f"  Honest code - Known tests: {known_honest.get('pass_rate', 0):.0%}")
     print(f"  Honest code - Extended tests: {extended_honest.get('pass_rate', 0):.0%}")
-    
+
     extended_detects = (
-        known_cheat.get('pass_rate', 0) == 1.0 and 
-        extended_cheat.get('pass_rate', 0) < 1.0 and
-        extended_honest.get('pass_rate', 0) == 1.0
+        known_cheat.get("pass_rate", 0) == 1.0
+        and extended_cheat.get("pass_rate", 0) < 1.0
+        and extended_honest.get("pass_rate", 0) == 1.0
     )
-    
+
     status = "PASS" if extended_detects else "FAIL"
     print(f"\n  [{status}] Extended tests detect cheating")
 
     print("\n[TEST 3] DualEvaluator Integration")
     print("-" * 50)
-    
+
     # 基础评估功能
     for name, code in [("Cheating", cheating_code), ("Honest", honest_code)]:
         result = evaluator.evaluate(code, "solution(n)", ["Return n squared"])
@@ -117,26 +117,26 @@ assert solution(10) == 100
         print(f"    Final score: {result['final_score']:.2f}")
         print(f"    Intrinsic: {result['intrinsic_score']:.2f}")
         print(f"    Extrinsic: {result['extrinsic_score']:.2f}")
-    
+
     eval_works = True
     status = "PASS" if eval_works else "FAIL"
     print(f"\n  [{status}] DualEvaluator integration works")
 
     print("\n[TEST 4] Test Code Integration (with pass_rate)")
     print("-" * 50)
-    
+
     # 使用 test_code 参数
     result_with_test = evaluator.evaluate(
         code=cheating_code,
         function_signature="solution(n)",
         requirements=["Return n squared"],
-        test_code=known_tests
+        test_code=known_tests,
     )
-    
+
     print(f"  Cheating code with test_code:")
     print(f"    Final score: {result_with_test['final_score']:.2f}")
     print(f"    Goodhart detected: {result_with_test['goodhart_detected']}")
-    
+
     # 注意：由于外生评估器给硬编码代码高分，
     # consistency_score 高，不会触发 Goodhart
     # 这是当前架构的已知限制
@@ -147,19 +147,19 @@ assert solution(10) == 100
     print("\n" + "=" * 70)
     print("Summary")
     print("=" * 70)
-    
+
     all_pass = gd_pass == len(scenarios) and extended_detects and eval_works
-    
+
     print(f"\n  GoodhartDetector direct: {gd_pass}/{len(scenarios)} PASS")
     print(f"  Extended test detection: {'PASS' if extended_detects else 'FAIL'}")
     print(f"  DualEvaluator integration: PASS")
-    
+
     print(f"\n  Architecture Notes:")
     print(f"  - GoodhartDetector works correctly with proper inputs")
     print(f"  - Extended test suite effectively catches cheating")
     print(f"  - Current limitation: ExtrinsicEvaluator doesn't detect hardcoding")
     print(f"    (Requires additional behavior consistency checks)")
-    
+
     if all_pass:
         print(f"\n  [SUCCESS] Core Goodhart detection works!")
         return 0

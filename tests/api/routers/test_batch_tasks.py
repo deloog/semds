@@ -1,4 +1,5 @@
 """测试批量任务操作API"""
+
 import pytest  # noqa: F401
 from unittest.mock import MagicMock, patch
 
@@ -72,7 +73,9 @@ class TestBatchCreateTasks:
                 ]
             }
 
-            response = client.post("/api/tasks/batch", json=tasks_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch", json=tasks_data, headers=auth_headers
+            )
 
             # 验证响应
             assert response.status_code == 201
@@ -99,7 +102,9 @@ class TestBatchCreateTasks:
         try:
             client = TestClient(app)
 
-            response = client.post("/api/tasks/batch", json={"tasks": []}, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch", json={"tasks": []}, headers=auth_headers
+            )
 
             assert response.status_code == 400
         finally:
@@ -135,7 +140,9 @@ class TestBatchCreateTasks:
                 ]
             }
 
-            response = client.post("/api/tasks/batch", json=tasks_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch", json=tasks_data, headers=auth_headers
+            )
 
             # Pydantic会在验证层返回422错误
             assert response.status_code == 422
@@ -177,7 +184,9 @@ class TestBatchPauseTasks:
 
             request_data = {"task_ids": ["task-1"]}
 
-            response = client.post("/api/tasks/batch/pause", json=request_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/pause", json=request_data, headers=auth_headers
+            )
 
             assert response.status_code == 200
             data = response.json()
@@ -199,7 +208,9 @@ class TestBatchPauseTasks:
         try:
             client = TestClient(app)
 
-            response = client.post("/api/tasks/batch/pause", json={"task_ids": []}, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/pause", json={"task_ids": []}, headers=auth_headers
+            )
 
             assert response.status_code == 400
         finally:
@@ -239,7 +250,9 @@ class TestBatchResumeTasks:
 
             request_data = {"task_ids": ["task-1"]}
 
-            response = client.post("/api/tasks/batch/resume", json=request_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/resume", json=request_data, headers=auth_headers
+            )
 
             assert response.status_code == 200
             data = response.json()
@@ -283,7 +296,9 @@ class TestBatchAbortTasks:
 
             request_data = {"task_ids": ["task-1"]}
 
-            response = client.post("/api/tasks/batch/abort", json=request_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/abort", json=request_data, headers=auth_headers
+            )
 
             assert response.status_code == 200
             data = response.json()
@@ -328,7 +343,9 @@ class TestBatchDeleteTasks:
 
             request_data = {"task_ids": ["task-1"]}
 
-            response = client.post("/api/tasks/batch/delete", json=request_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/delete", json=request_data, headers=auth_headers
+            )
 
             assert response.status_code == 200
             data = response.json()
@@ -355,7 +372,9 @@ class TestBatchOperationValidation:
             client = TestClient(app)
 
             # 不带认证头
-            response = client.post("/api/tasks/batch/pause", json={"task_ids": ["task-1"]})
+            response = client.post(
+                "/api/tasks/batch/pause", json={"task_ids": ["task-1"]}
+            )
 
             # 应返回401未授权
             assert response.status_code == 401
@@ -384,7 +403,9 @@ class TestBatchOperationValidation:
 
             request_data = {"task_ids": ["nonexistent-task"]}
 
-            response = client.post("/api/tasks/batch/pause", json=request_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/pause", json=request_data, headers=auth_headers
+            )
 
             assert response.status_code == 200
             data = response.json()
@@ -412,7 +433,9 @@ class TestBatchOperationLimits:
             # 超过最大限制（假设为100）
             request_data = {"task_ids": [f"task-{i}" for i in range(101)]}
 
-            response = client.post("/api/tasks/batch/pause", json=request_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/pause", json=request_data, headers=auth_headers
+            )
 
             assert response.status_code == 400
             assert "exceeds maximum" in response.json()["detail"].lower()
@@ -450,7 +473,9 @@ class TestBatchOperationLimits:
             # 重复的task_id
             request_data = {"task_ids": ["task-1", "task-1", "task-1"]}
 
-            response = client.post("/api/tasks/batch/pause", json=request_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/pause", json=request_data, headers=auth_headers
+            )
 
             # 应该成功处理 - 第一个成功，后面因为状态已变而失败
             assert response.status_code == 200
@@ -476,7 +501,9 @@ class TestBatchOperationLimits:
             # 包含空字符串task_id
             request_data = {"task_ids": ["", "task-1"]}
 
-            response = client.post("/api/tasks/batch/pause", json=request_data, headers=auth_headers)
+            response = client.post(
+                "/api/tasks/batch/pause", json=request_data, headers=auth_headers
+            )
 
             assert response.status_code == 400
             assert "empty" in response.json()["detail"].lower()

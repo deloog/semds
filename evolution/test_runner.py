@@ -16,7 +16,7 @@ import re
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -56,7 +56,7 @@ class TestRunner:
         test_file_path: str,
         solution_file_path: Optional[str] = None,
         working_dir: Optional[str] = None,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """
         运行测试文件并返回结果。
 
@@ -172,7 +172,7 @@ class TestRunner:
 
     def run_tests_with_code(
         self, code: str, test_code: str, working_dir: Optional[str] = None
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """
         将代码写入临时文件并运行测试。
 
@@ -213,13 +213,13 @@ class TestRunner:
     def _format_test_code(self, test_code: str) -> str:
         """
         将测试代码格式化为pytest可识别的格式。
-        
+
         如果测试代码不包含 def test_ 函数定义，
         则将其包装在一个 test_solution() 函数中。
-        
+
         Args:
             test_code: 原始测试代码
-            
+
         Returns:
             格式化后的测试代码
         """
@@ -227,10 +227,13 @@ class TestRunner:
         if "def test_" in test_code:
             # 已经是pytest格式，直接返回
             # 但需要确保有导入语句
-            if "from solution import" not in test_code and "import solution" not in test_code:
+            if (
+                "from solution import" not in test_code
+                and "import solution" not in test_code
+            ):
                 test_code = "from solution import *\n\n" + test_code
             return test_code
-        
+
         # 简单格式：包装成pytest函数
         # 移除可能存在的import语句（我们会自动添加）
         lines = test_code.strip().split("\n")
@@ -238,9 +241,9 @@ class TestRunner:
         for line in lines:
             if not line.strip().startswith(("from solution import", "import solution")):
                 filtered_lines.append(line)
-        
+
         test_body = "\n".join(filtered_lines)
-        
+
         formatted = f'''from solution import *
 
 def test_solution():
@@ -261,12 +264,13 @@ def test_solution():
         try:
             # 尝试导入插件来检测
             import importlib.util
+
             spec = importlib.util.find_spec("pytest_jsonreport")
             return spec is not None
         except Exception:
             return False
 
-    def _parse_json_output(self, output: str) -> dict:
+    def _parse_json_output(self, output: str) -> Dict[str, Any]:
         """
         解析pytest-json-report的JSON输出。
 
@@ -276,7 +280,7 @@ def test_solution():
         Returns:
             解析后的结果字典
         """
-        result: dict[str, Any] = {
+        result: Dict[str, Any] = {
             "pass_rate": 0.0,
             "passed": [],
             "failed": [],
@@ -286,7 +290,7 @@ def test_solution():
         try:
             # 查找JSON部分（通常在输出的最后）
             lines = output.strip().split("\n")
-            json_str = None
+            json_str: Optional[str] = None
 
             # 尝试找到JSON开始的位置
             for i, line in enumerate(lines):
@@ -320,7 +324,7 @@ def test_solution():
 
         return result
 
-    def _parse_standard_output(self, output: str) -> dict:
+    def _parse_standard_output(self, output: str) -> Dict[str, Any]:
         """
         解析pytest标准文本输出。
 
@@ -330,15 +334,15 @@ def test_solution():
         Returns:
             解析后的结果字典
         """
-        result: dict[str, Any] = {
+        result: Dict[str, Any] = {
             "pass_rate": 0.0,
             "passed": [],
             "failed": [],
             "total_tests": 0,
         }
 
-        passed: list[str] = []
-        failed: list[str] = []
+        passed: List[str] = []
+        failed: List[str] = []
 
         # 解析每一行
         for line in output.split("\n"):

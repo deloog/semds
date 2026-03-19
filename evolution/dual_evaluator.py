@@ -72,10 +72,10 @@ class DualEvaluator:
 
     def __init__(
         self,
-        intrinsic_evaluator: IntrinsicEvaluator = None,
-        extrinsic_evaluator: ExtrinsicEvaluator = None,
-        goodhart_detector: GoodhartDetector = None,
-    ):
+        intrinsic_evaluator: Optional[IntrinsicEvaluator] = None,
+        extrinsic_evaluator: Optional[ExtrinsicEvaluator] = None,
+        goodhart_detector: Optional[GoodhartDetector] = None,
+    ) -> None:
         """初始化双轨评估器
 
         Args:
@@ -88,11 +88,11 @@ class DualEvaluator:
         self.goodhart_detector = goodhart_detector or GoodhartDetector()
 
     def evaluate(
-        self, 
-        code: str, 
-        function_signature: str, 
+        self,
+        code: str,
+        function_signature: str,
         requirements: List[str],
-        test_code: str = None,
+        test_code: Optional[str] = None,
     ) -> Dict[str, Any]:
         """执行双轨评估
 
@@ -135,6 +135,7 @@ class DualEvaluator:
         pass_rate = intrinsic_score  # 默认使用内生得分作为近似
         if test_code:
             from evolution.test_runner import TestRunner
+
             test_result = TestRunner().run_tests_with_code(code, test_code)
             pass_rate = test_result.get("pass_rate", intrinsic_score)
 

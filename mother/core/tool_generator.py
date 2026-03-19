@@ -2,6 +2,7 @@
 Tool Generator - 工具生成器
 当发现缺少能力时，自动生成工具代码
 """
+
 import os
 import sys
 import tempfile
@@ -10,13 +11,13 @@ import importlib.util
 from typing import Optional
 
 # 导入 SEMDS 的代码生成器
-sys.path.insert(0, r'D:\semds')
+sys.path.insert(0, r"D:\semds")
 from evolution.code_generator import CodeGenerator
 
 
 class ToolGenerator:
     """工具生成器 - MVP 版本"""
-    
+
     # 工具代码模板 (使用标准库，无额外依赖)
     TOOL_TEMPLATES = {
         "html_parser": """
@@ -62,29 +63,29 @@ class CSVReaderTool(Capability):
         with open(file_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             return list(reader)
-"""
+""",
     }
-    
+
     def __init__(self, tools_dir: str = "mother/tools"):
         self.tools_dir = tools_dir
         self.llm = CodeGenerator(backend="deepseek")
-        
+
         # 确保工具目录存在
         os.makedirs(tools_dir, exist_ok=True)
-    
+
     def generate(self, capability_name: str, requirement: str = "") -> Optional[str]:
         """
         生成工具代码
-        
+
         Args:
             capability_name: 能力名称，如 "html_parser"
             requirement: 需求描述
-        
+
         Returns:
             生成的代码，如果失败返回 None
         """
         print(f"[ToolGen] Generating tool: {capability_name}")
-        
+
         # 1. 使用预设模板 (确保接口一致性)
         if capability_name in self.TOOL_TEMPLATES:
             code = self._generate_from_template(capability_name)
@@ -94,15 +95,15 @@ class CSVReaderTool(Capability):
             else:
                 print(f"[ToolGen] Template validation failed for {capability_name}")
                 return None
-        
+
         # 2. 未知能力类型，暂不支持LLM生成
         print(f"[ToolGen] Unknown capability: {capability_name}")
         return None
-    
+
     def _generate_from_template(self, capability_name: str) -> str:
         """从模板生成"""
         template = self.TOOL_TEMPLATES[capability_name]
-        
+
         # 添加导入和基类
         code = f'''"""
 Auto-generated tool: {capability_name}
@@ -115,8 +116,10 @@ from mother.core.capability_registry import Capability
 {template}
 '''
         return code
-    
-    def _generate_with_llm(self, capability_name: str, requirement: str) -> Optional[str]:
+
+    def _generate_with_llm(
+        self, capability_name: str, requirement: str
+    ) -> Optional[str]:
         """使用 LLM 生成工具代码"""
         task_spec = {
             "description": f"Create a Python tool class named {capability_name}Tool that inherits from Capability. {requirement}",
@@ -125,10 +128,10 @@ from mother.core.capability_registry import Capability
                 "Inherit from Capability base class",
                 "Implement execute method",
                 "Handle errors gracefully",
-                "Add proper docstrings"
-            ]
+                "Add proper docstrings",
+            ],
         }
-        
+
         result = self.llm.generate(task_spec)
         if result["success"]:
             # 添加必要的导入
@@ -144,48 +147,54 @@ from mother.core.capability_registry import Capability
 '''
             return code
         return None
-    
+
     def _validate_tool(self, code: str, capability_name: str) -> bool:
         """验证生成的工具代码"""
         print(f"[ToolGen] Validating {capability_name}...")
-        
+
         try:
             # 1. 语法检查
-            compile(code, f"{capability_name}.py", 'exec')
-            
+            compile(code, f"{capability_name}.py", "exec")
+
             # 2. 写入临时文件测试导入 (use utf-8)
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".py", delete=False, encoding="utf-8"
+            ) as f:
                 f.write(code)
                 temp_path = f.name
-            
+
             try:
                 # 尝试导入
-                spec = importlib.util.spec_from_file_location(capability_name, temp_path)
+                spec = importlib.util.spec_from_file_location(
+                    capability_name, temp_path
+                )
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
-                
+
                 # 检查是否包含能力类
                 has_capability_class = False
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
-                    if (isinstance(attr, type) and 
-                        attr_name.endswith('Tool') and
-                        attr_name != 'Capability'):
+                    if (
+                        isinstance(attr, type)
+                        and attr_name.endswith("Tool")
+                        and attr_name != "Capability"
+                    ):
                         has_capability_class = True
                         break
-                
+
                 return has_capability_class
             finally:
                 os.unlink(temp_path)
-        
+
         except Exception as e:
             print(f"[ToolGen] Validation failed: {e}")
             return False
-    
+
     def _save_tool(self, code: str, capability_name: str):
         """保存工具到文件"""
         tool_path = os.path.join(self.tools_dir, f"{capability_name}.py")
-        with open(tool_path, 'w', encoding='utf-8') as f:
+        with open(tool_path, "w", encoding="utf-8") as f:
             f.write(code)
         print(f"[ToolGen] Saved to: {tool_path}")
 

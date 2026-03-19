@@ -8,42 +8,44 @@ Design Principles Applied:
 - Security: Input validation, no dangerous functions
 - Robustness: Error handling, timeout control
 """
+
 import sys
-sys.path.insert(0, 'D:\semds')
+
+sys.path.insert(0, "D:\semds")
 from mother.core.capability_registry import Capability
 
 
 class HTTPClientTool(Capability):
     """HTTP client with timeouts and safety limits."""
-    
+
     MAX_RESPONSE_SIZE = 10_000_000  # 10MB
     DEFAULT_TIMEOUT = 30
-    
+
     # Security: block internal addresses
     BLOCKED_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "::1")
-    
+
     def __init__(self):
         super().__init__("http_client", "Make HTTP requests safely")
-    
+
     def execute(self, url: str, method: str = "GET", timeout: int = None) -> dict:
         """
         Make HTTP request.
-        
+
         Args:
             url: URL to fetch (http/https only)
             method: HTTP method (GET/POST)
             timeout: Timeout in seconds (default 30)
-            
+
         Returns:
             Response data or error dict
         """
         import requests
         from urllib.parse import urlparse
-        
+
         # Input validation
         if not isinstance(url, str) or not url.startswith(("http://", "https://")):
             return {"success": False, "error": "Invalid URL", "data": None}
-        
+
         # Security: check blocked hosts
         try:
             parsed = urlparse(url)
@@ -51,36 +53,36 @@ class HTTPClientTool(Capability):
                 return {"success": False, "error": "Access denied", "data": None}
         except:
             return {"success": False, "error": "URL parse error", "data": None}
-        
+
         # Request with timeout and size limit
         try:
             timeout = timeout or self.DEFAULT_TIMEOUT
             response = requests.request(
-                method.upper(), 
-                url, 
-                timeout=timeout,
-                stream=True
+                method.upper(), url, timeout=timeout, stream=True
             )
             response.raise_for_status()
-            
+
             # Limit response size
             content = b""
             for chunk in response.iter_content(chunk_size=8192):
                 content += chunk
                 if len(content) > self.MAX_RESPONSE_SIZE:
-                    return {"success": False, "error": "Response too large", "data": None}
-            
+                    return {
+                        "success": False,
+                        "error": "Response too large",
+                        "data": None,
+                    }
+
             return {
                 "success": True,
                 "data": content.decode("utf-8", errors="replace"),
                 "status_code": response.status_code,
-                "error": None
+                "error": None,
             }
-            
+
         except requests.Timeout:
             return {"success": False, "error": "Request timeout", "data": None}
         except requests.RequestException as e:
             return {"success": False, "error": f"Request failed: {e}", "data": None}
         except Exception as e:
             return {"success": False, "error": f"Unexpected error: {e}", "data": None}
-

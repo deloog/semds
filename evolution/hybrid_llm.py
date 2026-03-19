@@ -11,7 +11,7 @@ Strategy:
 """
 
 import os
-from typing import Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
 from evolution.code_generator import CodeGenerator
@@ -20,8 +20,9 @@ from evolution.code_generator import CodeGenerator
 @dataclass
 class HybridConfig:
     """Configuration for hybrid LLM strategy"""
+
     strategic_interval: int = 20  # Use DeepSeek every N generations
-    fallback_threshold: int = 3   # Escalate after N consecutive failures
+    fallback_threshold: int = 3  # Escalate after N consecutive failures
     ollama_temperature: float = 0.7
     deepseek_temperature: float = 0.5
     ollama_model: str = "qwen3.5:4b"
@@ -42,11 +43,11 @@ class HybridLLMManager:
         )
     """
 
-    def __init__(self, config: Optional[HybridConfig] = None):
+    def __init__(self, config: Optional[HybridConfig] = None) -> None:
         self.config = config or HybridConfig()
         self._ollama_generator: Optional[CodeGenerator] = None
         self._deepseek_generator: Optional[CodeGenerator] = None
-        self._stats = {
+        self._stats: Dict[str, Any] = {
             "ollama_calls": 0,
             "deepseek_calls": 0,
             "ollama_failures": 0,
@@ -61,7 +62,7 @@ class HybridLLMManager:
             self._ollama_generator = CodeGenerator(
                 backend="ollama",
                 model=self.config.ollama_model,
-                default_temperature=self.config.ollama_temperature
+                default_temperature=self.config.ollama_temperature,
             )
         return self._ollama_generator
 
@@ -71,7 +72,7 @@ class HybridLLMManager:
             self._deepseek_generator = CodeGenerator(
                 backend="deepseek",
                 model=self.config.deepseek_model,
-                default_temperature=self.config.deepseek_temperature
+                default_temperature=self.config.deepseek_temperature,
             )
         return self._deepseek_generator
 
@@ -100,11 +101,11 @@ class HybridLLMManager:
     def generate(
         self,
         generation: int,
-        task_spec: dict,
+        task_spec: Dict[str, Any],
         previous_code: Optional[str] = None,
-        previous_score: Optional[dict] = None,
-        failed_tests: Optional[list] = None,
-        strategy: Optional[dict] = None,
+        previous_score: Optional[Dict[str, Any]] = None,
+        failed_tests: Optional[List[str]] = None,
+        strategy: Optional[Dict[str, Any]] = None,
         consecutive_failures: int = 0,
     ) -> Dict[str, Any]:
         """
@@ -165,20 +166,25 @@ class HybridLLMManager:
             **self._stats,
             "total_calls": total,
             "ollama_ratio": self._stats["ollama_calls"] / total if total > 0 else 0,
-            "estimated_cost_cny": self._stats["deepseek_calls"] * 0.02,  # ~0.02 CNY per call
+            "estimated_cost_cny": self._stats["deepseek_calls"]
+            * 0.02,  # ~0.02 CNY per call
         }
 
-    def print_stats(self):
+    def print_stats(self) -> None:
         """Print usage statistics"""
         stats = self.get_stats()
         print("\n" + "=" * 60)
         print("Hybrid LLM Usage Statistics")
         print("=" * 60)
         print(f"Ollama calls:    {stats['ollama_calls']:4d} (free)")
-        print(f"DeepSeek calls:  {stats['deepseek_calls']:4d} (~{stats['estimated_cost_cny']:.2f} CNY)")
+        print(
+            f"DeepSeek calls:  {stats['deepseek_calls']:4d} (~{stats['estimated_cost_cny']:.2f} CNY)"
+        )
         print(f"Ollama failures: {stats['ollama_failures']:4d}")
         print(f"Fallback activations: {stats['fallback_activations']:4d}")
-        print(f"Cost savings:    {(1 - stats['ollama_ratio']) * 100:.1f}% vs pure DeepSeek")
+        print(
+            f"Cost savings:    {(1 - stats['ollama_ratio']) * 100:.1f}% vs pure DeepSeek"
+        )
         print("=" * 60)
 
 
@@ -186,7 +192,7 @@ class HybridLLMManager:
 def create_hybrid_generator(
     strategic_interval: int = 20,
     fallback_threshold: int = 3,
-    ollama_model: str = "qwen3.5:4b"
+    ollama_model: str = "qwen3.5:4b",
 ) -> HybridLLMManager:
     """
     Create a hybrid LLM manager with common settings.
@@ -227,6 +233,7 @@ if __name__ == "__main__":
         if not use_deepseek:
             # Ollama has 70% success rate
             import random
+
             success = random.random() < 0.7
             if not success:
                 failures += 1

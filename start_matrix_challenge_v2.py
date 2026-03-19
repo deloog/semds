@@ -3,14 +3,16 @@ Matrix Multiplication Challenge V2 - Fixed for Local LLM
 
 Improved prompt to help Qwen 3.5 generate correct function signatures
 """
+
 import os
 import sys
 import requests
 
-os.chdir(r'D:\semds')
-sys.path.insert(0, r'D:\semds')
+os.chdir(r"D:\semds")
+sys.path.insert(0, r"D:\semds")
 
 from core.env_loader import load_env
+
 load_env()
 
 from api.auth.jwt import create_access_token
@@ -122,8 +124,8 @@ def check_ollama():
         resp = requests.get("http://localhost:11434/api/tags", timeout=5)
         if resp.status_code == 200:
             models = resp.json()
-            for m in models.get('models', []):
-                if 'qwen' in m['name'].lower():
+            for m in models.get("models", []):
+                if "qwen" in m["name"].lower():
                     print(f"[OK] Ollama ready with: {m['name']}")
                     return True
         print("[X] Qwen model not found")
@@ -139,10 +141,10 @@ def start_challenge():
         print("  $env:OLLAMA_MODELS='D:\\ollama_models'")
         print("  ollama serve")
         return False
-    
-    print("\n" + "="*60)
+
+    print("\n" + "=" * 60)
     print("MATRIX MULTIPLICATION CHALLENGE V2")
-    print("="*60)
+    print("=" * 60)
     print("\nImprovements:")
     print("  - Better function signature examples")
     print("  - Stricter validation")
@@ -151,38 +153,37 @@ def start_challenge():
     print("  Standard: 8 multiplications")
     print("  Strassen: 7 multiplications")
     print("  Goal: Faster practical implementation")
-    print("="*60 + "\n")
-    
-    token = create_access_token(data={'sub': 'admin-1', 'role': UserRole.ADMIN})
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json'
-    }
-    
+    print("=" * 60 + "\n")
+
+    token = create_access_token(data={"sub": "admin-1", "role": UserRole.ADMIN})
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
     task_data = {
-        'name': 'Matrix Challenge V2 (Fixed)',
-        'description': '2x2 matmul optimization with improved prompts for local LLM. Target: correct solution() signature.',
-        'target_function_signature': 'def solution(A: list, B: list) -> list:',
-        'test_code': TEST_CODE,
-        'max_generations': 200,
-        'success_criteria': {'target_score': 0.95}
+        "name": "Matrix Challenge V2 (Fixed)",
+        "description": "2x2 matmul optimization with improved prompts for local LLM. Target: correct solution() signature.",
+        "target_function_signature": "def solution(A: list, B: list) -> list:",
+        "test_code": TEST_CODE,
+        "max_generations": 200,
+        "success_criteria": {"target_score": 0.95},
     }
-    
+
     print("Creating task...")
-    resp = requests.post('http://localhost:8000/api/tasks', 
-                        headers=headers, json=task_data)
-    
+    resp = requests.post(
+        "http://localhost:8000/api/tasks", headers=headers, json=task_data
+    )
+
     if resp.status_code != 201:
         print(f"[ERROR] {resp.status_code}: {resp.text[:500]}")
         return False
-    
+
     task = resp.json()
     print(f"[OK] Task: {task['id']}")
-    
+
     print("\nStarting evolution...")
-    resp2 = requests.post(f"http://localhost:8000/api/tasks/{task['id']}/start", 
-                         headers=headers)
-    
+    resp2 = requests.post(
+        f"http://localhost:8000/api/tasks/{task['id']}/start", headers=headers
+    )
+
     if resp2.status_code == 200:
         print("[OK] Evolution started!")
         print(f"\nMonitor: http://localhost:8000/monitor/")
@@ -201,5 +202,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[ERROR] {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

@@ -442,7 +442,9 @@ def factorial(n: int) -> int:
 
             from evolution.code_generator import CodeGenerator
 
-            generator = CodeGenerator(api_key="test-key", default_temperature=0.3, backend="anthropic")
+            generator = CodeGenerator(
+                api_key="test-key", default_temperature=0.3, backend="anthropic"
+            )
             result = generator.generate(task_spec)
 
             assert result["success"] is True

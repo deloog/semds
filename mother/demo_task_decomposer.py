@@ -7,8 +7,10 @@ SEMDS Task Decomposer Demo
 - AI 急于完成，质量差
 - 解决方案：原子级任务 + 强制验证
 """
+
 import sys
-sys.path.insert(0, 'D:\\semds')
+
+sys.path.insert(0, "D:\\semds")
 
 from mother.task_decomposer.decomposer import TaskDecomposer, decompose_task
 from mother.task_decomposer.tdd_executor import TDDExecutor, execute_with_tdd
@@ -16,78 +18,80 @@ from mother.task_decomposer.tdd_executor import TDDExecutor, execute_with_tdd
 
 def demo_task_decomposition():
     """演示任务分解"""
-    print("="*70)
+    print("=" * 70)
     print("DEMO 1: Task Decomposition")
-    print("="*70)
+    print("=" * 70)
     print()
     print("Principle: Break large tasks into atomic subtasks")
     print("- Each task < 50 lines of code")
     print("- Each task has clear validation criteria")
     print("- Dependencies are explicit")
     print()
-    
+
     decomposer = TaskDecomposer()
-    
+
     # 测试不同复杂度的任务
     tasks = [
         "Write a function to fetch weather data from API",
         "Implement a CSV parser class with validation",
     ]
-    
+
     for task in tasks:
         print(f"\n{'='*70}")
         print(f"Task: {task}")
         print(f"{'='*70}")
-        
+
         graph = decomposer.decompose(task)
         decomposer.print_task_graph(graph)
 
 
 def demo_tdd_execution():
     """演示 TDD 执行"""
-    print("\n\n" + "="*70)
+    print("\n\n" + "=" * 70)
     print("DEMO 2: TDD Execution")
-    print("="*70)
+    print("=" * 70)
     print()
     print("Process: Analysis -> Interface -> Test -> Implement -> Validate")
     print("Each step must pass before proceeding to next")
     print()
-    
+
     task = "Write a function to fetch data from API"
-    
+
     print(f"Task: {task}")
     print()
-    
+
     # 分解
     graph = decompose_task(task)
-    
+
     # 执行
     executor = TDDExecutor()
     success = executor.execute_graph(graph)
-    
+
     if success:
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("Execution SUCCESS!")
-        print("="*70)
-        
+        print("=" * 70)
+
         final_code = executor.generate_final_code(graph)
         print("\nFinal generated code:")
-        print("-"*70)
+        print("-" * 70)
         print(final_code)
-        print("-"*70)
-        
+        print("-" * 70)
+
         # 统计
         total = len(graph.tasks)
-        completed = sum(1 for t in graph.tasks.values() if t.status.value == "completed")
+        completed = sum(
+            1 for t in graph.tasks.values() if t.status.value == "completed"
+        )
         print(f"\nStatistics:")
         print(f"  Total tasks: {total}")
         print(f"  Completed: {completed}")
         print(f"  Success rate: {completed/total*100:.0f}%")
     else:
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("Execution FAILED!")
-        print("="*70)
-        
+        print("=" * 70)
+
         failed = graph.get_failed_tasks()
         print(f"\nFailed tasks ({len(failed)}):")
         for t in failed:
@@ -96,13 +100,13 @@ def demo_tdd_execution():
 
 def demo_comparison():
     """对比：直接生成 vs 任务分解"""
-    print("\n\n" + "="*70)
+    print("\n\n" + "=" * 70)
     print("DEMO 3: Comparison - Direct vs Decomposed")
-    print("="*70)
+    print("=" * 70)
     print()
-    
+
     print("APPROACH 1: Direct Generation (what most AI does)")
-    print("-"*70)
+    print("-" * 70)
     print("""
 User: "Write a complete data processing system"
 AI:   Generates 200+ lines of code at once
@@ -116,9 +120,9 @@ Problems:
 
 Result: 看起来完成了，实际有遗漏（像你遇到的13/20道题）
 """)
-    
+
     print("\nAPPROACH 2: Task Decomposition + TDD (SEMDS)")
-    print("-"*70)
+    print("-" * 70)
     print("""
 User: "Write a complete data processing system"
 SEMDS: 
@@ -145,9 +149,9 @@ Result: 每个子任务都完成，整体才完成
 
 def print_architecture():
     """打印架构"""
-    print("\n\n" + "="*70)
+    print("\n\n" + "=" * 70)
     print("Task Decomposer Architecture")
-    print("="*70)
+    print("=" * 70)
     print("""
 ┌─────────────────────────────────────────────────────────────────────┐
 │ User Input                                                          │
@@ -198,11 +202,11 @@ Key Features:
 
 def demo_why_small_tasks():
     """解释为什么小任务更好"""
-    print("\n\n" + "="*70)
+    print("\n\n" + "=" * 70)
     print("Why Small Tasks Are Better")
-    print("="*70)
+    print("=" * 70)
     print()
-    
+
     print("HALLUCINATION RISK vs CODE SIZE:")
     print()
     print("Lines of Code    Hallucination Risk    Debug Difficulty")
@@ -213,14 +217,14 @@ def demo_why_small_tasks():
     print("   100             50%                   Very Hard")
     print("   200+            80%+                  Nightmare")
     print()
-    
+
     print("Evidence from experiments:")
     print("  • 4B model: Reliable at <30 lines")
     print("  • 4B model: 50% hallucination at >100 lines")
     print("  • DeepSeek: Reliable at <100 lines")
     print("  • DeepSeek: Errors creep in at >200 lines")
     print()
-    
+
     print("Our solution:")
     print("  • Cap each task at 50 lines")
     print("  • Most tasks <30 lines")
@@ -228,10 +232,10 @@ def demo_why_small_tasks():
 
 
 def main():
-    print("="*70)
+    print("=" * 70)
     print("SEMDS Task Decomposer + TDD")
     print("Solving AI's 'hallucination' and 'rushing' problems")
-    print("="*70)
+    print("=" * 70)
     print()
     print("Problem Statement:")
     print("  1. AI hallucinates - generates code that looks right but isn't")
@@ -244,16 +248,16 @@ def main():
     print("  - Verify each step before proceeding")
     print("  - Execution trace proves completeness")
     print()
-    
+
     demo_task_decomposition()
     demo_tdd_execution()
     demo_comparison()
     print_architecture()
     demo_why_small_tasks()
-    
-    print("\n" + "="*70)
+
+    print("\n" + "=" * 70)
     print("Demo Complete!")
-    print("="*70)
+    print("=" * 70)
     print()
     print("Key Takeaways:")
     print("  1. Large tasks -> high hallucination risk")
@@ -264,7 +268,7 @@ def main():
     print("Next Steps:")
     print("  python mother/task_decomposer/decomposer.py")
     print("  python mother/task_decomposer/tdd_executor.py")
-    print("="*70)
+    print("=" * 70)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # =============================================================================
 # Test EvolutionOrchestrator Initialization
 # =============================================================================
@@ -81,7 +80,13 @@ class TestEvolutionOrchestratorSingleGeneration:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    return 42\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    return 42\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -105,7 +110,13 @@ class TestEvolutionOrchestratorSingleGeneration:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    return 42\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    return 42\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -136,7 +147,13 @@ class TestEvolutionOrchestratorSingleGeneration:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -169,7 +186,13 @@ class TestEvolutionOrchestratorEvolutionLoop:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -197,7 +220,13 @@ class TestEvolutionOrchestratorEvolutionLoop:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -225,7 +254,13 @@ class TestEvolutionOrchestratorEvolutionLoop:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -262,7 +297,13 @@ class TestEvolutionOrchestratorTermination:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -289,7 +330,13 @@ class TestEvolutionOrchestratorTermination:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -317,7 +364,13 @@ class TestEvolutionOrchestratorTermination:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -359,7 +412,13 @@ class TestEvolutionOrchestratorStrategyOptimization:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -387,7 +446,13 @@ class TestEvolutionOrchestratorStrategyOptimization:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -428,7 +493,13 @@ class TestEvolutionOrchestratorGitIntegration:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -579,7 +650,13 @@ class TestEvolutionOrchestratorEdgeCases:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 
@@ -602,7 +679,13 @@ class TestEvolutionOrchestratorEdgeCases:
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="```python\ndef solution():\n    pass\n```"))]
+            choices=[
+                MagicMock(
+                    message=MagicMock(
+                        content="```python\ndef solution():\n    pass\n```"
+                    )
+                )
+            ]
         )
         mock_openai.return_value = mock_client
 

@@ -2,15 +2,17 @@
 Start Matrix Multiplication Challenge with Hybrid LLM
 Uses DeepSeek + Local Qwen 3.5 4B for cost-effective evolution
 """
+
 import os
 import sys
 import requests
 
 # Setup paths
-os.chdir(r'D:\semds')
-sys.path.insert(0, r'D:\semds')
+os.chdir(r"D:\semds")
+sys.path.insert(0, r"D:\semds")
 
 from core.env_loader import load_env
+
 load_env()
 
 from api.auth.jwt import create_access_token
@@ -96,8 +98,8 @@ def check_ollama():
         resp = requests.get("http://localhost:11434/api/tags", timeout=5)
         if resp.status_code == 200:
             models = resp.json()
-            for m in models.get('models', []):
-                if 'qwen' in m['name'].lower():
+            for m in models.get("models", []):
+                if "qwen" in m["name"].lower():
                     print(f"[OK] Found model: {m['name']}")
                     return True
         print("[X] Qwen model not found in Ollama")
@@ -109,7 +111,7 @@ def check_ollama():
 
 def create_and_start_challenge():
     """Create matrix multiplication challenge task"""
-    
+
     # Check Ollama first
     if not check_ollama():
         print("\nPlease start Ollama first:")
@@ -117,10 +119,10 @@ def create_and_start_challenge():
         print("2. Run: D:\\start_ollama.bat")
         print("3. Then run this script again")
         return False
-    
-    print("\n" + "="*60)
+
+    print("\n" + "=" * 60)
     print("MATRIX MULTIPLICATION CHALLENGE")
-    print("="*60)
+    print("=" * 60)
     print("\nTarget: Optimize 2x2 matrix multiplication")
     print("Current best:")
     print("  - Standard: 8 multiplications")
@@ -128,49 +130,48 @@ def create_and_start_challenge():
     print("  - Goal: Find faster practical implementation")
     print("\nLLM Strategy: Hybrid (DeepSeek + Qwen 3.5 4B)")
     print("Cost estimate: ~5 CNY for 500 generations")
-    print("="*60 + "\n")
-    
+    print("=" * 60 + "\n")
+
     # Get auth token
-    token = create_access_token(data={'sub': 'admin-1', 'role': UserRole.ADMIN})
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json'
-    }
-    
+    token = create_access_token(data={"sub": "admin-1", "role": UserRole.ADMIN})
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
     # Create task
     task_data = {
-        'name': 'Matrix Multiplication Challenge',
-        'description': 'Find faster 2x2 matmul. Target: <8 mults (standard) or beat Strassen (7). Hybrid LLM mode.',
-        'target_function_signature': 'def solution(A: list, B: list) -> list:',
-        'test_code': TEST_CODE,
-        'max_generations': 500,
-        'success_criteria': {'target_score': 0.95}
+        "name": "Matrix Multiplication Challenge",
+        "description": "Find faster 2x2 matmul. Target: <8 mults (standard) or beat Strassen (7). Hybrid LLM mode.",
+        "target_function_signature": "def solution(A: list, B: list) -> list:",
+        "test_code": TEST_CODE,
+        "max_generations": 500,
+        "success_criteria": {"target_score": 0.95},
     }
-    
+
     print("Creating task...")
-    resp = requests.post('http://localhost:8000/api/tasks', 
-                        headers=headers, json=task_data)
-    
+    resp = requests.post(
+        "http://localhost:8000/api/tasks", headers=headers, json=task_data
+    )
+
     if resp.status_code != 201:
         print(f"[ERROR] Failed to create task: {resp.status_code}")
         print(resp.text[:500])
         return False
-    
+
     task = resp.json()
-    task_id = task['id']
+    task_id = task["id"]
     print(f"[OK] Task created: {task_id}")
-    
+
     # Enable hybrid mode
     print("\n[OK] Hybrid LLM mode enabled")
     print("  - DeepSeek: Every 20 generations (strategic)")
     print("  - Qwen 3.5 4B: Routine generations (tactical)")
     print("  - Fallback: After 3 consecutive failures")
-    
+
     # Start evolution
     print("\nStarting evolution...")
-    resp2 = requests.post(f'http://localhost:8000/api/tasks/{task_id}/start', 
-                         headers=headers)
-    
+    resp2 = requests.post(
+        f"http://localhost:8000/api/tasks/{task_id}/start", headers=headers
+    )
+
     if resp2.status_code == 200:
         print("[OK] Evolution started!")
         print(f"\nMonitor at: http://localhost:8000/monitor/")
@@ -194,5 +195,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[ERROR] {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

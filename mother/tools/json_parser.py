@@ -8,42 +8,44 @@ Design Principles Applied:
 - Security: Input validation, no dangerous functions
 - Robustness: Error handling, timeout control
 """
+
 import sys
-sys.path.insert(0, 'D:\semds')
+
+sys.path.insert(0, "D:\semds")
 from mother.core.capability_registry import Capability
 import os
 
 
 class JSONParserTool(Capability):
     """Parse JSON safely with size limits."""
-    
+
     MAX_SIZE = 10_000_000  # 10MB
-    
+
     def __init__(self):
         super().__init__("json_parser", "Parse JSON string to Python object")
-    
+
     def execute(self, json_str: str) -> dict:
         """
         Parse JSON string.
-        
+
         Args:
             json_str: JSON string to parse
-            
+
         Returns:
             Parsed data or error dict
         """
         import json
-        
+
         # Validation
         if not isinstance(json_str, str):
             return {"success": False, "error": "Input must be string", "data": None}
-        
+
         if len(json_str) > self.MAX_SIZE:
             return {"success": False, "error": "JSON too large", "data": None}
-        
+
         if not json_str.strip():
             return {"success": False, "error": "Empty input", "data": None}
-        
+
         # Parse with error handling
         try:
             data = json.loads(json_str)
@@ -52,4 +54,3 @@ class JSONParserTool(Capability):
             return {"success": False, "error": f"Invalid JSON: {e}", "data": None}
         except Exception as e:
             return {"success": False, "error": f"Parse error: {e}", "data": None}
-

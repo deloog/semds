@@ -2,6 +2,7 @@
 
 SEMDS API入口模块，提供HTTP API和WebSocket服务。
 """
+
 import os
 from contextlib import asynccontextmanager
 
@@ -29,8 +30,9 @@ app = FastAPI(
     title="SEMDS API",
     description="自进化元开发系统 API",
     version="1.1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
+
 
 # CORS配置 - 从环境变量读取，生产环境必须配置具体域名
 def get_cors_origins() -> list:
@@ -49,6 +51,7 @@ app.add_middleware(
 
 # 注册路由
 from api.routers import tasks, evolution, monitor, approvals, auth
+
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])
 app.include_router(evolution.router, prefix="/api/tasks", tags=["evolution"])
@@ -67,7 +70,7 @@ async def health_check():
 
 async def init_database() -> None:
     """初始化数据库
-    
+
     应用启动时调用，初始化数据库连接和表结构。
     目前为占位实现，后续将集成storage.database模块。
     """
@@ -76,7 +79,7 @@ async def init_database() -> None:
 
 async def close_database() -> None:
     """关闭数据库连接
-    
+
     应用关闭时调用，清理数据库资源。
     目前为占位实现，后续将集成storage.database模块。
     """

@@ -9,6 +9,7 @@ Tests the complete workflow:
 Usage:
     python tests/e2e_frontend_test.py
 """
+
 import asyncio
 import json
 import sys
@@ -17,8 +18,8 @@ import os
 from datetime import datetime
 
 # Setup path
-os.chdir(r'd:\semds')
-sys.path.insert(0, r'd:\semds')
+os.chdir(r"d:\semds")
+sys.path.insert(0, r"d:\semds")
 
 import requests
 import websocket
@@ -29,20 +30,17 @@ WS_URL = "ws://localhost:8000"
 
 # Load env and get auth token
 from core.env_loader import load_env
+
 load_env()
 
 from api.auth.jwt import create_access_token
 from api.auth.models import UserRole
 
 TEST_TOKEN = create_access_token(
-    data={'sub': 'admin-1', 'role': UserRole.ADMIN},
-    expires_delta=None
+    data={"sub": "admin-1", "role": UserRole.ADMIN}, expires_delta=None
 )
 
-HEADERS = {
-    'Authorization': f'Bearer {TEST_TOKEN}',
-    'Content-Type': 'application/json'
-}
+HEADERS = {"Authorization": f"Bearer {TEST_TOKEN}", "Content-Type": "application/json"}
 
 
 def test_health():
@@ -51,7 +49,7 @@ def test_health():
     resp = requests.get(f"{BASE_URL}/health")
     assert resp.status_code == 200
     data = resp.json()
-    assert data['status'] == 'healthy'
+    assert data["status"] == "healthy"
     print(f"  OK - API version: {data['version']}")
 
 
@@ -68,39 +66,32 @@ def test_list_tasks():
 def test_create_task():
     """Test creating a task"""
     print("\n[3/6] Testing create task...")
-    
+
     task_data = {
         "name": f"E2E Test Task {datetime.now().strftime('%H%M%S')}",
         "description": "End-to-end test task for frontend validation",
         "target_function_signature": "def solution(data: list) -> list:",
         "test_code": "def test_solution():\n    assert solution([3,1,2]) == [1,2,3]\n    assert solution([5,4,3,2,1]) == [1,2,3,4,5]",
         "max_generations": 5,
-        "success_criteria": {"target_score": 0.9}
+        "success_criteria": {"target_score": 0.9},
     }
-    
-    resp = requests.post(
-        f"{BASE_URL}/api/tasks",
-        headers=HEADERS,
-        json=task_data
-    )
-    
+
+    resp = requests.post(f"{BASE_URL}/api/tasks", headers=HEADERS, json=task_data)
+
     if resp.status_code != 201:
         print(f"  FAILED - Status: {resp.status_code}")
         print(f"  Response: {resp.text}")
         return None
-        
+
     task = resp.json()
     print(f"  OK - Created task: {task['id']}")
-    return task['id']
+    return task["id"]
 
 
 def test_get_generations(task_id):
     """Test getting generation history"""
     print(f"\n[4/6] Testing generation history for {task_id[:8]}...")
-    resp = requests.get(
-        f"{BASE_URL}/api/tasks/{task_id}/generations",
-        headers=HEADERS
-    )
+    resp = requests.get(f"{BASE_URL}/api/tasks/{task_id}/generations", headers=HEADERS)
     assert resp.status_code == 200
     generations = resp.json()
     print(f"  OK - Found {len(generations)} generations")
@@ -110,40 +101,42 @@ def test_get_generations(task_id):
 def test_websocket(task_id):
     """Test WebSocket connection"""
     print(f"\n[5/6] Testing WebSocket connection...")
-    
+
     ws_url = f"{WS_URL}/ws/tasks/{task_id}"
     print(f"  Connecting to {ws_url}...")
-    
+
     messages = []
-    
+
     def on_message(ws, message):
         data = json.loads(message)
         messages.append(data)
-        print(f"  Received: gen={data.get('generation', 'N/A')}, score={data.get('best_score', 'N/A')}")
+        print(
+            f"  Received: gen={data.get('generation', 'N/A')}, score={data.get('best_score', 'N/A')}"
+        )
         if len(messages) >= 3:
             ws.close()
-    
+
     def on_error(ws, error):
         print(f"  WebSocket error: {error}")
-    
+
     def on_close(ws, close_status_code, close_msg):
         print(f"  WebSocket closed: {close_status_code}")
-    
+
     def on_open(ws):
         print("  WebSocket connected")
         ws.send(json.dumps({"action": "subscribe"}))
-    
+
     ws = websocket.WebSocketApp(
         ws_url,
         on_open=on_open,
         on_message=on_message,
         on_error=on_error,
-        on_close=on_close
+        on_close=on_close,
     )
-    
+
     # Run for 5 seconds
     ws.run_forever(ping_interval=5, ping_timeout=3)
-    
+
     print(f"  OK - Received {len(messages)} messages")
     return messages
 
@@ -151,20 +144,17 @@ def test_websocket(task_id):
 def test_start_evolution(task_id):
     """Test starting evolution"""
     print(f"\n[6/6] Testing start evolution...")
-    resp = requests.post(
-        f"{BASE_URL}/api/tasks/{task_id}/start",
-        headers=HEADERS
-    )
-    
+    resp = requests.post(f"{BASE_URL}/api/tasks/{task_id}/start", headers=HEADERS)
+
     if resp.status_code == 400 and "already" in resp.text.lower():
         print("  OK - Evolution already running")
         return True
-    
+
     if resp.status_code == 200:
         data = resp.json()
         print(f"  OK - Evolution started: {data.get('message', 'OK')}")
         return True
-    
+
     print(f"  WARNING - Status: {resp.status_code}")
     print(f"  Response: {resp.text[:200]}")
     return False
@@ -173,7 +163,7 @@ def test_start_evolution(task_id):
 def test_frontend_static():
     """Test frontend static files"""
     print("\n[*] Testing frontend static files...")
-    
+
     # Test main page
     resp = requests.get(f"{BASE_URL}/monitor/")
     assert resp.status_code == 200
@@ -188,38 +178,39 @@ def run_all_tests():
     print("=" * 60)
     print("SEMDS Frontend E2E Test Suite")
     print("=" * 60)
-    
+
     try:
         # Basic tests
         test_health()
         test_frontend_static()
-        
+
         # Task tests
         tasks = test_list_tasks()
-        
+
         # Create new task
         task_id = test_create_task()
         if not task_id:
             print("\nFAILED: Could not create task")
             return False
-        
+
         # Test generations endpoint
         test_get_generations(task_id)
-        
+
         # Test WebSocket (without starting evolution)
         test_websocket(task_id)
-        
+
         # Test start evolution
         test_start_evolution(task_id)
-        
+
         print("\n" + "=" * 60)
         print("ALL TESTS PASSED!")
         print("=" * 60)
         return True
-        
+
     except Exception as e:
         print(f"\nTEST FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

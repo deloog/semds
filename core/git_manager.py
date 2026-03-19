@@ -10,7 +10,7 @@ Git Manager 模块 - Git版本控制管理
 
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
 
 
 class GitManager:
@@ -46,7 +46,7 @@ class GitManager:
 
     def _run_git(
         self, args: List[str], check: bool = True
-    ) -> subprocess.CompletedProcess:
+    ) -> subprocess.CompletedProcess[str]:
         """运行Git命令
 
         Args:
@@ -137,7 +137,7 @@ class GitManager:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Rollback failed: {e.stderr}")
 
-    def get_generation_history(self, file_path: str) -> List[dict]:
+    def get_generation_history(self, file_path: str) -> List[Dict[str, Any]]:
         """获取文件的历史记录
 
         Args:

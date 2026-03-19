@@ -61,7 +61,7 @@ class IntrinsicEvaluator:
     MAX_FUNCTION_LENGTH = 30  # 函数最大行数
     MAX_NESTING_DEPTH = 3  # 最大嵌套深度（在函数/类内部）
 
-    def __init__(self):
+    def __init__(self) -> None:
         """初始化评估器"""
         self._warnings: List[str] = []
 
@@ -429,10 +429,10 @@ class IntrinsicEvaluator:
         # 检查模块文档
         has_module_doc = False
         if (
-            tree.body
-            and isinstance(tree.body[0], ast.Expr)
-            and isinstance(tree.body[0].value, ast.Constant)
-            and isinstance(tree.body[0].value.value, str)
+            tree.body  # type: ignore[attr-defined]
+            and isinstance(tree.body[0], ast.Expr)  # type: ignore[attr-defined]
+            and isinstance(tree.body[0].value, ast.Constant)  # type: ignore[attr-defined]
+            and isinstance(tree.body[0].value.value, str)  # type: ignore[attr-defined]
         ):
             has_module_doc = True
 

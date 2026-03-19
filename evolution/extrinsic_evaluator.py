@@ -19,7 +19,7 @@ import ast
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Callable, Dict, List, Tuple, Optional, cast
 
 
 @dataclass
@@ -61,7 +61,7 @@ class ExtrinsicEvaluator:
         ...     requirements=["Returns sum"]
         ... )
         >>> print(f"Score: {result['score']:.2f}")
-        
+
         >>> # 启用增强评估
         >>> result = evaluator.evaluate(
         ...     code=code,
@@ -74,7 +74,7 @@ class ExtrinsicEvaluator:
     # 权重配置（可自定义）
     WEIGHT_STATIC = 0.4
     WEIGHT_CONSISTENCY = 0.6
-    
+
     # 增强模式权重（当传入 test_code 时使用）
     WEIGHT_ENHANCED_BASE = 0.3
     WEIGHT_ENHANCED_PERF = 0.4
@@ -105,19 +105,19 @@ class ExtrinsicEvaluator:
         (r'token\s*=\s*[\'"][^\'"]{3,}[\'"]', "Hardcoded token"),
     ]
 
-    def __init__(self, timeout_seconds: float = 2.0):
+    def __init__(self, timeout_seconds: float = 2.0) -> None:
         """
         初始化评估器。
-        
+
         Args:
             timeout_seconds: 性能测试超时时间（秒）
         """
         self.timeout_seconds = timeout_seconds
 
     def evaluate(
-        self, 
-        code: str, 
-        function_signature: str, 
+        self,
+        code: str,
+        function_signature: str,
         requirements: List[str],
         test_code: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -155,14 +155,14 @@ class ExtrinsicEvaluator:
         edge_results, consistency_score = self._execute_edge_cases(
             code, function_signature, edge_cases
         )
-        
+
         # 基础模式：仅使用静态和一致性得分
         if test_code is None:
             total_score = (
                 self.WEIGHT_STATIC * static_score
                 + self.WEIGHT_CONSISTENCY * consistency_score
             )
-            
+
             return {
                 "score": round(total_score, 2),
                 "consistency_score": round(consistency_score, 2),
@@ -178,14 +178,14 @@ class ExtrinsicEvaluator:
                     for r in edge_results
                 ],
             }
-        
+
         # 增强模式：添加性能和鲁棒性评估
         # 2. 性能评估
         perf_score = self._evaluate_performance(code, function_signature)
-        
+
         # 3. 鲁棒性评估
         robust_score = self._evaluate_robustness(code, test_code)
-        
+
         # 4. 综合得分（增强权重）
         # 基础质量 30% + 性能 40% + 鲁棒性 30%
         base_quality = (static_score + consistency_score) / 2
@@ -194,7 +194,7 @@ class ExtrinsicEvaluator:
             + self.WEIGHT_ENHANCED_PERF * perf_score
             + self.WEIGHT_ENHANCED_ROBUST * robust_score
         )
-        
+
         return {
             "score": round(total_score, 2),
             "consistency_score": round(consistency_score, 2),
@@ -226,32 +226,32 @@ class ExtrinsicEvaluator:
             "static_analysis_score": 0.0,
             "edge_case_results": [],
         }
-    
+
     def _evaluate_performance(self, code: str, function_signature: str) -> float:
         """
         评估代码执行性能（整合自原 enhanced 版本）。
-        
+
         通过执行代码并测量运行时间来判断性能。
-        
+
         Args:
             code: 代码字符串
             function_signature: 函数签名
-            
+
         Returns:
             性能得分 (0-1)
         """
         try:
-            namespace = {}
-            exec(code, namespace)
-            
+            namespace: Dict[str, Any] = {}
+            exec(code, namespace)  # nosec B102
+
             func_name = function_signature.split("(")[0].strip()
             if func_name not in namespace:
                 return 0.5
-            
+
             func = namespace[func_name]
             test_inputs = self._generate_perf_test_inputs(function_signature)
-            
-            total_time = 0
+
+            total_time = 0.0
             for test_input in test_inputs:
                 start = time.perf_counter()
                 try:
@@ -263,9 +263,9 @@ class ExtrinsicEvaluator:
                     pass
                 elapsed = time.perf_counter() - start
                 total_time += elapsed
-            
+
             avg_time = total_time / len(test_inputs) if test_inputs else 0
-            
+
             # 评分：越快越高分
             if avg_time < 0.001:  # 1ms
                 return 1.0
@@ -277,22 +277,22 @@ class ExtrinsicEvaluator:
                 return 0.6
             else:
                 return 0.3
-                
+
         except Exception:
             return 0.5
-    
-    def _generate_perf_test_inputs(self, function_signature: str) -> list:
+
+    def _generate_perf_test_inputs(self, function_signature: str) -> List[Any]:
         """
         生成性能测试输入（整合自原 enhanced 版本）。
-        
+
         Args:
             function_signature: 函数签名
-            
+
         Returns:
             测试输入列表
         """
         sig = function_signature.lower()
-        
+
         if "sort" in sig or "list" in sig:
             return [
                 list(range(10)),
@@ -309,28 +309,28 @@ class ExtrinsicEvaluator:
             ]
         else:
             return [1, 10, 100]
-    
+
     def _evaluate_robustness(self, code: str, test_code: str) -> float:
         """
         评估代码鲁棒性（基于测试通过率）。
-        
+
         直接运行测试代码，计算通过率。
-        
+
         Args:
             code: 被测代码
             test_code: 测试代码
-            
+
         Returns:
             鲁棒性得分 (0-1)
         """
         from evolution.test_runner import TestRunner
-        
+
         try:
             result = TestRunner().run_tests_with_code(code, test_code)
-            return result.get("pass_rate", 0.0)
+            return float(result.get("pass_rate", 0.0))
         except:
             return 0.0
-    
+
     def _static_analysis(self, code: str) -> float:
         """静态代码分析
 
@@ -430,7 +430,7 @@ class ExtrinsicEvaluator:
             return []
 
         # 为每个参数生成边界值列表
-        param_values = {}
+        param_values: Dict[str, List[Any]] = {}
         for param_name, param_type in param_types.items():
             if "int" in param_type.lower():
                 param_values[param_name] = [0, 1, -1, 10000, -10000]
@@ -442,7 +442,7 @@ class ExtrinsicEvaluator:
                 param_values[param_name] = [None, 0, 1]
 
         # 生成参数组合（笛卡尔积的子集）
-        edge_cases = []
+        edge_cases: List[Dict[str, Any]] = []
         param_names = list(param_types.keys())
 
         # 策略：生成一些代表性的组合
@@ -497,7 +497,7 @@ class ExtrinsicEvaluator:
         Returns:
             参数字典 {name: type}
         """
-        params = {}
+        params: Dict[str, str] = {}
 
         # 提取括号内的参数部分
         match = re.search(r"\(([^)]*)\)", signature)
@@ -581,7 +581,7 @@ class ExtrinsicEvaluator:
 
         try:
             # 执行代码定义函数
-            exec(code, safe_globals)
+            exec(code, safe_globals)  # nosec B102
 
             # 获取函数
             if func_name not in safe_globals:
@@ -600,7 +600,7 @@ class ExtrinsicEvaluator:
                     )
                 return results, 0.0
 
-            func = safe_globals[func_name]
+            func = cast(Callable[..., Any], safe_globals[func_name])
 
             # 执行每个边界用例
             for case in edge_cases:
@@ -735,6 +735,6 @@ class ExtrinsicEvaluator:
 
         # 默认相等比较
         try:
-            return actual == expected
+            return bool(actual == expected)
         except Exception:
             return False

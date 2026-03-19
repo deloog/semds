@@ -8,48 +8,50 @@ Design Principles Applied:
 - Security: Input validation, no dangerous functions
 - Robustness: Error handling, timeout control
 """
+
 import sys
-sys.path.insert(0, 'D:\semds')
+
+sys.path.insert(0, "D:\semds")
 from mother.core.capability_registry import Capability
 import os
 
 
 class CSVReaderTool(Capability):
     """Read CSV files safely."""
-    
+
     MAX_FILE_SIZE = 10_000_000  # 10MB
     MAX_ROWS = 100_000
-    
+
     def __init__(self):
         super().__init__("csv_reader", "Read CSV file and return list of dicts")
-    
+
     def execute(self, file_path: str) -> list:
         """
         Read CSV file.
-        
+
         Args:
             file_path: Path to CSV file (relative to allowed directory)
-            
+
         Returns:
             List of dictionaries
         """
         import csv
         import os
-        
+
         # Security: path validation
         if not isinstance(file_path, str):
             return [{"error": "Path must be string"}]
-        
+
         if ".." in file_path or file_path.startswith(("/", "\\", "C:", "D:")):
             return [{"error": "Invalid path"}]
-        
+
         # Check file exists and size
         if not os.path.exists(file_path):
             return [{"error": f"File not found: {file_path}"}]
-        
+
         if os.path.getsize(file_path) > self.MAX_FILE_SIZE:
             return [{"error": "File too large"}]
-        
+
         # Read with safety limits
         try:
             with open(file_path, "r", encoding="utf-8", newline="") as f:
@@ -62,4 +64,3 @@ class CSVReaderTool(Capability):
                 return rows
         except Exception as e:
             return [{"error": str(e)}]
-

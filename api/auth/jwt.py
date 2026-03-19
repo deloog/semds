@@ -1,10 +1,10 @@
 """JWT Token处理"""
+
 import os
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional
 
 from jose import JWTError, jwt
-
 
 # 默认配置（将被环境变量覆盖）
 _DEFAULT_SECRET_KEY = "your-secret-key-change-in-production"
@@ -24,29 +24,28 @@ def _get_algorithm() -> str:
 
 def _get_expire_minutes() -> int:
     """获取过期时间（分钟）"""
-    return int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", str(_DEFAULT_EXPIRE_MINUTES)))
+    return int(
+        os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", str(_DEFAULT_EXPIRE_MINUTES))
+    )
 
 
-def create_access_token(
-    data: Dict,
-    expires_delta: Optional[timedelta] = None
-) -> str:
+def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -> str:
     """创建访问Token
-    
+
     Args:
         data: Token payload数据，应包含sub(用户ID)和role
         expires_delta: 过期时间增量，默认30分钟
-        
+
     Returns:
         JWT Token字符串
     """
     to_encode = data.copy()
-    
+
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=_get_expire_minutes())
-    
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, _get_secret_key(), algorithm=_get_algorithm())
     return encoded_jwt
@@ -54,10 +53,10 @@ def create_access_token(
 
 def verify_token(token: str) -> Optional[Dict]:
     """验证Token
-    
+
     Args:
         token: JWT Token字符串
-        
+
     Returns:
         Token payload字典如果有效，None如果无效或过期
     """

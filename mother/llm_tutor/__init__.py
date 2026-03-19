@@ -6,6 +6,6 @@ LLM Tutor - LLM 编程教练
 from mother.llm_tutor.code_tutor import CodeTutor, TutorSession
 
 __all__ = [
-    'CodeTutor',
-    'TutorSession',
+    "CodeTutor",
+    "TutorSession",
 ]

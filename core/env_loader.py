@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 
-def load_env(env_file: str = ".env") -> dict:
+def load_env(env_file: str = ".env") -> dict[str, Any]:
     """
     从 .env 文件加载环境变量。
 

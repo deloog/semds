@@ -150,7 +150,7 @@ class DockerManager:
                 network_mode=network_mode,
                 security_opt=["no-new-privileges:true"],
                 read_only=True,
-                tmpfs={"/tmp": "noexec,nosuid,size=100m"},
+                tmpfs={"/tmp": "noexec,nosuid,size=100m"},  # nosec B108
                 name=container_name,
                 remove=False,
             )

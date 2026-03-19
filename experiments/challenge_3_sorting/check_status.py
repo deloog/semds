@@ -1,25 +1,29 @@
 """Check Challenge 3 status"""
+
 import os
 import sys
 import time
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 from core.env_loader import load_env
+
 load_env()
 
 import requests
 from api.auth.jwt import create_access_token
 from api.auth.models import UserRole
 
-token = create_access_token(data={'sub': 'admin-1', 'role': UserRole.ADMIN})
-headers = {'Authorization': f'Bearer {token}'}
-task_id = 'ff69c252-d72c-49df-9fc8-ff4b7396d193'
+token = create_access_token(data={"sub": "admin-1", "role": UserRole.ADMIN})
+headers = {"Authorization": f"Bearer {token}"}
+task_id = "ff69c252-d72c-49df-9fc8-ff4b7396d193"
 
 print("Challenge 3: Extreme Sorting - Status")
 print("=" * 60)
 
-resp = requests.get(f'http://localhost:8000/api/tasks/{task_id}', headers=headers)
+resp = requests.get(f"http://localhost:8000/api/tasks/{task_id}", headers=headers)
 if resp.status_code == 200:
     task = resp.json()
     print(f"Task: {task['name']}")

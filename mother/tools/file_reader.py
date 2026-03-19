@@ -8,48 +8,54 @@ Design Principles Applied:
 - Security: Input validation, no dangerous functions
 - Robustness: Error handling, timeout control
 """
+
 import sys
-sys.path.insert(0, 'D:\semds')
+
+sys.path.insert(0, "D:\semds")
 from mother.core.capability_registry import Capability
 import os
 
 
 class FileReaderTool(Capability):
     """Read files safely with path validation."""
-    
+
     MAX_SIZE = 10_000_000  # 10MB
     ALLOWED_EXTENSIONS = (".txt", ".csv", ".json", ".md", ".py", ".log")
-    
+
     def __init__(self, base_dir: str = "."):
         super().__init__("file_reader", "Read file content safely")
         self.base_dir = os.path.abspath(base_dir)
-    
+
     def execute(self, file_path: str) -> dict:
         """
         Read file content.
-        
+
         Args:
             file_path: Relative path to file
-            
+
         Returns:
             File content or error dict
         """
         import os
-        
+
         # Validation
         if not isinstance(file_path, str) or not file_path:
             return {"success": False, "error": "Invalid path", "data": None}
-        
+
         # Extension check
         _, ext = os.path.splitext(file_path.lower())
         if ext not in self.ALLOWED_EXTENSIONS:
-            return {"success": False, "error": f"File type '{ext}' not allowed", "data": None}
-        
+            return {
+                "success": False,
+                "error": f"File type '{ext}' not allowed",
+                "data": None,
+            }
+
         # Path traversal protection
         full_path = os.path.abspath(os.path.join(self.base_dir, file_path))
         if not full_path.startswith(self.base_dir):
             return {"success": False, "error": "Path traversal detected", "data": None}
-        
+
         # Size check
         try:
             size = os.path.getsize(full_path)
@@ -57,7 +63,7 @@ class FileReaderTool(Capability):
                 return {"success": False, "error": "File too large", "data": None}
         except OSError as e:
             return {"success": False, "error": str(e), "data": None}
-        
+
         # Read file
         try:
             with open(full_path, "r", encoding="utf-8") as f:
@@ -73,4 +79,3 @@ class FileReaderTool(Capability):
                 return {"success": False, "error": str(e), "data": None}
         except Exception as e:
             return {"success": False, "error": str(e), "data": None}
-

@@ -4,14 +4,16 @@ Matrix Multiplication Challenge - DeepSeek Mode
 Uses DeepSeek API for high-quality code generation.
 Expected cost: ~10-15 CNY for 200 generations
 """
+
 import os
 import sys
 import requests
 
-os.chdir(r'D:\semds')
-sys.path.insert(0, r'D:\semds')
+os.chdir(r"D:\semds")
+sys.path.insert(0, r"D:\semds")
 
 from core.env_loader import load_env
+
 load_env()
 
 from api.auth.jwt import create_access_token
@@ -90,47 +92,46 @@ if __name__ == "__main__":
 
 
 def start_challenge():
-    print("="*60)
+    print("=" * 60)
     print("MATRIX MULTIPLICATION CHALLENGE")
     print("Mode: DeepSeek API (High Quality)")
-    print("="*60)
+    print("=" * 60)
     print("\nTarget: Optimize 2x2 matrix multiplication")
     print("  Standard: 8 multiplications")
     print("  Strassen: 7 multiplications (1969)")
     print("  Goal: Find faster implementation")
     print("\nCost estimate: ~10-15 CNY for 200 generations")
-    print("="*60 + "\n")
-    
-    token = create_access_token(data={'sub': 'admin-1', 'role': UserRole.ADMIN})
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json'
-    }
-    
+    print("=" * 60 + "\n")
+
+    token = create_access_token(data={"sub": "admin-1", "role": UserRole.ADMIN})
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
     task_data = {
-        'name': 'Matrix Challenge (DeepSeek)',
-        'description': '2x2 matrix multiplication optimization using DeepSeek API. Target: correct code with speed improvements.',
-        'target_function_signature': 'def solution(A: list, B: list) -> list:',
-        'test_code': TEST_CODE,
-        'max_generations': 200,
-        'success_criteria': {'target_score': 0.95}
+        "name": "Matrix Challenge (DeepSeek)",
+        "description": "2x2 matrix multiplication optimization using DeepSeek API. Target: correct code with speed improvements.",
+        "target_function_signature": "def solution(A: list, B: list) -> list:",
+        "test_code": TEST_CODE,
+        "max_generations": 200,
+        "success_criteria": {"target_score": 0.95},
     }
-    
+
     print("Creating task...")
-    resp = requests.post('http://localhost:8000/api/tasks', 
-                        headers=headers, json=task_data)
-    
+    resp = requests.post(
+        "http://localhost:8000/api/tasks", headers=headers, json=task_data
+    )
+
     if resp.status_code != 201:
         print(f"[ERROR] {resp.status_code}: {resp.text[:500]}")
         return False
-    
+
     task = resp.json()
     print(f"[OK] Task created: {task['id']}")
-    
+
     print("\nStarting evolution...")
-    resp2 = requests.post(f"http://localhost:8000/api/tasks/{task['id']}/start", 
-                         headers=headers)
-    
+    resp2 = requests.post(
+        f"http://localhost:8000/api/tasks/{task['id']}/start", headers=headers
+    )
+
     if resp2.status_code == 200:
         print("[OK] Evolution started with DeepSeek!")
         print(f"\nMonitor: http://localhost:8000/monitor/")
@@ -152,5 +153,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[ERROR] {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

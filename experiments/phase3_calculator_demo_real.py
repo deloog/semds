@@ -38,9 +38,7 @@ def run_calculator_experiment():
 
     # 实验配置
     config = TerminationConfig(
-        success_threshold=0.90,
-        max_generations=12,
-        stagnation_generations=4
+        success_threshold=0.90, max_generations=12, stagnation_generations=4
     )
 
     orchestrator = EvolutionOrchestrator(
@@ -76,9 +74,7 @@ assert add(-5, -3) == -8, "Two negatives failed"
     try:
         print("开始进化...\n")
         result = orchestrator.evolve(
-            requirements=requirements,
-            test_code=test_code,
-            max_generations=12
+            requirements=requirements, test_code=test_code, max_generations=12
         )
 
         elapsed_time = time.time() - start_time
@@ -102,10 +98,12 @@ assert add(-5, -3) == -8, "Two negatives failed"
         print("进化历史:")
         print("-" * 70)
         for gen_result in result.history:
-            print(f"  Gen {gen_result.generation:2d}: "
-                  f"score={gen_result.score:.4f} | "
-                  f"tests={'PASS' if gen_result.passed_tests else 'FAIL'} | "
-                  f"strategy={gen_result.strategy.get('mutation_type', 'unknown')}")
+            print(
+                f"  Gen {gen_result.generation:2d}: "
+                f"score={gen_result.score:.4f} | "
+                f"tests={'PASS' if gen_result.passed_tests else 'FAIL'} | "
+                f"strategy={gen_result.strategy.get('mutation_type', 'unknown')}"
+            )
         print("-" * 70)
         print()
 
@@ -120,10 +118,14 @@ assert add(-5, -3) == -8, "Two negatives failed"
         gen_check = result.generations >= target_generations
         score_check = result.best_score >= target_score
 
-        print(f"[{'OK' if gen_check else 'NG'}] 运行 >={target_generations} 代: "
-              f"{result.generations} 代 {'PASS' if gen_check else 'FAIL'}")
-        print(f"[{'OK' if score_check else 'NG'}] 最终得分 >={target_score}: "
-              f"{result.best_score:.4f} {'PASS' if score_check else 'FAIL'}")
+        print(
+            f"[{'OK' if gen_check else 'NG'}] 运行 >={target_generations} 代: "
+            f"{result.generations} 代 {'PASS' if gen_check else 'FAIL'}"
+        )
+        print(
+            f"[{'OK' if score_check else 'NG'}] 最终得分 >={target_score}: "
+            f"{result.best_score:.4f} {'PASS' if score_check else 'FAIL'}"
+        )
         print()
 
         if gen_check and score_check:
@@ -168,6 +170,7 @@ assert add(-5, -3) == -8, "Two negatives failed"
         print(f"\n[ERROR] 实验失败: {e}")
         print(f"运行时间: {elapsed_time:.2f} 秒")
         import traceback
+
         traceback.print_exc()
         return None, "FAILED"
 

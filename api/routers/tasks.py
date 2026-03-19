@@ -402,40 +402,47 @@ logger = logging.getLogger(__name__)
 
 class BatchTaskCreate(BaseModel):
     """批量创建任务请求"""
+
     tasks: List[TaskCreate]
 
 
 class BatchTaskIds(BaseModel):
     """批量任务ID请求"""
+
     task_ids: List[str]
 
 
 class BatchOperationResult(TypedDict):
     """批量操作结果类型"""
+
     successful: List[str]
     failed: List[Dict[str, str]]
 
 
 class BatchPauseResult(TypedDict):
     """批量暂停结果类型"""
+
     paused: List[str]
     failed: List[Dict[str, str]]
 
 
 class BatchResumeResult(TypedDict):
     """批量恢复结果类型"""
+
     resumed: List[str]
     failed: List[Dict[str, str]]
 
 
 class BatchAbortResult(TypedDict):
     """批量中止结果类型"""
+
     aborted: List[str]
     failed: List[Dict[str, str]]
 
 
 class BatchDeleteResult(TypedDict):
     """批量删除结果类型"""
+
     deleted: List[str]
     failed: List[Dict[str, str]]
 
@@ -458,8 +465,7 @@ def _validate_batch_ids(task_ids: List[str], max_size: int = MAX_BATCH_SIZE) -> 
 
     if len(task_ids) > max_size:
         raise HTTPException(
-            status_code=400,
-            detail=f"Batch size exceeds maximum limit of {max_size}"
+            status_code=400, detail=f"Batch size exceeds maximum limit of {max_size}"
         )
 
     # 检查空字符串ID
@@ -516,17 +522,24 @@ def _process_batch_operation(
         try:
             task = task_map.get(task_id)
             if not task:
-                result["failed"].append({"task_id": task_id, "reason": "Task not found"})
+                result["failed"].append(
+                    {"task_id": task_id, "reason": "Task not found"}
+                )
                 continue
 
             if not verify_task_ownership(task, current_user):
-                result["failed"].append({"task_id": task_id, "reason": "Permission denied"})
+                result["failed"].append(
+                    {"task_id": task_id, "reason": "Permission denied"}
+                )
                 continue
 
             if task.status not in valid_statuses:
                 valid_names = ", ".join(s.value for s in valid_statuses)
                 result["failed"].append(
-                    {"task_id": task_id, "reason": f"Task status must be one of: {valid_names}"}
+                    {
+                        "task_id": task_id,
+                        "reason": f"Task status must be one of: {valid_names}",
+                    }
                 )
                 continue
 
@@ -571,7 +584,7 @@ async def create_batch_tasks(
     if len(batch.tasks) > MAX_BATCH_SIZE:
         raise HTTPException(
             status_code=400,
-            detail=f"Batch size exceeds maximum limit of {MAX_BATCH_SIZE}"
+            detail=f"Batch size exceeds maximum limit of {MAX_BATCH_SIZE}",
         )
 
     created_tasks: List[Task] = []
@@ -610,7 +623,9 @@ async def create_batch_tasks(
     except SQLAlchemyError as e:
         logger.error(f"Database error during batch create: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail="Database error during task creation")
+        raise HTTPException(
+            status_code=500, detail="Database error during task creation"
+        )
     except Exception as e:
         logger.exception(f"Unexpected error during batch create: {e}")
         db.rollback()
@@ -645,10 +660,12 @@ async def batch_pause_tasks(
         task.status = TaskStatus.PAUSED
 
     return _process_batch_operation(
-        db, current_user, batch.task_ids,
+        db,
+        current_user,
+        batch.task_ids,
         pause_operation,
         {TaskStatus.RUNNING},
-        "paused"
+        "paused",
     )
 
 
@@ -680,10 +697,12 @@ async def batch_resume_tasks(
         task.status = TaskStatus.RUNNING
 
     return _process_batch_operation(
-        db, current_user, batch.task_ids,
+        db,
+        current_user,
+        batch.task_ids,
         resume_operation,
         {TaskStatus.PAUSED},
-        "resumed"
+        "resumed",
     )
 
 
@@ -715,10 +734,12 @@ async def batch_abort_tasks(
         task.status = TaskStatus.ABORTED
 
     return _process_batch_operation(
-        db, current_user, batch.task_ids,
+        db,
+        current_user,
+        batch.task_ids,
         abort_operation,
         {TaskStatus.RUNNING, TaskStatus.PAUSED},
-        "aborted"
+        "aborted",
     )
 
 
@@ -749,9 +770,17 @@ async def batch_delete_tasks(
         db.delete(task)
 
     return _process_batch_operation(
-        db, current_user, batch.task_ids,
+        db,
+        current_user,
+        batch.task_ids,
         delete_operation,
-        {TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED,
-         TaskStatus.SUCCESS, TaskStatus.ABORTED, TaskStatus.FAILED},
-        "deleted"
+        {
+            TaskStatus.PENDING,
+            TaskStatus.RUNNING,
+            TaskStatus.PAUSED,
+            TaskStatus.SUCCESS,
+            TaskStatus.ABORTED,
+            TaskStatus.FAILED,
+        },
+        "deleted",
     )

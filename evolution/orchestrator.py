@@ -30,27 +30,27 @@ from evolution.test_runner import TestRunner
 def extract_function_signature(code: str) -> str:
     """
     从代码中提取函数签名。
-    
+
     查找第一个函数定义的签名，如 "def add(a, b)" -> "add(a, b)"
-    
+
     Args:
         code: Python 代码字符串
-        
+
     Returns:
         函数签名字符串，如果没有找到则返回 "solution()"
     """
     if not code:
         return "solution()"
-    
+
     # 匹配函数定义: def function_name(args) -> return_type:
-    pattern = r'def\s+(\w+)\s*\(([^)]*)\)'
+    pattern = r"def\s+(\w+)\s*\(([^)]*)\)"
     match = re.search(pattern, code)
-    
+
     if match:
         func_name = match.group(1)
         args = match.group(2).strip()
         return f"{func_name}({args})"
-    
+
     return "solution()"
 
 
@@ -96,14 +96,14 @@ class EvolutionOrchestrator:
     def __init__(
         self,
         task_id: str,
-        code_generator: CodeGenerator = None,
-        test_runner: TestRunner = None,
-        dual_evaluator: DualEvaluator = None,
-        strategy_optimizer: StrategyOptimizer = None,
-        termination_checker: TerminationChecker = None,
-        git_manager: GitManager = None,
-        termination_config: TerminationConfig = None,
-    ):
+        code_generator: Optional[CodeGenerator] = None,
+        test_runner: Optional[TestRunner] = None,
+        dual_evaluator: Optional[DualEvaluator] = None,
+        strategy_optimizer: Optional[StrategyOptimizer] = None,
+        termination_checker: Optional[TerminationChecker] = None,
+        git_manager: Optional[GitManager] = None,
+        termination_config: Optional[TerminationConfig] = None,
+    ) -> None:
         """初始化编排器
 
         Args:
@@ -136,7 +136,7 @@ class EvolutionOrchestrator:
         self,
         requirements: List[str],
         test_code: str,
-        max_generations: int = None,
+        max_generations: Optional[int] = None,
     ) -> EvolutionResult:
         """运行完整进化过程
 
@@ -217,13 +217,17 @@ class EvolutionOrchestrator:
                 "function_signature": "def solution():",
                 "requirements": requirements,
             }
-            
+
             gen_result = self.code_generator.generate(
                 task_spec=task_spec,
                 temperature=strategy.get("generation_temperature", 0.5),
             )
             # 从返回字典中提取代码
-            code = gen_result.get("code", "") if isinstance(gen_result, dict) else str(gen_result)
+            code = (
+                gen_result.get("code", "")
+                if isinstance(gen_result, dict)
+                else str(gen_result)
+            )
         except Exception as e:
             # 生成失败返回空代码
             print(f"Code generation error: {e}")
@@ -233,7 +237,7 @@ class EvolutionOrchestrator:
         try:
             test_result = self.test_runner.run_tests_with_code(code, test_code)
             passed_tests = (
-                len(test_result.get("passed", [])) > 0 
+                len(test_result.get("passed", [])) > 0
                 and len(test_result.get("failed", [])) == 0
             )
         except Exception as e:

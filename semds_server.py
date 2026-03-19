@@ -26,7 +26,6 @@ import uvicorn
 
 from semds_live import SEMDSLive
 
-
 # 创建FastAPI应用
 app = FastAPI(title="SEMDS - Self-Evolving System")
 
@@ -38,7 +37,7 @@ system_status = {
     "success_rate": 0.0,
     "last_evolution": None,
     "evolution_count": 0,
-    "current_tasks": []
+    "current_tasks": [],
 }
 
 
@@ -46,21 +45,22 @@ system_status = {
 class ConnectionManager:
     def __init__(self):
         self.active_connections = []
-    
+
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
-    
+
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
-    
+
     async def broadcast(self, message: dict):
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
             except:
                 pass
+
 
 manager = ConnectionManager()
 
@@ -204,48 +204,58 @@ async def root():
 async def execute_task(data: dict):
     """执行任务"""
     global semds_system, system_status
-    
+
     description = data.get("description", "")
     if not description:
         return {"error": "No task description"}
-    
+
     # 后台执行
     def run_task():
         try:
             result = semds_system.execute_task(description)
-            
+
             # 广播结果
             message = {
                 "type": "log",
                 "log_type": "success" if result["success"] else "error",
-                "message": f"Task '{description[:40]}...' -> {'SUCCESS' if result['success'] else 'FAILED'} (score: {result.get('score', 0):.2f})"
+                "message": f"Task '{description[:40]}...' -> {'SUCCESS' if result['success'] else 'FAILED'} (score: {result.get('score', 0):.2f})",
             }
-            
+
             # 更新状态
             system_status["tasks_completed"] += 1
             if result["success"]:
-                current_success = system_status["success_rate"] * (system_status["tasks_completed"] - 1)
-                system_status["success_rate"] = (current_success + 100) / system_status["tasks_completed"]
+                current_success = system_status["success_rate"] * (
+                    system_status["tasks_completed"] - 1
+                )
+                system_status["success_rate"] = (current_success + 100) / system_status[
+                    "tasks_completed"
+                ]
             else:
-                current_success = system_status["success_rate"] * (system_status["tasks_completed"] - 1)
-                system_status["success_rate"] = current_success / system_status["tasks_completed"]
-            
+                current_success = system_status["success_rate"] * (
+                    system_status["tasks_completed"] - 1
+                )
+                system_status["success_rate"] = (
+                    current_success / system_status["tasks_completed"]
+                )
+
             # 异步广播
             import asyncio
+
             asyncio.run(manager.broadcast(message))
             asyncio.run(manager.broadcast({"type": "status", **system_status}))
-            
+
         except Exception as e:
             message = {
                 "type": "log",
                 "log_type": "error",
-                "message": f"Task failed: {str(e)}"
+                "message": f"Task failed: {str(e)}",
             }
             import asyncio
+
             asyncio.run(manager.broadcast(message))
-    
+
     threading.Thread(target=run_task).start()
-    
+
     return {"status": "Task queued"}
 
 
@@ -253,34 +263,44 @@ async def execute_task(data: dict):
 async def evolve():
     """触发进化"""
     global semds_system, system_status
-    
+
     def run_evolution():
         try:
-            message = {"type": "log", "log_type": "evolve", "message": "Starting self-evolution..."}
+            message = {
+                "type": "log",
+                "log_type": "evolve",
+                "message": "Starting self-evolution...",
+            }
             import asyncio
+
             asyncio.run(manager.broadcast(message))
-            
+
             result = semds_system.evolve_self()
-            
+
             system_status["evolution_count"] += 1
             system_status["last_evolution"] = datetime.now().isoformat()
-            
+
             improvements = result.get("improvements_applied", 0)
             message = {
                 "type": "log",
                 "log_type": "success" if improvements > 0 else "info",
-                "message": f"Evolution complete. Applied {improvements} improvements."
+                "message": f"Evolution complete. Applied {improvements} improvements.",
             }
             asyncio.run(manager.broadcast(message))
             asyncio.run(manager.broadcast({"type": "status", **system_status}))
-            
+
         except Exception as e:
-            message = {"type": "log", "log_type": "error", "message": f"Evolution failed: {str(e)}"}
+            message = {
+                "type": "log",
+                "log_type": "error",
+                "message": f"Evolution failed: {str(e)}",
+            }
             import asyncio
+
             asyncio.run(manager.broadcast(message))
-    
+
     threading.Thread(target=run_evolution).start()
-    
+
     return {"status": "Evolution started"}
 
 
@@ -297,11 +317,11 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         # 发送初始状态
         await websocket.send_json({"type": "status", **system_status})
-        
+
         while True:
             # 保持连接
             data = await websocket.receive_text()
-            
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
@@ -309,30 +329,35 @@ async def websocket_endpoint(websocket: WebSocket):
 def auto_evolution_loop():
     """自动进化循环（每10分钟检查一次）"""
     global semds_system, system_status
-    
+
     while True:
         time.sleep(600)  # 10分钟
-        
+
         if system_status["tasks_completed"] >= 5:
             try:
-                message = {"type": "log", "log_type": "evolve", "message": "[AUTO] Triggering scheduled evolution..."}
+                message = {
+                    "type": "log",
+                    "log_type": "evolve",
+                    "message": "[AUTO] Triggering scheduled evolution...",
+                }
                 import asyncio
+
                 asyncio.run(manager.broadcast(message))
-                
+
                 result = semds_system.evolve_self()
-                
+
                 system_status["evolution_count"] += 1
                 system_status["last_evolution"] = datetime.now().isoformat()
-                
+
                 improvements = result.get("improvements_applied", 0)
                 message = {
                     "type": "log",
                     "log_type": "success" if improvements > 0 else "info",
-                    "message": f"[AUTO] Evolution complete. Applied {improvements} improvements."
+                    "message": f"[AUTO] Evolution complete. Applied {improvements} improvements.",
                 }
                 asyncio.run(manager.broadcast(message))
                 asyncio.run(manager.broadcast({"type": "status", **system_status}))
-                
+
             except Exception as e:
                 print(f"Auto-evolution error: {e}")
 
@@ -340,12 +365,12 @@ def auto_evolution_loop():
 def main():
     """启动服务器"""
     global semds_system, system_status
-    
-    print("="*70)
+
+    print("=" * 70)
     print("  SEMDS Web Server")
-    print("="*70)
+    print("=" * 70)
     print("\nInitializing...")
-    
+
     # 初始化系统
     try:
         semds_system = SEMDSLive()
@@ -354,19 +379,19 @@ def main():
         print("\n[ERROR] API Key not configured!")
         print("  Create .env file with: DEEPSEEK_API_KEY=your-key")
         return
-    
+
     # 启动自动进化线程
     evolution_thread = threading.Thread(target=auto_evolution_loop, daemon=True)
     evolution_thread.start()
-    
+
     print("\n✓ System ready")
     print("✓ Auto-evolution enabled (every 10 minutes)")
     print("\nAccess SEMDS at:")
     print("  Web Interface: http://localhost:8000")
     print("  API: http://localhost:8000/api/")
     print("\nPress Ctrl+C to stop")
-    print("="*70)
-    
+    print("=" * 70)
+
     # 启动服务器
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="warning")
 

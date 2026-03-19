@@ -12,13 +12,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.env_loader import load_env
+
 load_env()
 
 from evolution.code_generator import CodeGenerator
 from evolution.test_runner import TestRunner
 
 # 这是实验中生成的最佳代码（从实验输出中提取）
-BEST_CODE = '''def solution(expression: str) -> float:
+BEST_CODE = """def solution(expression: str) -> float:
     def tokenize(expr):
         tokens = []
         i = 0
@@ -104,10 +105,12 @@ BEST_CODE = '''def solution(expression: str) -> float:
         raise ValueError("Invalid expression format")
     
     return result
-'''
+"""
 
 # 读取测试文件
-TEST_FILE_PATH = Path(__file__).parent / "calculator" / "tests" / "test_string_calculator.py"
+TEST_FILE_PATH = (
+    Path(__file__).parent / "calculator" / "tests" / "test_string_calculator.py"
+)
 
 print("=" * 70)
 print("字符串计算器测试失败分析")
@@ -118,14 +121,14 @@ print()
 with tempfile.TemporaryDirectory() as tmpdir:
     # 写入代码
     solution_path = Path(tmpdir) / "solution.py"
-    with open(solution_path, 'w', encoding='utf-8') as f:
+    with open(solution_path, "w", encoding="utf-8") as f:
         f.write(BEST_CODE)
-    
+
     # 写入测试
     test_path = Path(tmpdir) / "test_string_calculator.py"
-    with open(test_path, 'w', encoding='utf-8') as f:
-        f.write(open(TEST_FILE_PATH, encoding='utf-8').read())
-    
+    with open(test_path, "w", encoding="utf-8") as f:
+        f.write(open(TEST_FILE_PATH, encoding="utf-8").read())
+
     # 运行测试
     runner = TestRunner(timeout_seconds=30, verbose=False)
     test_result = runner.run_tests(str(test_path), str(solution_path), tmpdir)
@@ -138,14 +141,16 @@ print(f"总测试数: {test_result['total_tests']}")
 print()
 
 # 按类别分析测试
-passed_tests = test_result['passed']
-failed_tests = test_result['failed']
+passed_tests = test_result["passed"]
+failed_tests = test_result["failed"]
+
 
 # 提取测试名称
 def extract_test_name(full_name):
-    if '::' in full_name:
-        return full_name.split('::')[-1]
+    if "::" in full_name:
+        return full_name.split("::")[-1]
     return full_name
+
 
 passed_names = [extract_test_name(t) for t in passed_tests]
 failed_names = [extract_test_name(t) for t in failed_tests]
@@ -171,7 +176,7 @@ categories = {
     "TestParentheses": "括号支持",
     "TestWhitespaceHandling": "空格处理",
     "TestEdgeCases": "边界情况",
-    "TestComplexExpressions": "复杂表达式"
+    "TestComplexExpressions": "复杂表达式",
 }
 
 print("-" * 70)
@@ -184,7 +189,7 @@ for cat_class, cat_name in categories.items():
     cat_passed = [t for t in passed_tests if cat_class in t]
     cat_failed = [t for t in failed_tests if cat_class in t]
     total = len(cat_passed) + len(cat_failed)
-    
+
     if total > 0:
         status = "OK" if len(cat_failed) == 0 else f"{len(cat_passed)}/{total}"
         print(f"{cat_name:<30} {len(cat_passed):<8} {len(cat_failed):<8} {status}")
@@ -199,23 +204,23 @@ print("=" * 70)
 print()
 
 # 从原始输出中提取失败详情
-raw_output = test_result['raw_output']
+raw_output = test_result["raw_output"]
 
 # 解析失败信息
-if 'FAILED' in raw_output:
+if "FAILED" in raw_output:
     # 提取失败详情
-    lines = raw_output.split('\n')
+    lines = raw_output.split("\n")
     current_test = None
     error_details = []
-    
+
     for line in lines:
-        if '::test_' in line and 'FAILED' in line:
+        if "::test_" in line and "FAILED" in line:
             current_test = line.strip()
             print(f"\n测试: {current_test}")
-        elif current_test and line.strip().startswith('E   '):
+        elif current_test and line.strip().startswith("E   "):
             error_details.append(line.strip())
             print(f"  错误: {line.strip()}")
-        elif current_test and '==' in line:
+        elif current_test and "==" in line:
             print(f"  详情: {line.strip()}")
 
 print()
@@ -224,19 +229,19 @@ print("[失败原因总结]")
 print("=" * 70)
 
 # 根据测试类别推断失败原因
-if any('TestEdgeCases' in t for t in failed_tests):
+if any("TestEdgeCases" in t for t in failed_tests):
     print("\n1. 边界情况处理不完善")
     print("   - 可能原因: 负数、科学计数法(1e10)等未正确处理")
-    
-if any('TestWhitespaceHandling' in t for t in failed_tests):
+
+if any("TestWhitespaceHandling" in t for t in failed_tests):
     print("\n2. 空格处理有问题")
     print("   - 可能原因: 首尾空格、多个空格处理不当")
-    
-if any('TestComplexExpressions' in t for t in failed_tests):
+
+if any("TestComplexExpressions" in t for t in failed_tests):
     print("\n3. 复杂表达式解析问题")
     print("   - 可能原因: 多层括号或复杂运算符组合")
 
-if any('TestParentheses' in t for t in failed_tests):
+if any("TestParentheses" in t for t in failed_tests):
     print("\n4. 括号处理有缺陷")
     print("   - 可能原因: 嵌套括号或多个括号组合")
 

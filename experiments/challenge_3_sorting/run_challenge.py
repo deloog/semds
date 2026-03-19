@@ -5,21 +5,24 @@ Run 1000 generations to evolve a sorting algorithm approaching C qsort performan
 Usage:
     python experiments/challenge_3_sorting/run_challenge.py
 """
+
 import os
 import sys
 import time
 from datetime import datetime
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 from core.env_loader import load_env
+
 load_env()
 
 import requests
 from api.auth.jwt import create_access_token
 from api.auth.models import UserRole
-
 
 # Configuration
 API_BASE = "http://localhost:8000/api"
@@ -105,35 +108,31 @@ if __name__ == "__main__":
 def get_auth_token():
     """Get admin auth token"""
     return create_access_token(
-        data={'sub': 'admin-1', 'role': UserRole.ADMIN},
-        expires_delta=None
+        data={"sub": "admin-1", "role": UserRole.ADMIN}, expires_delta=None
     )
 
 
 def create_task():
     """Create the sorting challenge task"""
     token = get_auth_token()
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Content-Type': 'application/json'
-    }
-    
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
     task_data = {
-        'name': 'Challenge 3: Extreme Sorting',
-        'description': 'Evolve a sorting algorithm approaching C qsort performance. Target: <0.1s for 100k integers.',
-        'target_function_signature': 'def solution(arr: list) -> list:',
-        'test_code': TEST_CODE,
-        'max_generations': 1000,
-        'success_criteria': {'target_score': 0.95}
+        "name": "Challenge 3: Extreme Sorting",
+        "description": "Evolve a sorting algorithm approaching C qsort performance. Target: <0.1s for 100k integers.",
+        "target_function_signature": "def solution(arr: list) -> list:",
+        "test_code": TEST_CODE,
+        "max_generations": 1000,
+        "success_criteria": {"target_score": 0.95},
     }
-    
+
     print("Creating Challenge 3 task...")
-    resp = requests.post(f'{API_BASE}/tasks', headers=headers, json=task_data)
-    
+    resp = requests.post(f"{API_BASE}/tasks", headers=headers, json=task_data)
+
     if resp.status_code == 201:
         task = resp.json()
         print(f"[OK] Task created: {task['id']}")
-        return task['id']
+        return task["id"]
     else:
         print(f"[FAIL] Failed to create task: {resp.status_code}")
         print(resp.text)
@@ -143,11 +142,11 @@ def create_task():
 def start_evolution(task_id):
     """Start evolution for the task"""
     token = get_auth_token()
-    headers = {'Authorization': f'Bearer {token}'}
-    
+    headers = {"Authorization": f"Bearer {token}"}
+
     print(f"\nStarting evolution (1000 generations)...")
-    resp = requests.post(f'{API_BASE}/tasks/{task_id}/start', headers=headers)
-    
+    resp = requests.post(f"{API_BASE}/tasks/{task_id}/start", headers=headers)
+
     if resp.status_code == 200:
         print("[OK] Evolution started!")
         return True
@@ -160,45 +159,45 @@ def start_evolution(task_id):
 def monitor_progress(task_id, interval=10):
     """Monitor evolution progress"""
     token = get_auth_token()
-    headers = {'Authorization': f'Bearer {token}'}
-    
+    headers = {"Authorization": f"Bearer {token}"}
+
     print("\n" + "=" * 70)
     print("MONITORING EVOLUTION")
     print("=" * 70)
     print(f"{'Generation':>12} {'Best Score':>12} {'Status':>12} {'Time':>12}")
     print("-" * 70)
-    
+
     start_time = time.time()
     last_gen = 0
-    
+
     while True:
         time.sleep(interval)
-        
-        resp = requests.get(f'{API_BASE}/tasks/{task_id}', headers=headers)
+
+        resp = requests.get(f"{API_BASE}/tasks/{task_id}", headers=headers)
         if resp.status_code != 200:
             print(f"Error fetching status: {resp.status_code}")
             continue
-        
+
         task = resp.json()
-        gen = task['current_generation']
-        score = task['best_score']
-        status = task['status']
+        gen = task["current_generation"]
+        score = task["best_score"]
+        status = task["status"]
         elapsed = time.time() - start_time
-        
+
         # Only print if generation changed
         if gen != last_gen:
             print(f"{gen:>12} {score:>11.2%} {status:>12} {elapsed:>10.0f}s")
             last_gen = gen
-            
+
             # Check if completed
-            if status in ['success', 'failed', 'aborted']:
+            if status in ["success", "failed", "aborted"]:
                 print("-" * 70)
                 print(f"\nEvolution completed!")
                 print(f"Final generation: {gen}")
                 print(f"Best score: {score:.2%}")
                 print(f"Total time: {elapsed:.0f}s")
                 return
-        
+
         # Print heartbeat every 60 seconds even if no change
         if int(elapsed) % 60 == 0 and int(elapsed) > 0:
             print(f"{gen:>12} {score:>11.2%} {status:>12} {elapsed:>10.0}s ...")
@@ -212,18 +211,18 @@ def main():
     print("Target: <0.1s for 100,000 integers")
     print("Baseline: Bubble sort O(n^2)")
     print("=" * 70)
-    
+
     # Create task
     task_id = create_task()
     if not task_id:
         print("\nFailed to create task. Exiting.")
         return 1
-    
+
     # Start evolution
     if not start_evolution(task_id):
         print("\nFailed to start evolution. Exiting.")
         return 1
-    
+
     # Monitor
     try:
         monitor_progress(task_id)
@@ -231,9 +230,9 @@ def main():
         print("\n\nMonitoring stopped. Evolution continues in background.")
         print(f"View progress at: http://localhost:8000/monitor/")
         print(f"Task ID: {task_id}")
-    
+
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
