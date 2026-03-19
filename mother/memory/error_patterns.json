@@ -1,0 +1,18 @@
+{
+  "importerror: no module named 'bs4'": {
+    "error_type": "ImportError",
+    "error_message": "ImportError: No module named 'bs4'",
+    "context": "",
+    "solution": "",
+    "success_rate": 0.0,
+    "occurrence_count": 3
+  },
+  "valueerror: invalid data format": {
+    "error_type": "RuntimeError",
+    "error_message": "ValueError: invalid data format",
+    "context": "",
+    "solution": "",
+    "success_rate": 0.0,
+    "occurrence_count": 3
+  }
+}

@@ -22,7 +22,7 @@
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 0: Core Kernel (核心内核层) 【不可修改】               │
 │ - safe_write: 四层防护写入机制                               │
-│ - sandbox_execute: Docker沙盒执行                            │
+│ - sandbox_execute: subprocess沙盒执行                        │
 │ - version_control: Git自动提交                               │
 │ - 递归终止保障                                               │
 └─────────────────────────────────────────────────────────────┘
@@ -69,7 +69,7 @@ def sandbox_execute(
     
     隔离级别:
     - Phase 1: subprocess + seccomp
-    - Phase 2: Docker容器
+    - Phase 2: subprocess + tempfile (当前使用)
     - Phase 3: 更严格的容器 + seccomp
     """
 ```

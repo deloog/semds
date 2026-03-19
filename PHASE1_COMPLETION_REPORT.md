@@ -173,13 +173,13 @@ tests/test_phase1_acceptance.py::TestPhase1Acceptance::test_full_single_evolutio
 
 ## Next Steps
 
-Phase 1 is complete. Proceed to **Phase 2: Docker Sandbox**.
+Phase 1 is complete. Proceed to **Phase 2: Enhanced Sandbox**.
 
 **Phase 2 Tasks:**
-1. Configure Docker sandbox environment
-2. Replace subprocess execution with Docker
-3. Implement safe_write Docker version
-4. Verify code cannot access host filesystem
+1. Enhance subprocess sandbox with resource limits
+2. Add timeout and memory controls
+3. Implement process isolation improvements
+4. Verify code isolation in temporary directories
 
 ---
 

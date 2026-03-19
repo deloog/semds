@@ -53,7 +53,7 @@
 ├── 📁 api/                     # API层（Phase 4）
 ├── 📁 storage/                 # 数据层
 ├── 📁 monitor/                 # 监控前端（Phase 4）
-├── 📁 docker/                  # Docker配置
+├── 📁 docker/                  # Docker配置（备用）
 ```
 
 #### 2.2 README.md（根目录）
@@ -79,7 +79,7 @@
 | 规格要求 | 状态 | 说明 |
 |---------|:----:|------|
 | 目录结构: `core/`, `evolution/`, `skills/`, `factory/` | ✅ | FILE_MANAGEMENT.md 已更新 |
-| 技术栈: FastAPI, Docker, Thompson Sampling | ✅ | 各Phase路线图已明确 |
+| 技术栈: FastAPI, subprocess, Thompson Sampling | ✅ | 各Phase路线图已明确 |
 | 三层防崩溃架构 | ✅ | ARCHITECTURE_GUIDE.md 已符合 |
 | `factory/task_manager.py` | ✅ | Phase 5 路线图已包含 P5-T1~P5-T5 |
 | `factory/isolation_manager.py` | ✅ | Phase 5 路线图已包含 P5-T6~P5-T10 |
@@ -108,7 +108,7 @@ D:\semds\
 ├── docs\
 │   ├── roadmaps\
 │   │   ├── PHASE1_ROADMAP.md   # 核心骨架
-│   │   ├── PHASE2_ROADMAP.md   # Docker沙盒
+│   │   ├── PHASE2_ROADMAP.md   # 沙盒执行 (subprocess)
 │   │   ├── PHASE3_ROADMAP.md   # 进化循环
 │   │   ├── PHASE4_ROADMAP.md   # FastAPI + 监控界面
 │   │   └── PHASE5_ROADMAP.md   # 多任务并发（新建）

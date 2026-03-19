@@ -6,10 +6,25 @@ from typing import Dict, Optional
 from jose import JWTError, jwt
 
 
-# 配置（从环境变量读取，默认为开发密钥）
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "30"))
+# 默认配置（将被环境变量覆盖）
+_DEFAULT_SECRET_KEY = "your-secret-key-change-in-production"
+_DEFAULT_ALGORITHM = "HS256"
+_DEFAULT_EXPIRE_MINUTES = 30
+
+
+def _get_secret_key() -> str:
+    """获取JWT密钥（支持环境变量）"""
+    return os.getenv("JWT_SECRET_KEY", _DEFAULT_SECRET_KEY)
+
+
+def _get_algorithm() -> str:
+    """获取JWT算法"""
+    return os.getenv("JWT_ALGORITHM", _DEFAULT_ALGORITHM)
+
+
+def _get_expire_minutes() -> int:
+    """获取过期时间（分钟）"""
+    return int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", str(_DEFAULT_EXPIRE_MINUTES)))
 
 
 def create_access_token(
@@ -24,22 +39,16 @@ def create_access_token(
         
     Returns:
         JWT Token字符串
-        
-    Example:
-        >>> token = create_access_token(
-        ...     data={"sub": "user-123", "role": "user"},
-        ...     expires_delta=timedelta(hours=1)
-        ... )
     """
     to_encode = data.copy()
     
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=_get_expire_minutes())
     
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, _get_secret_key(), algorithm=_get_algorithm())
     return encoded_jwt
 
 
@@ -51,18 +60,18 @@ def verify_token(token: str) -> Optional[Dict]:
         
     Returns:
         Token payload字典如果有效，None如果无效或过期
-        
-    Example:
-        >>> payload = verify_token("eyJhbGciOiJIUzI1NiIs...")
-        >>> if payload:
-        ...     user_id = payload.get("sub")
     """
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, _get_secret_key(), algorithms=[_get_algorithm()])
         return payload
     except JWTError:
         return None
 
+
+# 向后兼容的导出
+SECRET_KEY = _get_secret_key()
+ALGORITHM = _get_algorithm()
+ACCESS_TOKEN_EXPIRE_MINUTES = _get_expire_minutes()
 
 __all__ = [
     "create_access_token",

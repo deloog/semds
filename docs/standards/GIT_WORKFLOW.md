@@ -166,7 +166,7 @@ git tag -a v1.0.0 -m "Initial stable release"
 git tag -a v1.0.1 -m "Fix sandbox timeout issue"
 
 # 发布新功能 v1.1.0
-git tag -a v1.1.0 -m "Add Docker sandbox support"
+git tag -a v1.1.0 -m "Add subprocess sandbox support"
 ```
 
 ---

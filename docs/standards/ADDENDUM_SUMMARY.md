@@ -166,7 +166,7 @@
 ### 路线图对齐
 
 - [x] Phase 1 - 基础骨架
-- [x] Phase 2 - Docker沙盒
+- [x] Phase 2 - 沙盒执行 (subprocess)
 - [x] Phase 3 - 进化循环
 - [x] Phase 4 - API + 监控
 - [x] Phase 5 - 多任务并发

@@ -164,23 +164,31 @@ class SecureSandbox:
         # 1. 静态检查
         self.validate_code(code)
         
-        # 2. Docker隔离执行
-        return self._docker_execute(code)
+        # 2. subprocess隔离执行
+        return self._subprocess_execute(code)
     
-    def _docker_execute(self, code: str) -> ExecutionResult:
-        """Docker容器内执行。"""
-        container = docker.run(
-            "python:3.11-slim",
-            command=["python", "-c", code],
-            mem_limit="128m",           # 内存限制
-            cpu_quota=50000,            # CPU限制
-            network_disabled=True,      # 禁用网络
-            read_only=True,             # 只读文件系统
-            remove=True                 # 执行后删除
-        )
+    def _subprocess_execute(self, code: str) -> ExecutionResult:
+        """subprocess临时目录中执行。"""
+        import tempfile
+        import subprocess
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 写入代码文件
+            code_file = Path(tmpdir) / "code.py"
+            code_file.write_text(code)
+            
+            # 在隔离环境中执行
+            result = subprocess.run(
+                ["python", str(code_file)],
+                capture_output=True,
+                text=True,
+                timeout=30,           # 时间限制
+                cwd=tmpdir,           # 工作目录隔离
+            )
+            
         return ExecutionResult(
-            exit_code=container.exit_code,
-            output=container.logs
+            exit_code=result.returncode,
+            output=result.stdout + result.stderr
         )
 ```
 

@@ -15,7 +15,7 @@ semds/
 │   └── ISSUE_TEMPLATE/         # Issue模板
 ├── 📁 core/                    # Layer 0：核心内核【不可修改】
 │   ├── kernel.py               # safe_write, sandbox_execute, version_control
-│   ├── docker_manager.py       # Docker沙盒管理
+│   ├── docker_manager.py       # Docker沙盒管理（备用）
 │   └── audit.log               # 审计日志
 ├── 📁 evolution/               # Layer 1：进化引擎
 │   ├── orchestrator.py         # 总调度器
@@ -52,9 +52,9 @@ semds/
 │       ├── task_spec.json      # 任务规格
 │       └── tests/
 │           └── test_calculator.py
-├── 📁 docker/                  # Docker配置
-│   ├── Dockerfile.sandbox      # 沙盒执行环境
-│   └── docker-compose.yml      # 本地开发环境
+├── 📁 docker/                  # Docker配置（备用）
+│   ├── Dockerfile.sandbox      # 沙盒执行环境（备用）
+│   └── docker-compose.yml      # 本地开发环境（备用）
 ├── 📁 tests/                   # 测试代码
 │   ├── unit/                   # 单元测试
 │   ├── integration/            # 集成测试

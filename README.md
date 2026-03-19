@@ -13,7 +13,7 @@ LLM生成代码 → 沙盒执行 → 测试评分 → 策略调整 → 再次生
 
 ## 重要设计决策
 
-**关于沙盒执行**: 原设计使用 Docker，但因 Windows Docker Desktop 不稳定，已改用 `subprocess + tempfile`。该方案已通过完整验证。详见 `docs/standards/DESIGN_DECISIONS.md` DD-001。
+**关于沙盒执行**: 使用 `subprocess + tempfile` 实现代码沙盒，无需 Docker，Windows 兼容性好。详见 `docs/standards/DESIGN_DECISIONS.md` DD-001。
 
 **关于 LLM**: 默认使用 DeepSeek API（国内可用），Claude/OpenAI 作为备选。详见 DD-002。
 
@@ -83,7 +83,7 @@ python demo_phase1.py
 semds/
 ├── core/                          # Layer 0：核心内核【不可修改】
 │   ├── kernel.py                  # safe_write, append_audit_log
-│   ├── docker_manager.py          # Docker沙盒管理（可选，未启用）
+│   ├── docker_manager.py          # 保留，未启用（见 DD-001）
 │   └── audit.log                  # 审计日志
 │
 ├── evolution/                     # Layer 1：进化引擎
@@ -121,9 +121,9 @@ semds/
 │       └── tests/
 │           └── test_calculator.py # 测试用例
 │
-├── docker/                        # Docker配置
-│   ├── Dockerfile.sandbox         # 沙盒执行环境
-│   └── docker-compose.yml         # 本地开发环境
+├── docker/                        # Docker配置（保留，未启用）
+│   ├── Dockerfile.sandbox         # 沙盒执行环境（备用）
+│   └── docker-compose.yml         # 本地开发环境（备用）
 │
 ├── docs/                          # 文档
 │   ├── standards/                 # 开发规范
@@ -142,7 +142,7 @@ semds/
 
 ## Phase 2-5 规划
 
-- **Phase 2**: Docker沙盒隔离
+- **Phase 2**: 沙盒执行（subprocess + tempfile）
 - **Phase 3**: 进化循环、Thompson Sampling、双轨评估
 - **Phase 4**: FastAPI、WebSocket、监控界面
 - **Phase 5**: 多任务并发

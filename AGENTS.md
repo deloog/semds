@@ -31,7 +31,7 @@
 - **DD-002**: 使用 DeepSeek API 作为默认 LLM
 - **DD-003**: 使用 SQLite 作为默认数据库
 
-**⚠️ 警告**: 任何涉及 Docker 的方案必须先阅读 DD-001，当前项目使用 subprocess 方案！
+**✅ 注意**: 项目使用 subprocess + tempfile 方案，无需 Docker。详见 DD-001。
 
 ### 环境检查
 

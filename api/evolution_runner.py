@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from api.state import active_evolutions
 from evolution.orchestrator import EvolutionOrchestrator
 from evolution.termination_checker import TerminationConfig
-from storage.database import get_session
+from storage.database import get_session_factory
 from storage.models import Task, Generation
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,8 @@ class EvolutionRunner:
             "updated_at": datetime.now().isoformat(),
         }
         
-        db = get_session()
+        SessionFactory = get_session_factory()
+        db = SessionFactory()
         try:
             # 获取任务信息
             task = db.query(Task).filter(Task.id == self.task_id).first()
@@ -105,8 +106,10 @@ class EvolutionRunner:
             self._update_task_status(db, "failed")
         finally:
             db.close()
-            if self.task_id in active_evolutions:
-                del active_evolutions[self.task_id]
+            
+        # Clean up active evolution tracking
+        if self.task_id in active_evolutions:
+            del active_evolutions[self.task_id]
     
     def _run_evolution_sync(self, requirements: list, test_code: str):
         """
@@ -174,7 +177,8 @@ class EvolutionRunner:
     async def _save_generation_to_db(self, generation: int, score: float):
         """保存当前代到数据库"""
         try:
-            db = get_session()
+            SessionFactory = get_session_factory()
+            db = SessionFactory()
             try:
                 # 检查是否已存在该代记录
                 existing = db.query(Generation).filter(

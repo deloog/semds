@@ -88,7 +88,11 @@ git config --global user.email "your@email.com"
 
 ---
 
-## 🐳 Docker Desktop 安装（关键步骤）
+## 🐳 Docker Desktop 安装（可选）
+
+**⚠️ 注意**: SEMDS 已使用 **subprocess + tempfile** 方案替代 Docker（见 DD-001），Docker 不再是必需依赖。
+
+如需安装 Docker 作为可选后端使用，请参考以下步骤：
 
 ### 安装前准备
 1. 确保 Windows 更新完成

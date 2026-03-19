@@ -1,0 +1,47 @@
+{
+  "name": "FlowLang",
+  "version": "0.1.0",
+  "file_extension": ".flow",
+  "syntax_rules": {
+    "variable": "let <name>: <type> = <value>",
+    "pipeline": "source |> transform |> sink",
+    "function": "fn <name>(<params>) -> <return> { <body> }"
+  },
+  "keywords": [
+    "let",
+    "fn",
+    "stream",
+    "pipeline",
+    "source",
+    "sink",
+    "map",
+    "filter"
+  ],
+  "operators": [
+    "|>",
+    "->",
+    "=>"
+  ],
+  "type_system": {
+    "int": "Integer",
+    "float": "Floating point",
+    "stream<T>": "Stream of T"
+  },
+  "control_structures": {
+    "if": "if condition { ... }",
+    "for": "for item in stream { ... }"
+  },
+  "function_syntax": "fn name(params) -> return_type { body }",
+  "module_syntax": "module Name { ... }",
+  "example_programs": [
+    {
+      "description": "Simple pipeline",
+      "code": "let data = [1, 2, 3]\ndata |> map(x -> x * 2) |> print"
+    }
+  ],
+  "design_philosophy": "FlowLang is for data flow processing",
+  "target_use_cases": [
+    "ETL pipelines",
+    "Stream processing"
+  ]
+}

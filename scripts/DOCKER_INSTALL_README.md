@@ -1,4 +1,8 @@
-# SEMDS Docker 安装指南 (D盘数据配置)
+# SEMDS Docker 安装指南 (D盘数据配置) [DEPRECATED]
+
+**⚠️ 注意**: 本项目已改用 **subprocess + tempfile** 方案（DD-001），不再需要 Docker。
+
+本文档保留供参考，如需使用 Docker 作为可选后端时参考。
 
 ## 📋 安装前检查
 

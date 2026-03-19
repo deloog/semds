@@ -187,13 +187,16 @@ lint (代码质量)
 
 | 检查项 | 工具 | 环境 | 失败策略 |
 |--------|------|------|----------|
-| Docker测试 | pytest | dind | 阻断 |
+| 集成测试 | pytest | ubuntu | 阻断 |
 
 ```yaml
-services:
-  docker:
-    image: docker:24-dind
-    options: --privileged
+# 集成测试配置
+integration:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    - name: Run integration tests
+      run: pytest tests/integration/ -v
 ```
 
 #### Job 6: build (构建验证)
@@ -306,8 +309,12 @@ git push origin v1.2.1
 ### 7.2 本地复现CI环境
 
 ```bash
-# 使用Docker复现CI环境
-docker run -it --rm -v $(pwd):/workspace python:3.11 bash
+# 本地复现CI环境
+python -m venv ci-env
+ci-env\Scripts\activate  # Windows
+ci-env/bin/activate      # Linux/Mac
+pip install -r requirements.txt
+pytest tests/ -v
 cd /workspace
 pip install -e ".[dev]"
 make check

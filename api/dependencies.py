@@ -6,8 +6,6 @@ from typing import Generator
 
 from sqlalchemy.orm import Session
 
-from storage.database import get_session
-
 __all__ = ["get_db_session"]
 
 
@@ -20,13 +18,15 @@ def get_db_session() -> Generator[Session, None, None]:
     
     Yields:
         Session: SQLAlchemy Session对象
-    
+
     Example:
         @app.get("/items")
         def get_items(db: Session = Depends(get_db_session)):
             return db.query(Item).all()
     """
-    db = get_session()
+    from storage.database import get_session_factory
+    SessionFactory = get_session_factory()
+    db = SessionFactory()
     try:
         yield db
     finally:

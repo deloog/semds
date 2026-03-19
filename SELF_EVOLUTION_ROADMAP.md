@@ -413,7 +413,7 @@ python -m uvicorn api.main:app --reload
 **总实验数**: 6 个  
 **核心组件**: 5 个  
 **Phase 1 测试**: 11/11 通过  
-**下一步**: Phase 2 (Docker沙盒)
+**下一步**: Phase 2 (沙盒执行 - subprocess)
 
 ### 累计成果
 

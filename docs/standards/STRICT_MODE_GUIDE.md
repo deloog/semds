@@ -168,7 +168,7 @@ echo "=== 所有检查通过 ==="
 | type-check | MyPy严格模式 | 0错误 |
 | test | pytest + coverage | 核心≥90%，进化≥90%，存储≥85% |
 | security | Bandit, Safety | 无高危 |
-| integration-test | Docker测试 | 100%通过 |
+| integration-test | 集成测试 | 100%通过 |
 | build | 构建验证 | 成功 |
 
 ### 3.3 PR审查门禁

@@ -50,7 +50,7 @@ pip install -r requirements.txt  # 成功
 
 def safe_write(filepath: str, content: str) -> bool:
     """
-    四层防护写入机制（Phase 1简化版，不含Docker）
+    四层防护写入机制（Phase 1简化版）
     
     防护层:
     1. 备份: 写入前备份到 .bak.{timestamp}

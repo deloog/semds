@@ -169,7 +169,9 @@ pip-audit --requirement requirements.txt --format=json
 
 ---
 
-## 🐳 Docker依赖管理
+## 🐳 Docker依赖管理（可选）
+
+**注意**: 项目使用 **subprocess + tempfile** 作为主要沙盒方案（DD-001），Docker 配置保留作为可选后端。
 
 ### Dockerfile规范
 

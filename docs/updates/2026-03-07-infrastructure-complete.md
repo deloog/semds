@@ -14,7 +14,7 @@
 |------|------|
 | `pyproject.toml` | Python 项目配置，包含 black/isort/mypy/pytest 完整配置 |
 | `Makefile` | 常用命令封装 (`make install`, `make test`, `make lint` 等) |
-| `docker-compose.yml` | 一键启动环境（SEMDS + Sandbox + Monitor + Redis） |
+| `docker-compose.yml` | 开发环境编排（可选） |
 | `.vscode/settings.json` | VSCode 统一配置（格式化、类型检查、测试） |
 | `.vscode/extensions.json` | 推荐扩展列表 |
 | `.vscode/launch.json` | 调试配置（Phase 1-5 + FastAPI） |
@@ -76,18 +76,20 @@ pre-commit install
 **测试标记**:
 - `@pytest.mark.slow` - 慢测试
 - `@pytest.mark.integration` - 集成测试
-- `@pytest.mark.docker` - 需要 Docker
+- `@pytest.mark.docker` - Docker 集成测试（可选）
 - `@pytest.mark.api` - API 测试
 
 ---
 
-### 5. Docker 配置
+### 5. Docker 配置（可选）
 
 | 文件 | 描述 |
 |------|------|
-| `docker/Dockerfile` | SEMDS 主服务镜像 |
-| `docker/Dockerfile.sandbox` | 代码执行沙盒镜像 |
-| `docker-compose.yml` | 完整服务编排 |
+| `docker/Dockerfile` | SEMDS 主服务镜像（备用） |
+| `docker/Dockerfile.sandbox` | 沙盒镜像（备用） |
+| `docker-compose.yml` | 服务编排（备用） |
+
+**注意**: 项目使用 **subprocess + tempfile** 作为主要沙盒方案（DD-001），Docker 配置保留作为可选后端。
 
 ---
 

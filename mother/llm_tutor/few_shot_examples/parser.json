@@ -1,0 +1,35 @@
+[
+  {
+    "task": "Parse CSV data",
+    "bad": "def parse_csv(data):\n    lines = data.split(\"\\n\")\n    return [line.split(\",\") for line in lines]",
+    "good": "def parse_csv(data: str) -> list:\n    \"\"\"Parse CSV string to list of lists.\"\"\"\n    import csv\n    from io import StringIO\n    \n    if not isinstance(data, str):\n        return []\n    \n    try:\n        reader = csv.reader(StringIO(data))\n        return list(reader)\n    except csv.Error as e:\n        return []",
+    "improvements": [
+      "Type hints",
+      "Input validation",
+      "Proper CSV parsing",
+      "Error handling"
+    ]
+  },
+  {
+    "task": "Parse CSV data",
+    "bad": "def parse_csv(data):\n    lines = data.split(\"\\n\")\n    return [line.split(\",\") for line in lines]",
+    "good": "def parse_csv(data: str) -> list:\n    \"\"\"Parse CSV string to list of lists.\"\"\"\n    import csv\n    from io import StringIO\n    \n    if not isinstance(data, str):\n        return []\n    \n    try:\n        reader = csv.reader(StringIO(data))\n        return list(reader)\n    except csv.Error as e:\n        return []",
+    "improvements": [
+      "Type hints",
+      "Input validation",
+      "Proper CSV parsing",
+      "Error handling"
+    ]
+  },
+  {
+    "task": "Parse CSV data",
+    "bad": "def parse_csv(data):\n    lines = data.split(\"\\n\")\n    return [line.split(\",\") for line in lines]",
+    "good": "def parse_csv(data: str) -> list:\n    \"\"\"Parse CSV string to list of lists.\"\"\"\n    import csv\n    from io import StringIO\n    \n    if not isinstance(data, str):\n        return []\n    \n    try:\n        reader = csv.reader(StringIO(data))\n        return list(reader)\n    except csv.Error as e:\n        return []",
+    "improvements": [
+      "Type hints",
+      "Input validation",
+      "Proper CSV parsing",
+      "Error handling"
+    ]
+  }
+]
