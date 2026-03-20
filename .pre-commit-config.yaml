@@ -14,10 +14,10 @@ repos:
     hooks:
       - id: trailing-whitespace
         name: "Trim trailing whitespace"
-        exclude: "\.md$|\.svg$"
+        exclude: '\.md$|\.svg$'
       - id: end-of-file-fixer
         name: "Fix end of files"
-        exclude: "\.svg$"
+        exclude: '\.svg$'
       - id: check-yaml
         name: "Check YAML syntax"
       - id: check-toml
@@ -53,7 +53,7 @@ repos:
         name: "Black formatter"
         language_version: python3.11
         args: ["--line-length=88", "--check"]
-        exclude: "(migrations/|tests/fixtures/|\.venv/|venv/)"
+        exclude: '(migrations/|tests/fixtures/|\.venv/|venv/)'
         # 注意：使用 --check 确保只检查不自动修改，强制开发者手动运行格式化
 
   # ============================================================================
@@ -65,7 +65,7 @@ repos:
       - id: isort
         name: "isort import sorting"
         args: ["--profile=black", "--line-length=88", "--check-only"]
-        exclude: "(migrations/|\.venv/|venv/)"
+        exclude: '(migrations/|\.venv/|venv/)'
 
   # ============================================================================
   # Python 类型检查（MyPy - 严格模式）
@@ -88,7 +88,7 @@ repos:
           - --show-error-codes
           - --show-column-numbers
           - --ignore-missing-imports
-        exclude: "(tests/|migrations/|demo_|\.venv/|venv/)"
+        exclude: '(tests/|migrations/|demo_|\.venv/|venv/)'
         # 严格模式：不允许任何类型错误
 
   # ============================================================================
@@ -114,7 +114,7 @@ repos:
           # W503: line break before binary operator (与black冲突)
           - --max-complexity=10
           - --max-function-length=50
-        exclude: "(tests/|migrations/|demo_|\.venv/|venv/)"
+        exclude: '(tests/|migrations/|demo_|\.venv/|venv/)'
 
   # ============================================================================
   # Python 静态分析（Pylint - 高阈值）
@@ -135,7 +135,7 @@ repos:
           # R0903: too-few-public-methods
           # R0913: too-many-arguments
           # W0511: fixme
-        exclude: "(tests/|migrations/|demo_|\.venv/|venv/)"
+        exclude: '(tests/|migrations/|demo_|\.venv/|venv/)'
 
   # ============================================================================
   # Python 安全扫描（Bandit - 不容错）
@@ -153,7 +153,7 @@ repos:
           # -ll: 报告中危和高危
           # -ii: 报告中危和高危内置函数
         additional_dependencies: ["bandit[toml]"]
-        exclude: "(tests/|migrations/|demo_|\.venv/|venv/)"
+        exclude: '(tests/|migrations/|demo_|\.venv/|venv/)'
 
   # ============================================================================
   # 测试运行（快速单元测试）
@@ -167,7 +167,7 @@ repos:
         pass_filenames: false
         always_run: true
         # 只在有Python文件变更时运行
-        files: '\.(py)$'
+        files: '\.py$'
 
   # ============================================================================
   # 文档格式检查

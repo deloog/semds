@@ -37,7 +37,10 @@ class TestDatabaseDependency:
 
         # 直接在get_db_session内部mock SessionFactory
         from unittest.mock import patch
-        with patch("storage.database.get_session_factory", return_value=lambda: mock_session):
+
+        with patch(
+            "storage.database.get_session_factory", return_value=lambda: mock_session
+        ):
             gen = get_db_session()
             db = next(gen)
 
@@ -64,7 +67,9 @@ class TestDatabaseDependency:
         mock_session = MagicMock()
         mock_session.close = MagicMock()
 
-        with patch("storage.database.get_session_factory", return_value=lambda: mock_session):
+        with patch(
+            "storage.database.get_session_factory", return_value=lambda: mock_session
+        ):
             client = TestClient(app)
             response = client.get("/test-db")
 
@@ -82,7 +87,9 @@ class TestDependencyErrorHandling:
 
         mock_session = MagicMock()
 
-        with patch("storage.database.get_session_factory", return_value=lambda: mock_session):
+        with patch(
+            "storage.database.get_session_factory", return_value=lambda: mock_session
+        ):
             gen = get_db_session()
             db = next(gen)
 

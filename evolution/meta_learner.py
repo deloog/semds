@@ -211,7 +211,10 @@ class MetaLearner:
         return best_strategy, best_rate
 
     def generate_enhanced_prompt(
-        self, task_type: str, base_prompt: str, error_history: Optional[List[Dict[str, Any]]] = None
+        self,
+        task_type: str,
+        base_prompt: str,
+        error_history: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         """
         基于历史经验生成增强提示词

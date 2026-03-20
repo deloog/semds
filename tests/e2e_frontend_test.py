@@ -16,10 +16,12 @@ import sys
 import time
 import os
 from datetime import datetime
+from pathlib import Path
 
-# Setup path
-os.chdir(r"d:\semds")
-sys.path.insert(0, r"d:\semds")
+# Setup path - use current directory
+_current_dir = Path(__file__).parent.parent
+os.chdir(_current_dir)
+sys.path.insert(0, str(_current_dir))
 
 import requests
 import websocket

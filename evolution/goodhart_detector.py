@@ -53,7 +53,9 @@ class GoodhartDetector:
     DEFAULT_CONSISTENCY_THRESHOLD = 0.5
 
     def __init__(
-        self, pass_rate_threshold: Optional[float] = None, consistency_threshold: Optional[float] = None
+        self,
+        pass_rate_threshold: Optional[float] = None,
+        consistency_threshold: Optional[float] = None,
     ) -> None:
         """初始化检测器
 

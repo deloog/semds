@@ -264,7 +264,7 @@ class CodeGenerator:
 
     def _call_ollama(self, prompt: str, temperature: Optional[float]) -> str:
         """Call Ollama API"""
-        import requests  # type: ignore[import-untyped]
+        import requests
 
         url = f"{self.base_url}/api/generate"
         payload = {

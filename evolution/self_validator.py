@@ -29,7 +29,10 @@ class SelfValidator:
         self.validation_history: List[Dict[str, Any]] = []
 
     def validate(
-        self, code: str, test_runner: Optional[TestRunner] = None, test_code: Optional[str] = None
+        self,
+        code: str,
+        test_runner: Optional[TestRunner] = None,
+        test_code: Optional[str] = None,
     ) -> Tuple[bool, str, Dict[str, Any]]:
         """
         验证代码并给出修正建议
@@ -149,7 +152,9 @@ class SelfValidator:
 
         return False, info
 
-    def _run_test(self, code: str, test_runner: TestRunner, test_code: str) -> Dict[str, Any]:
+    def _run_test(
+        self, code: str, test_runner: TestRunner, test_code: str
+    ) -> Dict[str, Any]:
         """运行测试"""
         with tempfile.TemporaryDirectory() as tmpdir:
             # 写入代码
