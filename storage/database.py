@@ -143,28 +143,19 @@ def get_session_factory(db_path: str | None = None) -> sessionmaker[Session]:
     return _SessionFactory
 
 
-@contextmanager
-def get_session(db_path: str | None = None) -> Generator[Session, None, None]:
+def get_session(db_path: str | None = None) -> Session:
     """
-    Get database session (context manager).
+    Get database session.
 
     Args:
         db_path: Optional database path. If provided, creates a new session for
                 that path.
 
-    Usage:
-        with get_session() as session:
-            # use session
-
-    Yields:
-        SQLAlchemy Session
+    Returns:
+        SQLAlchemy Session instance
     """
     factory = get_session_factory(db_path)
-    session = factory()
-    try:
-        yield session
-    finally:
-        session.close()
+    return factory()
 
 
 def init_database(db_path: str | None = None) -> Engine:
@@ -185,24 +176,30 @@ def init_database(db_path: str | None = None) -> Engine:
     return engine
 
 
-def drop_database() -> None:
+def drop_database(db_path: str | None = None) -> None:
     """
     Drop all database tables.
 
+    Args:
+        db_path: Optional database path. If provided, drops tables from that database.
+
     WARNING: This will delete all data!
     """
-    engine = get_engine()
+    engine = get_engine(db_path)
     Base.metadata.drop_all(bind=engine)
 
 
-def reset_database() -> None:
+def reset_database(db_path: str | None = None) -> None:
     """
     Reset database (drop and recreate).
 
+    Args:
+        db_path: Optional database path. If provided, resets that database.
+
     WARNING: This will delete all data!
     """
-    drop_database()
-    init_database()
+    drop_database(db_path)
+    init_database(db_path)
 
 
 def is_postgresql() -> bool:
@@ -244,6 +241,33 @@ def get_db_path() -> str:
     raise ValueError("Not using SQLite database")
 
 
-# Legacy compatibility aliases
+def get_db_session(db_path: str | None = None) -> Generator[Session, None, None]:
+    """
+    Get database session as a generator.
+
+    Args:
+        db_path: Optional database path. If provided, creates a new session for
+                that path.
+
+    Usage:
+        gen = get_db_session()
+        session = next(gen)
+        # use session
+        try:
+            next(gen)  # closes session
+        except StopIteration:
+            pass
+
+    Yields:
+        SQLAlchemy Session
+    """
+    factory = get_session_factory(db_path)
+    session = factory()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+# Legacy compatibility alias
 SessionLocal = get_session_factory
-get_db_session = get_session

@@ -29,7 +29,7 @@ class StrategyArm:
     """
 
     key: str
-    name: str
+    name: str = ""
     alpha: float = 1.0
     beta: float = 1.0
     total_uses: int = 0
@@ -122,7 +122,13 @@ class StrategyOptimizer:
         for mutation in self.STRATEGY_DIMENSIONS["mutation_type"]:
             for validation in self.STRATEGY_DIMENSIONS["validation_mode"]:
                 for temp in self.STRATEGY_DIMENSIONS["temperature"]:
-                    key = f"{mutation}_{validation}_{temp}"
+                    # Use JSON format for key (as expected by tests)
+                    strategy_dict = {
+                        "mutation_type": mutation,
+                        "validation_mode": validation,
+                        "generation_temperature": temp,
+                    }
+                    key = json.dumps(strategy_dict, sort_keys=True)
                     name = (
                         f"{mutation.title()} mutation, {validation} validation, "
                         f"T={temp}"
@@ -153,21 +159,41 @@ class StrategyOptimizer:
         selected_key = max(samples, key=lambda k: samples[k])
         selected_arm = self.arms[selected_key]
 
-        # Parse strategy key
-        parts = selected_key.split("_")
-        mutation = parts[0]
-        validation = parts[1]
-        temperature = float(parts[2])
+        # Parse strategy key (JSON format)
+        strategy_dict = json.loads(selected_key)
 
+        # Return only the fields expected by tests
         return {
-            "key": selected_key,
-            "name": selected_arm.name,
-            "mutation_type": mutation,
-            "validation_mode": validation,
-            "temperature": temperature,
-            "expected_value": selected_arm.expected_value(),
-            "total_uses": selected_arm.total_uses,
+            "mutation_type": strategy_dict["mutation_type"],
+            "validation_mode": strategy_dict["validation_mode"],
+            "generation_temperature": strategy_dict["generation_temperature"],
         }
+
+    def _strategy_to_key(self, strategy: Dict[str, Any]) -> str:
+        """
+        Convert strategy dict to key string.
+
+        Uses JSON with sorted keys for deterministic output.
+
+        Args:
+            strategy: Strategy dictionary
+
+        Returns:
+            JSON string key
+        """
+        return json.dumps(strategy, sort_keys=True)
+
+    def _key_to_strategy(self, key: str) -> Dict[str, Any]:
+        """
+        Convert key string back to strategy dict.
+
+        Args:
+            key: JSON string key
+
+        Returns:
+            Strategy dictionary
+        """
+        return json.loads(key)
 
     def update_strategy(self, key: str, success: bool, reward: float = 0.0) -> None:
         """
@@ -191,11 +217,15 @@ class StrategyOptimizer:
         Alias for update_strategy to match Orchestrator interface.
 
         Args:
-            strategy: Strategy dict (must contain 'key')
+            strategy: Strategy dict or key string
             success: Whether generation succeeded
             score: Score value as reward
         """
-        key = strategy.get("key") if isinstance(strategy, dict) else strategy
+        if isinstance(strategy, dict):
+            # If dict doesn't have 'key', generate it from the dict
+            key = strategy.get("key") or self._strategy_to_key(strategy)
+        else:
+            key = strategy
         if key:
             self.update_strategy(key, success, score)
 
@@ -209,17 +239,36 @@ class StrategyOptimizer:
         best_key = max(self.arms.keys(), key=lambda k: self.arms[k].expected_value())
         best_arm = self.arms[best_key]
 
-        parts = best_key.split("_")
+        # Parse strategy key (JSON format)
+        strategy_dict = json.loads(best_key)
         return {
             "key": best_key,
             "name": best_arm.name,
-            "mutation_type": parts[0],
-            "validation_mode": parts[1],
-            "temperature": float(parts[2]),
+            "mutation_type": strategy_dict["mutation_type"],
+            "validation_mode": strategy_dict["validation_mode"],
+            "temperature": strategy_dict["generation_temperature"],
             "expected_value": best_arm.expected_value(),
             "total_uses": best_arm.total_uses,
             "total_reward": best_arm.total_reward,
         }
+
+    def get_arm_stats(self) -> List[Dict[str, Any]]:
+        """
+        Get all strategy arm statistics.
+
+        Returns:
+            List of arm stat dicts with keys: key, alpha, beta, uses, expected
+        """
+        return [
+            {
+                "key": key,
+                "alpha": arm.alpha,
+                "beta": arm.beta,
+                "uses": arm.total_uses,
+                "expected": arm.expected_value(),
+            }
+            for key, arm in sorted(self.arms.items())
+        ]
 
     def get_all_strategies(self) -> List[Dict[str, Any]]:
         """

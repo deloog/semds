@@ -129,11 +129,11 @@ class CodeGenerator:
     def _init_deepseek(self, api_key: Optional[str], base_url: Optional[str]) -> None:
         """Initialize Deepseek client"""
         if OpenAI is None:
-            raise ImportError("openai library required. Install: pip install openai")
+            raise ImportError("openai library is required")
 
         self.api_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
         if not self.api_key:
-            raise ValueError("Deepseek API key required via DEEPSEEK_API_KEY")
+            raise ValueError("Deepseek API key is required")
 
         base_url = base_url or os.environ.get(
             "DEEPSEEK_BASE_URL", "https://api.deepseek.com"

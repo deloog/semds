@@ -8,6 +8,8 @@ Tests the complete workflow:
 
 Usage:
     python tests/e2e_frontend_test.py
+
+Note: These tests require a running server and are skipped in CI.
 """
 
 import json
@@ -15,6 +17,8 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+
+import pytest
 
 # Setup path - use current directory
 _current_dir = Path(__file__).parent.parent
@@ -41,6 +45,12 @@ TEST_TOKEN = create_access_token(
 )
 
 HEADERS = {"Authorization": f"Bearer {TEST_TOKEN}", "Content-Type": "application/json"}
+
+# Skip all E2E tests in CI environment (requires running server)
+pytestmark = pytest.mark.skipif(
+    os.environ.get("CI") == "true" or os.environ.get("SKIP_E2E") == "1",
+    reason="E2E tests require running server, skipped in CI"
+)
 
 
 def test_health():
