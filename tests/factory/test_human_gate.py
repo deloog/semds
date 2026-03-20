@@ -1,9 +1,6 @@
 """测试HumanGateMonitor"""
 
 from datetime import datetime, timezone
-from unittest.mock import MagicMock
-
-import pytest
 
 
 class TestReview:

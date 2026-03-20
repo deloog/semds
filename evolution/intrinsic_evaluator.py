@@ -431,7 +431,7 @@ class IntrinsicEvaluator:
         if (
             tree.body  # type: ignore[attr-defined]
             and isinstance(tree.body[0], ast.Expr)  # type: ignore[attr-defined]
-            and isinstance(tree.body[0].value, ast.Constant)  # type: ignore[attr-defined]
+            and isinstance(tree.body[0].value, ast.Constant)  # type: ignore[attr-defined]  # noqa: E501
             and isinstance(tree.body[0].value.value, str)  # type: ignore[attr-defined]
         ):
             has_module_doc = True

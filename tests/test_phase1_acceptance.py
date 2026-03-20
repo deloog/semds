@@ -13,18 +13,13 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-import pytest
+import pytest  # noqa: E402
 
-from core.kernel import (
-    _pass_static_analysis,
-    _validate_python_syntax,
-    append_audit_log,
-    safe_write,
-)
-from evolution.code_generator import CodeGenerator
-from evolution.test_runner import TestRunner
-from storage.database import close_database, get_session, init_database
-from storage.models import Generation, Task
+from core.kernel import safe_write  # noqa: E402
+from evolution.code_generator import CodeGenerator  # noqa: E402
+from evolution.test_runner import TestRunner  # noqa: E402
+from storage.database import close_database, get_session, init_database  # noqa: E402
+from storage.models import Generation, Task  # noqa: E402
 
 
 class TestKernelSafeWrite:
@@ -195,7 +190,9 @@ class TestTestRunner:
             test_path = Path(tmpdir) / "test_solution.py"
             with open(test_path, "w") as f:
                 f.write(
-                    "from solution import add\ndef test_add():\n    assert add(2, 3) == 5"
+                    "from solution import add\n"
+                    "def test_add():\n"
+                    "    assert add(2, 3) == 5"
                 )
 
             runner = TestRunner(timeout_seconds=30)
@@ -217,7 +214,9 @@ class TestTestRunner:
             test_path = Path(tmpdir) / "test_solution.py"
             with open(test_path, "w") as f:
                 f.write(
-                    "from solution import add\ndef test_add():\n    assert add(2, 3) == 5"
+                    "from solution import add\n"
+                    "def test_add():\n"
+                    "    assert add(2, 3) == 5"
                 )
 
             runner = TestRunner(timeout_seconds=30)
@@ -310,7 +309,9 @@ class TestPhase1Acceptance:
                 test_path = Path(tmpdir) / "test_solution.py"
                 with open(test_path, "w") as f:
                     f.write(
-                        "from solution import add\ndef test_add():\n    assert add(2, 3) == 5"
+                        "from solution import add\n"
+                        "def test_add():\n"
+                        "    assert add(2, 3) == 5"
                     )
 
                 runner = TestRunner(timeout_seconds=30)

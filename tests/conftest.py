@@ -103,7 +103,9 @@ def sample_task_spec():
     return {
         "name": "calculator_test",
         "description": "测试计算器函数",
-        "target_function_signature": "def calculate(a: float, b: float, op: str) -> float",
+        "target_function_signature": (
+            "def calculate(a: float, b: float, op: str) -> float"
+        ),
         "requirements": [
             "支持操作符: +, -, *, /",
             "除零时抛出ValueError",

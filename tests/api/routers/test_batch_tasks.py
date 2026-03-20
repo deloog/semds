@@ -1,6 +1,6 @@
 """测试批量任务操作API"""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest  # noqa: F401
 

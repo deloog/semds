@@ -13,8 +13,6 @@ Evolution Orchestrator 测试模块 - TDD Red Phase
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 # =============================================================================
 # Test EvolutionOrchestrator Initialization
 # =============================================================================

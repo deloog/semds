@@ -1,8 +1,6 @@
 """Tests for SEMDS meta-evolution (self-improvement) system."""
 
 import json
-import tempfile
-from pathlib import Path
 
 import pytest
 
@@ -11,7 +9,6 @@ from mother.core.meta_evolution import (
     ImprovementHypothesis,
     MetaEvolutionEngine,
     SafeSelfUpdater,
-    SelfExperiment,
     SystemTelemetry,
 )
 

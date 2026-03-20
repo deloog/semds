@@ -11,13 +11,13 @@ Provides:
 
 import os
 from pathlib import Path
-from typing import Any, Iterator, Optional
+from typing import Any, Iterator
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from storage.models import Base, Generation, Task
+from storage.models import Base
 
 # Global engine and session factory
 _engine = None

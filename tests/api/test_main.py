@@ -1,6 +1,5 @@
 """测试FastAPI主应用"""
 
-import pytest
 from fastapi.testclient import TestClient
 
 

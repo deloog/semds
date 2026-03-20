@@ -13,15 +13,11 @@ import asyncio
 import sys
 from pathlib import Path
 
-import pytest
-from fastapi.testclient import TestClient
-
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from api.main import app
-from api.state import active_evolutions
-from storage.database import get_session, init_database
-from storage.models import Generation, Task
+from api.state import active_evolutions  # noqa: E402
+from storage.database import get_session, init_database  # noqa: E402
+from storage.models import Generation, Task  # noqa: E402
 
 # 简化的测试代码
 CALCULATOR_TEST = """
@@ -62,8 +58,6 @@ class TestAPIEvolutionIntegration:
         2. active_evolutions 中有该任务
         3. 一段时间后数据库中有 Generation 记录
         """
-        client = TestClient(app)
-
         # 1. 创建任务
         with get_session() as db:
             task = Task(
@@ -166,9 +160,6 @@ class TestAPIEvolutionIntegration:
         """
         # 这些导入应该都成功
         from api.evolution_runner import EvolutionRunner, start_evolution_task
-        from api.routers.evolution import evolution_runners
-        from evolution.orchestrator import EvolutionOrchestrator
-        from evolution.strategy_optimizer import StrategyOptimizer
 
         assert EvolutionRunner is not None
         assert start_evolution_task is not None
@@ -217,7 +208,8 @@ def test_end_to_end_workflow():
         if task_id in active_evolutions:
             state = active_evolutions[task_id]
             print(
-                f"[OK] Evolution active: gen={state.get('current_gen')}, score={state.get('best_score')}"
+                f"[OK] Evolution active: gen={state.get('current_gen')}, "
+                f"score={state.get('best_score')}"
             )
         else:
             print("[WARN] Evolution not in active state (may have completed quickly)")

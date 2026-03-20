@@ -1,7 +1,7 @@
 """测试任务管理路由"""
 
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -59,7 +59,9 @@ class TestCreateTask:
             task_data = {
                 "name": "calculator_task",
                 "description": "计算器进化任务",
-                "target_function_signature": "def calculate(a: float, b: float, op: str) -> float:",
+                "target_function_signature": (
+                    "def calculate(a: float, b: float, op: str) -> float:"
+                ),
                 "test_code": "def test_add(): assert calculate(1, 2, '+') == 3",
             }
 
@@ -237,8 +239,6 @@ class TestPathTraversalProtection:
 
     def test_task_name_with_path_traversal_is_sanitized(self, mock_db_session):
         """包含路径遍历字符的任务名应被清理"""
-        from api.dependencies import get_db_session
-        from api.main import app
         from api.routers.tasks import sanitize_filename
 
         # 测试sanitize_filename函数

@@ -10,7 +10,6 @@ Supported LLM:
 - Ollama (local models like Qwen3.5)
 """
 
-import json
 import os
 import re
 from typing import Any, Dict, List, Optional, Type, Union
@@ -31,7 +30,8 @@ except ImportError:
 
 
 # Code generation prompt template
-GENERATION_PROMPT = """You are a Python expert. Implement the following function specification.
+GENERATION_PROMPT = (
+    """You are a Python expert. Implement the following function specification.
 
 ## Task Description
 {task_description}
@@ -66,6 +66,7 @@ GENERATION_PROMPT = """You are a Python expert. Implement the following function
 
 ```python
 """
+)
 
 CODE_EXTRACTION_PATTERN = r"```python\n(.*?)\n```"
 
@@ -187,7 +188,8 @@ class CodeGenerator:
         Generate code implementation.
 
         Args:
-            task_spec: Task specification with description, function_signature, requirements
+            task_spec: Task specification with description, function_signature,
+                requirements
             previous_code: Previous generation code
             previous_score: Previous scores
             failed_tests: List of failed tests
@@ -286,7 +288,10 @@ class CodeGenerator:
         messages = [
             {
                 "role": "system",
-                "content": "You are a professional Python programmer. Only output code, no explanations. Code must be in ```python block.",
+                "content": (
+                    "You are a professional Python programmer. Only output code, "
+                    "no explanations. Code must be in ```python block."
+                ),
             },
             {"role": "user", "content": prompt},
         ]
@@ -304,7 +309,10 @@ class CodeGenerator:
             model=self.model,
             max_tokens=4096,
             temperature=temperature or self.default_temperature,
-            system="You are a professional Python programmer. Only output code, no explanations. Code must be in ```python block.",
+            system=(
+                "You are a professional Python programmer. Only output code, "
+                "no explanations. Code must be in ```python block."
+            ),
             messages=[{"role": "user", "content": prompt}],
         )
         content = response.content[0]
@@ -355,8 +363,6 @@ class CodeGenerator:
 
 if __name__ == "__main__":
     # Test with Ollama
-    import os
-
     os.environ["LLM_BACKEND"] = "ollama"
     os.environ["OLLAMA_MODEL"] = "qwen3.5:4b"
 

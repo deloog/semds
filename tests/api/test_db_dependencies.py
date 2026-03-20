@@ -1,8 +1,5 @@
 """测试API依赖注入"""
 
-from unittest.mock import Mock, patch
-
-import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 
@@ -38,13 +35,12 @@ class TestDatabaseDependency:
         mock_session = MagicMock()
 
         # 直接在get_db_session内部mock SessionFactory
-        from unittest.mock import patch
 
         with patch(
             "storage.database.get_session_factory", return_value=lambda: mock_session
         ):
             gen = get_db_session()
-            db = next(gen)
+            next(gen)  # 获取数据库会话
 
             # 模拟会话结束
             try:
@@ -95,12 +91,12 @@ class TestDependencyErrorHandling:
             "storage.database.get_session_factory", return_value=lambda: mock_session
         ):
             gen = get_db_session()
-            db = next(gen)
+            next(gen)  # 获取数据库会话
 
             # 模拟抛出异常
             try:
                 raise ValueError("测试异常")
-            except:
+            except Exception:
                 # 确保生成器正确关闭
                 try:
                     next(gen)

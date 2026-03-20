@@ -2,8 +2,6 @@
 
 from datetime import datetime, timezone
 
-import pytest
-
 
 class TestUserModel:
     """用户模型测试"""

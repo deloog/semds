@@ -1,6 +1,5 @@
 """测试API中间件"""
 
-import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
@@ -68,7 +67,6 @@ class TestErrorHandlingMiddleware:
         import api.middleware
 
         reload(api.middleware)
-        from api.middleware import setup_exception_handlers
 
         app = FastAPI(debug=False)
         setup_exception_handlers(app)

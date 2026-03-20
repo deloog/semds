@@ -11,9 +11,7 @@ Test coverage targets:
 - read_audit_log(): 100%
 """
 
-import ast
 import os
-import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -21,7 +19,6 @@ from unittest.mock import Mock, patch
 import pytest
 
 from core.kernel import (
-    AUDIT_LOG_PATH,
     _compute_content_hash,
     _get_timestamp,
     _pass_static_analysis,
@@ -557,9 +554,7 @@ class TestAppendAuditLog:
         audit_file = tmp_path / "audit.log"
         monkeypatch.setattr("core.kernel.AUDIT_LOG_PATH", audit_file)
 
-        before = datetime.now(timezone.utc)
         append_audit_log("/path/file.py", "content", "WRITE", True)
-        after = datetime.now(timezone.utc)
 
         log_content = audit_file.read_text()
         # Timestamp should be in brackets at start
@@ -875,7 +870,8 @@ class TestReadAuditLog:
         audit_file = tmp_path / "audit.log"
         # Create 150 entries
         lines = [
-            f"[2024-01-01T00:00:{i:02d}] OP=WRITE FILE=/test{i}.py HASH=abc SUCCESS=True\n"
+            "[2024-01-01T00:00:{:02d}] OP=WRITE FILE=/test{}.py "
+            "HASH=abc SUCCESS=True\n".format(i, i)
             for i in range(150)
         ]
         audit_file.write_text("".join(lines))

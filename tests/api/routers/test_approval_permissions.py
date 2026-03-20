@@ -1,10 +1,5 @@
 """测试审批路由权限"""
 
-from unittest.mock import MagicMock
-
-import pytest
-from fastapi import HTTPException, status
-
 
 class TestApprovalPermissions:
     """审批权限测试"""

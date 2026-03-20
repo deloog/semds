@@ -4,12 +4,7 @@
 """
 
 import os
-import tempfile
-from pathlib import Path
-from typing import Generator
-from unittest.mock import patch
 
-import pytest
 from sqlalchemy import inspect, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
@@ -25,7 +20,7 @@ from storage.database import (
     init_database,
     reset_database,
 )
-from storage.models import Base, Task
+from storage.models import Task
 
 
 class TestGetDbPath:
@@ -298,9 +293,9 @@ class TestGetDbSession:
         init_database(":memory:")
 
         gen = get_db_session()
-        session = next(gen)
+        _session = next(gen)
 
-        assert isinstance(session, Session)
+        assert isinstance(_session, Session)
 
         # 清理
         try:
@@ -313,7 +308,7 @@ class TestGetDbSession:
         init_database(":memory:")
 
         gen = get_db_session()
-        session = next(gen)
+        next(gen)  # 获取会话（有副作用）
 
         # 使用完会话
         try:
@@ -330,7 +325,7 @@ class TestGetDbSession:
         init_database(":memory:")
 
         gen = get_db_session()
-        session = next(gen)
+        next(gen)  # 获取会话（有副作用）
 
         # 模拟异常
         try:
@@ -427,7 +422,7 @@ class TestCloseDatabase:
 
     def test_resets_session_factory(self):
         """测试重置会话工厂"""
-        factory1 = get_session_factory(":memory:")
+        get_session_factory(":memory:")  # 有副作用
 
         close_database()
 

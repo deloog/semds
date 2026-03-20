@@ -82,7 +82,9 @@ class TestTaskModel:
         task = Task(
             name="calculator_evolution",
             description="Evolve a calculator function",
-            target_function_signature="def calculate(a: float, b: float, op: str) -> float",
+            target_function_signature=(
+                "def calculate(a: float, b: float, op: str) -> float"
+            ),
             test_file_path="tests/test_calculator.py",
             status="running",
             current_generation=5,
@@ -668,8 +670,6 @@ class TestModelBase:
         """测试Task表的索引"""
         inspector = inspect(db_session.bind)
         indexes = inspector.get_indexes("tasks")
-        index_names = {idx["name"] for idx in indexes}
-
         # 应该有name字段的索引
         assert any("name" in idx["column_names"] for idx in indexes if idx["name"])
 

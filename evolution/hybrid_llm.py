@@ -178,12 +178,14 @@ class HybridLLMManager:
         print("=" * 60)
         print(f"Ollama calls:    {stats['ollama_calls']:4d} (free)")
         print(
-            f"DeepSeek calls:  {stats['deepseek_calls']:4d} (~{stats['estimated_cost_cny']:.2f} CNY)"
+            f"DeepSeek calls:  {stats['deepseek_calls']:4d} "
+            f"(~{stats['estimated_cost_cny']:.2f} CNY)"
         )
         print(f"Ollama failures: {stats['ollama_failures']:4d}")
         print(f"Fallback activations: {stats['fallback_activations']:4d}")
         print(
-            f"Cost savings:    {(1 - stats['ollama_ratio']) * 100:.1f}% vs pure DeepSeek"
+            f"Cost savings:    {(1 - stats['ollama_ratio']) * 100:.1f}% "
+            "vs pure DeepSeek"
         )
         print("=" * 60)
 

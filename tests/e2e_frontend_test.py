@@ -10,11 +10,9 @@ Usage:
     python tests/e2e_frontend_test.py
 """
 
-import asyncio
 import json
 import os
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -23,20 +21,20 @@ _current_dir = Path(__file__).parent.parent
 os.chdir(_current_dir)
 sys.path.insert(0, str(_current_dir))
 
-import requests
-import websocket
+import requests  # noqa: E402
+import websocket  # noqa: E402
 
 # Configuration
 BASE_URL = "http://localhost:8000"
 WS_URL = "ws://localhost:8000"
 
 # Load env and get auth token
-from core.env_loader import load_env
+from core.env_loader import load_env  # noqa: E402
 
 load_env()
 
-from api.auth.jwt import create_access_token
-from api.auth.models import UserRole
+from api.auth.jwt import create_access_token  # noqa: E402
+from api.auth.models import UserRole  # noqa: E402
 
 TEST_TOKEN = create_access_token(
     data={"sub": "admin-1", "role": UserRole.ADMIN}, expires_delta=None
@@ -73,7 +71,11 @@ def test_create_task():
         "name": f"E2E Test Task {datetime.now().strftime('%H%M%S')}",
         "description": "End-to-end test task for frontend validation",
         "target_function_signature": "def solution(data: list) -> list:",
-        "test_code": "def test_solution():\n    assert solution([3,1,2]) == [1,2,3]\n    assert solution([5,4,3,2,1]) == [1,2,3,4,5]",
+        "test_code": (
+            "def test_solution():\n"
+            "    assert solution([3,1,2]) == [1,2,3]\n"
+            "    assert solution([5,4,3,2,1]) == [1,2,3,4,5]"
+        ),
         "max_generations": 5,
         "success_criteria": {"target_score": 0.9},
     }
@@ -102,7 +104,7 @@ def test_get_generations(task_id):
 
 def test_websocket(task_id):
     """Test WebSocket connection"""
-    print(f"\n[5/6] Testing WebSocket connection...")
+    print("\n[5/6] Testing WebSocket connection...")
 
     ws_url = f"{WS_URL}/ws/tasks/{task_id}"
     print(f"  Connecting to {ws_url}...")
@@ -113,7 +115,9 @@ def test_websocket(task_id):
         data = json.loads(message)
         messages.append(data)
         print(
-            f"  Received: gen={data.get('generation', 'N/A')}, score={data.get('best_score', 'N/A')}"
+            "  Received: gen={}, score={}".format(
+                data.get("generation", "N/A"), data.get("best_score", "N/A")
+            )
         )
         if len(messages) >= 3:
             ws.close()
@@ -145,7 +149,7 @@ def test_websocket(task_id):
 
 def test_start_evolution(task_id):
     """Test starting evolution"""
-    print(f"\n[6/6] Testing start evolution...")
+    print("\n[6/6] Testing start evolution...")
     resp = requests.post(f"{BASE_URL}/api/tasks/{task_id}/start", headers=HEADERS)
 
     if resp.status_code == 400 and "already" in resp.text.lower():
@@ -187,7 +191,7 @@ def run_all_tests():
         test_frontend_static()
 
         # Task tests
-        tasks = test_list_tasks()
+        test_list_tasks()
 
         # Create new task
         task_id = test_create_task()

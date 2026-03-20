@@ -259,7 +259,7 @@ class ExtrinsicEvaluator:
                         func(*test_input)
                     else:
                         func(test_input)
-                except:
+                except Exception:
                     pass
                 elapsed = time.perf_counter() - start
                 total_time += elapsed
@@ -328,7 +328,7 @@ class ExtrinsicEvaluator:
         try:
             result = TestRunner().run_tests_with_code(code, test_code)
             return float(result.get("pass_rate", 0.0))
-        except:
+        except Exception:
             return 0.0
 
     def _static_analysis(self, code: str) -> float:

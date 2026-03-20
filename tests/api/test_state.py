@@ -1,7 +1,5 @@
 """测试API状态管理模块"""
 
-import pytest
-
 
 class TestStateManager:
     """状态管理器测试"""

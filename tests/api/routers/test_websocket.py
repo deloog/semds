@@ -1,9 +1,6 @@
 """测试WebSocket路由"""
 
-import json
-from unittest.mock import MagicMock, PropertyMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 
 class TestWebSocketConnection:
@@ -60,7 +57,6 @@ class TestSystemStats:
     def test_get_system_stats_returns_correct_structure(self):
         """系统统计应返回正确结构（使用mock）"""
         import asyncio
-        from unittest.mock import AsyncMock
 
         from api.routers.monitor import get_system_stats
 

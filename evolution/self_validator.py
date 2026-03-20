@@ -75,7 +75,8 @@ class SelfValidator:
                 (
                     f"Function name error: Expected '{self.expected_function_name}', "
                     f"but got '{actual_name}'. "
-                    f"Function signature must be: def {self.expected_function_name}(expression: str) -> float. "
+                    f"Function signature must be: "
+                    f"def {self.expected_function_name}(expression: str) -> float. "
                     f"Please regenerate with correct function name."
                 ),
                 {

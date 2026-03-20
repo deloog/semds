@@ -1,6 +1,5 @@
 """监控界面集成测试"""
 
-import pytest
 from fastapi.testclient import TestClient
 
 

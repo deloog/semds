@@ -309,7 +309,7 @@ class TestGenerate:
             from evolution.code_generator import CodeGenerator
 
             generator = CodeGenerator(api_key="test-key", backend="anthropic")
-            result = generator.generate(task_spec, temperature=0.9)
+            generator.generate(task_spec, temperature=0.9)
 
             # 验证调用时使用了自定义温度
             call_kwargs = mock_client.messages.create.call_args[1]

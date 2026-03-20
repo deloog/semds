@@ -9,7 +9,7 @@
 """
 
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -177,7 +177,7 @@ class TestPhase4GenerationHistory:
         query_mock = MagicMock()
         query_mock.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = (
             []
-        )
+        )  # noqa: E501
         query_mock.filter.return_value.first.return_value = mock_task
         mock_session.query.return_value = query_mock
 
@@ -318,7 +318,7 @@ class TestPhase4FullWorkflow:
         query_mock.filter.return_value.first.return_value = mock_task
         query_mock.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = (
             []
-        )
+        )  # noqa: E501
         query_mock.count.return_value = 1
         mock_session.query.return_value = query_mock
 

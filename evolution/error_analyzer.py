@@ -321,7 +321,10 @@ class ErrorAnalyzer:
             "TEST FAILURE ANALYSIS",
             "=" * 60,
             "",
-            f"Pass Rate: {result.pass_rate:.1%} ({result.passed_tests}/{result.total_tests})",
+            (
+                f"Pass Rate: {result.pass_rate:.1%} "
+                f"({result.passed_tests}/{result.total_tests})"
+            ),
             "",
             "Failures:",
         ]

@@ -200,7 +200,6 @@ class TestGetBestSolution:
         from api.auth.dependencies import get_current_user
         from api.dependencies import get_db_session
         from api.main import app
-        from storage.models import Task
 
         session, query_mock = mock_db_session
 

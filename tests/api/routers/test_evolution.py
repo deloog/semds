@@ -1,7 +1,6 @@
 """测试进化控制路由"""
 
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient

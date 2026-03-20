@@ -9,7 +9,7 @@ import random
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -123,7 +123,10 @@ class StrategyOptimizer:
             for validation in self.STRATEGY_DIMENSIONS["validation_mode"]:
                 for temp in self.STRATEGY_DIMENSIONS["temperature"]:
                     key = f"{mutation}_{validation}_{temp}"
-                    name = f"{mutation.title()} mutation, {validation} validation, T={temp}"
+                    name = (
+                        f"{mutation.title()} mutation, {validation} validation, "
+                        f"T={temp}"
+                    )
 
                     if key not in self.arms:
                         self.arms[key] = StrategyArm(
