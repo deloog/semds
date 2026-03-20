@@ -50,7 +50,7 @@ class TaskCreate(BaseModel):
     success_criteria: Optional[Dict] = Field(
         default_factory=dict, description="成功标准"
     )
-    max_generations: int = Field(default=50, ge=1, le=1000, description="最大进化代数")
+    max_generations: int = Field(default=50, ge=1, le=100, description="最大进化代数")
 
 
 class TaskResponse(BaseModel):
