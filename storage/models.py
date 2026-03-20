@@ -311,26 +311,26 @@ class StrategyState(Base):  # type: ignore[misc, valid-type]
 
 if __name__ == "__main__":
     # 简单测试
-    from storage.database import get_session, init_database
+    from storage.database import init_database
+    from storage.database import get_session as _get_session
 
     # 初始化数据库
     init_database()
 
     # 获取会话
-    session = next(get_session())
+    with _get_session() as session:  # type: ignore
+        # 创建测试任务
+        task = Task(
+            name="test_task",
+            description="A test task",
+            target_function_signature="def test():",
+            status="pending",
+        )
 
-    # 创建测试任务
-    task = Task(
-        name="test_task",
-        description="A test task",
-        target_function_signature="def test():",
-        status="pending",
-    )
+        session.add(task)
+        session.commit()
 
-    session.add(task)
-    session.commit()
-
-    print(f"Created task: {task.id}")
+        print(f"Created task: {task.id}")
 
     # 创建测试代
     gen = Generation(

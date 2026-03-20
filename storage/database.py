@@ -11,7 +11,8 @@ Provides:
 
 import os
 from pathlib import Path
-from typing import Any, Iterator
+from contextlib import contextmanager
+from typing import Any, Generator
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
@@ -55,14 +56,35 @@ def get_database_url() -> str:
     return f"sqlite:///{default_path.absolute()}"
 
 
-def get_engine() -> Engine:
+def get_engine(db_path: str | None = None) -> Engine:
     """
     Get or create database engine.
+
+    Args:
+        db_path: Optional database path. If provided, creates a new engine for
+                that path. If None, returns the global engine.
 
     Returns:
         SQLAlchemy Engine instance
     """
     global _engine
+
+    if db_path is not None:
+        # Create a new engine for the specified path (used in tests)
+        database_url = f"sqlite:///{db_path}"
+        engine = create_engine(
+            database_url,
+            connect_args={"check_same_thread": False},
+            echo=os.environ.get("SEMDS_LOG_LEVEL") == "DEBUG",
+        )
+
+        @event.listens_for(engine, "connect")
+        def set_sqlite_pragma_connect(dbapi_conn: Any, connection_record: Any) -> None:
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+
+        return engine
 
     if _engine is None:
         database_url = get_database_url()
@@ -96,14 +118,23 @@ def get_engine() -> Engine:
     return _engine
 
 
-def get_session_factory() -> sessionmaker[Session]:
+def get_session_factory(db_path: str | None = None) -> sessionmaker[Session]:
     """
     Get or create session factory.
+
+    Args:
+        db_path: Optional database path. If provided, creates a new factory for
+                that path.
 
     Returns:
         SQLAlchemy sessionmaker instance
     """
     global _SessionFactory
+
+    if db_path is not None:
+        # Create a new factory for the specified path (used in tests)
+        engine = get_engine(db_path)
+        return sessionmaker(bind=engine)
 
     if _SessionFactory is None:
         engine = get_engine()
@@ -112,18 +143,23 @@ def get_session_factory() -> sessionmaker[Session]:
     return _SessionFactory
 
 
-def get_session() -> Iterator[Session]:
+@contextmanager
+def get_session(db_path: str | None = None) -> Generator[Session, None, None]:
     """
-    Get database session (generator).
+    Get database session (context manager).
+
+    Args:
+        db_path: Optional database path. If provided, creates a new session for
+                that path.
 
     Usage:
-        for session in get_session():
+        with get_session() as session:
             # use session
 
     Yields:
         SQLAlchemy Session
     """
-    factory = get_session_factory()
+    factory = get_session_factory(db_path)
     session = factory()
     try:
         yield session
@@ -131,15 +167,22 @@ def get_session() -> Iterator[Session]:
         session.close()
 
 
-def init_database() -> None:
+def init_database(db_path: str | None = None) -> Engine:
     """
     Initialize database tables.
+
+    Args:
+        db_path: Optional database path. If provided, initializes that database.
+
+    Returns:
+        SQLAlchemy Engine instance
 
     Creates all tables defined in models.
     Safe to call multiple times (will not recreate existing tables).
     """
-    engine = get_engine()
+    engine = get_engine(db_path)
     Base.metadata.create_all(bind=engine)
+    return engine
 
 
 def drop_database() -> None:
@@ -188,16 +231,16 @@ def close_database() -> None:
         _engine = None
 
 
-def get_db_path() -> Path:
+def get_db_path() -> str:
     """
     Get database file path for SQLite.
 
     Returns:
-        Path to SQLite database file
+        Path to SQLite database file as string
     """
     url = get_database_url()
     if url.startswith("sqlite:///"):
-        return Path(url.replace("sqlite:///", ""))
+        return str(Path(url.replace("sqlite:///", "")))
     raise ValueError("Not using SQLite database")
 
 

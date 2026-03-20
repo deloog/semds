@@ -30,20 +30,20 @@ def solution(A, B):
     Multiply two 2x2 matrices.
     A, B are list of lists: [[a11, a12], [a21, a22]]
     Return: 2x2 result matrix
-    
+
     Goal: Optimize for speed, possibly fewer multiplications.
     """
     a11, a12 = A[0][0], A[0][1]
     a21, a22 = A[1][0], A[1][1]
     b11, b12 = B[0][0], B[0][1]
     b21, b22 = B[1][0], B[1][1]
-    
+
     # Standard algorithm: 8 multiplications
     c11 = a11 * b11 + a12 * b21
     c12 = a11 * b12 + a12 * b22
     c21 = a21 * b11 + a22 * b21
     c22 = a21 * b12 + a22 * b22
-    
+
     return [[c11, c12], [c21, c22]]
 
 
@@ -53,13 +53,13 @@ def test_correctness():
     I = [[1, 0], [0, 1]]
     A = [[1, 2], [3, 4]]
     assert solution(A, I) == A
-    
+
     # Simple multiplication
     A = [[1, 2], [3, 4]]
     B = [[5, 6], [7, 8]]
     expected = [[19, 22], [43, 50]]
     assert solution(A, B) == expected
-    
+
     # 100 random tests
     for _ in range(100):
         A = [[random.randint(-10, 10) for _ in range(2)] for _ in range(2)]
@@ -77,12 +77,12 @@ def test_performance():
     n = 100000
     A = [[random.random() for _ in range(2)] for _ in range(2)]
     B = [[random.random() for _ in range(2)] for _ in range(2)]
-    
+
     start = time.perf_counter()
     for _ in range(n):
         result = solution(A, B)
     elapsed = time.perf_counter() - start
-    
+
     assert elapsed < 0.5, f"Too slow: {elapsed}s"
 
 
