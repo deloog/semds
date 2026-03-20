@@ -13,13 +13,13 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from api.dependencies import get_db_session
+from api.auth.decorators import check_permission
 from api.auth.dependencies import get_current_user
 from api.auth.models import User, UserRole
 from api.auth.permissions import TaskPermission
-from api.auth.decorators import check_permission
-from api.schemas import TaskCreate, TaskResponse, TaskStatus, GenerationResponse
-from storage.models import Task, Generation
+from api.dependencies import get_db_session
+from api.schemas import GenerationResponse, TaskCreate, TaskResponse, TaskStatus
+from storage.models import Generation, Task
 
 router = APIRouter()
 
@@ -392,10 +392,12 @@ async def rollback_to_generation(
 
 # ============== 批量操作 API ==============
 
-from typing import Callable, Dict, List, Set, Tuple, TypedDict
+import logging
+from typing import Callable, Dict, List, Set, Tuple
+
 from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
-import logging
+from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
 

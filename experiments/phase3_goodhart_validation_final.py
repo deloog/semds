@@ -16,9 +16,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from evolution.test_runner import TestRunner
-from evolution.goodhart_detector import GoodhartDetector
 from evolution.dual_evaluator import DualEvaluator
+from evolution.goodhart_detector import GoodhartDetector
+from evolution.test_runner import TestRunner
 
 
 def run_validation():

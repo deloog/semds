@@ -10,14 +10,13 @@ Recursive Decomposer - 递归分解器
 
 import json
 import re
-from typing import List, Dict, Optional, Tuple
+import sys
 from dataclasses import dataclass
 from enum import Enum
-
-import sys
+from typing import Dict, List, Optional, Tuple
 
 sys.path.insert(0, "D:\\semds")
-from mother.task_decomposer.decomposer import AtomicTask, TaskType, TaskStatus
+from mother.task_decomposer.decomposer import AtomicTask, TaskStatus, TaskType
 
 
 class DecompositionLevel(Enum):

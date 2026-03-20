@@ -13,9 +13,9 @@ Code Assembler - 代码组装器
 """
 
 import re
-from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
 
 from mother.task_decomposer.decomposer import AtomicTask, TaskType
 

@@ -12,9 +12,9 @@ import time
 
 sys.path.insert(0, "D:\\semds")
 
-from mother.task_decomposer.decomposer import TaskDecomposer
-from mother.skills.code_optimizer import CodeOptimizer
 from evolution.code_generator import CodeGenerator
+from mother.skills.code_optimizer import CodeOptimizer
+from mother.task_decomposer.decomposer import TaskDecomposer
 
 
 class ComparisonExperiment:

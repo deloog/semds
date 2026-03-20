@@ -39,8 +39,9 @@ class HTTPClientTool(Capability):
         Returns:
             Response data or error dict
         """
-        import requests
         from urllib.parse import urlparse
+
+        import requests
 
         # Input validation
         if not isinstance(url, str) or not url.startswith(("http://", "https://")):

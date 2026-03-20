@@ -7,6 +7,7 @@ Expected cost: ~10-15 CNY for 200 generations
 
 import os
 import sys
+
 import requests
 
 os.chdir(r"D:\semds")

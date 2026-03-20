@@ -10,8 +10,8 @@ class TestCheckPermission:
     def test_check_permission_allows_authorized(self):
         """有权限的用户应通过检查"""
         from api.auth.decorators import check_permission
-        from api.auth.permissions import TaskPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import TaskPermission
 
         user = User(
             id="1",
@@ -27,8 +27,8 @@ class TestCheckPermission:
     def test_check_permission_allows_admin_any_permission(self):
         """管理员应有所有权限"""
         from api.auth.decorators import check_permission
-        from api.auth.permissions import TaskPermission, ApprovalPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import ApprovalPermission, TaskPermission
 
         admin = User(
             id="1",
@@ -45,8 +45,8 @@ class TestCheckPermission:
     def test_check_permission_denies_unauthorized(self):
         """无权限的用户应被拒绝"""
         from api.auth.decorators import check_permission
-        from api.auth.permissions import TaskPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import TaskPermission
 
         user = User(
             id="1",
@@ -67,8 +67,8 @@ class TestCheckPermission:
     def test_check_permission_denies_create_approval_for_user(self):
         """普通用户应被拒绝创建审批请求"""
         from api.auth.decorators import check_permission
-        from api.auth.permissions import ApprovalPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import ApprovalPermission
 
         user = User(
             id="1",
@@ -100,8 +100,8 @@ class TestRequirePermission:
     def test_require_permission_dependency_allows_authorized(self):
         """依赖函数应允许有权限的用户"""
         from api.auth.decorators import require_permission
-        from api.auth.permissions import TaskPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import TaskPermission
 
         user = User(
             id="1",
@@ -120,8 +120,8 @@ class TestRequirePermission:
     def test_require_permission_dependency_denies_unauthorized(self):
         """依赖函数应拒绝无权限的用户"""
         from api.auth.decorators import require_permission
-        from api.auth.permissions import TaskPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import TaskPermission
 
         user = User(
             id="1",
@@ -145,8 +145,8 @@ class TestPermissionIntegration:
     def test_user_can_read_but_not_delete(self):
         """用户应能读取但不能删除任务"""
         from api.auth.decorators import check_permission
-        from api.auth.permissions import TaskPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import TaskPermission
 
         user = User(
             id="1",
@@ -166,8 +166,8 @@ class TestPermissionIntegration:
     def test_admin_can_do_everything(self):
         """管理员应能执行所有操作"""
         from api.auth.decorators import check_permission
-        from api.auth.permissions import TaskPermission, ApprovalPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import ApprovalPermission, TaskPermission
 
         admin = User(
             id="1",

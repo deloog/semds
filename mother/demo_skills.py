@@ -7,9 +7,9 @@ import sys
 
 sys.path.insert(0, r"D:\semds")
 
-from mother.skills.web_search import WebSearchSkill
 from mother.skills.code_quality import check_code, fix_code
 from mother.skills.self_reflection import SelfReflection
+from mother.skills.web_search import WebSearchSkill
 
 
 def demo_web_search():

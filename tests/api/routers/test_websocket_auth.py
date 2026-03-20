@@ -7,8 +7,9 @@ import os
 # 设置JWT密钥（必须在导入模块之前）
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key")  # noqa: E402
 
-import pytest  # noqa: E402
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest  # noqa: E402
 
 
 class TestWebSocketTokenAuth:
@@ -50,6 +51,7 @@ class TestWebSocketTokenAuth:
     def test_websocket_rejects_expired_token(self):
         """WebSocket应拒绝过期Token"""
         from datetime import timedelta
+
         from api.auth.jwt import create_access_token
         from api.routers.monitor import verify_websocket_token
 
@@ -82,8 +84,9 @@ class TestWebSocketAuthIntegration:
     ):
         """带有效Token的WebSocket连接应被接受"""
         import asyncio
+
         from api.auth.jwt import create_access_token
-        from api.routers.monitor import evolution_websocket, connections
+        from api.routers.monitor import connections, evolution_websocket
 
         # 创建有效token（用户自己的任务）
         token = create_access_token(data={"sub": "user-123", "role": "user"})
@@ -125,6 +128,7 @@ class TestWebSocketAuthIntegration:
     def test_websocket_endpoint_rejects_connection_without_token(self, mock_websocket):
         """不带Token的WebSocket连接应被拒绝"""
         import asyncio
+
         from api.routers.monitor import evolution_websocket
 
         # 设置mock query_params返回None
@@ -146,6 +150,7 @@ class TestWebSocketAuthIntegration:
     ):
         """带无效Token的WebSocket连接应被拒绝"""
         import asyncio
+
         from api.routers.monitor import evolution_websocket
 
         # 设置mock query_params返回无效token

@@ -6,8 +6,8 @@
 
 import re
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
 
 
 class ErrorType(Enum):

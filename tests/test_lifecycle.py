@@ -1,8 +1,9 @@
 """Tests for SEMDS lifecycle management (subprocess-based)."""
 
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from mother.lifecycle import (
     ApplicationDeployer,
@@ -12,7 +13,7 @@ from mother.lifecycle import (
     LifecycleManager,
     ServiceMonitor,
 )
-from mother.lifecycle.healer import LogAnalyzer, PatchGenerator, HealingAction
+from mother.lifecycle.healer import HealingAction, LogAnalyzer, PatchGenerator
 
 
 class TestLogAnalyzer:

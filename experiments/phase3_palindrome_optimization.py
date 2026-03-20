@@ -11,9 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from evolution.dual_evaluator import DualEvaluator
+from evolution.extrinsic_evaluator import ExtrinsicEvaluator
 from evolution.test_runner import TestRunner
-from evolution.extrinsic_evaluator import ExtrinsicEvaluator
-from evolution.extrinsic_evaluator import ExtrinsicEvaluator
 
 # 高质量回文检测实现
 PALINDROME_CODE = '''def is_palindrome(s: str) -> bool:

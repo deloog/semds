@@ -3,14 +3,14 @@
 提供用户登录和认证相关的API端点。
 """
 
-import bcrypt
 import os
 import warnings
 
+import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from api.auth.jwt import create_access_token, SECRET_KEY
+from api.auth.jwt import SECRET_KEY, create_access_token
 from api.auth.models import Token, User, UserRole
 
 router = APIRouter(tags=["authentication"])

@@ -9,20 +9,20 @@ SEMDS Web Server - 真正的服务和交互
 启动: python semds_server.py
 """
 
+import json
 import os
 import sys
-import json
-import time
 import threading
+import time
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
 import uvicorn
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from semds_live import SEMDSLive
 

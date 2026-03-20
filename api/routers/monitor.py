@@ -7,20 +7,19 @@ import asyncio
 import json
 import logging
 import os
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import parse_qs
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
-from api.dependencies import get_db_session
-from api.schemas import TaskStatus
-from api.state import active_evolutions, connections
-from storage.models import Task, Generation
-
 # 导入JWT验证
 from api.auth.jwt import verify_token
 from api.auth.models import User, UserRole
+from api.dependencies import get_db_session
+from api.schemas import TaskStatus
+from api.state import active_evolutions, connections
+from storage.models import Generation, Task
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -186,8 +185,9 @@ async def evolution_websocket(websocket: WebSocket, task_id: str):
     )
 
     # 获取任务并验证权限
-    from api.dependencies import get_db_session
     from sqlalchemy.orm import Session
+
+    from api.dependencies import get_db_session
 
     db: Session = next(get_db_session())
     try:
@@ -251,6 +251,7 @@ async def send_progress_updates(task_id: str, websocket: WebSocket):
         websocket: WebSocket连接对象
     """
     from sqlalchemy.orm import Session
+
     from api.dependencies import get_db_session
 
     db: Session = next(get_db_session())

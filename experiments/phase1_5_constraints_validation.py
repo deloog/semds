@@ -15,10 +15,10 @@ Phase 1.5: 约束强化验证实验
 
 import sys
 import time
-from pathlib import Path
 from dataclasses import dataclass
-from typing import List, Dict
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -31,8 +31,8 @@ from evolution.constraints_injector import (
     ConstraintsInjector,
     TaskSpec,
     create_calculator_task,
-    create_list_sort_task,
     create_json_parser_task,
+    create_list_sort_task,
 )
 from evolution.self_validator import SelfValidator
 from evolution.test_runner import TestRunner

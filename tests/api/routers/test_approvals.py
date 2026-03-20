@@ -1,9 +1,10 @@
 """测试审批API路由"""
 
+from datetime import datetime, timezone
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
-from datetime import datetime, timezone
 
 
 @pytest.fixture
@@ -79,9 +80,9 @@ class TestListPendingApprovals:
         self, mock_db_session, mock_user, auth_headers
     ):
         """应返回待审批列表"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -121,9 +122,9 @@ class TestApproveRequest:
         self, mock_db_session, mock_pending_approval, mock_user, auth_headers
     ):
         """批准请求应返回成功"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = mock_pending_approval
@@ -151,9 +152,9 @@ class TestApproveRequest:
         self, mock_db_session, mock_user, auth_headers
     ):
         """批准不存在的请求应返回404"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = None
@@ -182,9 +183,9 @@ class TestRejectRequest:
         self, mock_db_session, mock_pending_approval, mock_user, auth_headers
     ):
         """拒绝请求应返回成功"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = mock_pending_approval
@@ -212,9 +213,9 @@ class TestRejectRequest:
         self, mock_db_session, mock_pending_approval, mock_user, auth_headers
     ):
         """拒绝请求应要求填写意见"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = mock_pending_approval
@@ -244,9 +245,9 @@ class TestApprovalStateMachine:
         self, mock_db_session, mock_user, auth_headers
     ):
         """已批准的请求再次批准应返回400"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -280,9 +281,9 @@ class TestApprovalStateMachine:
         self, mock_db_session, mock_user, auth_headers
     ):
         """已拒绝的请求再次拒绝应返回400"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -337,9 +338,9 @@ class TestApprovalRequestCreation:
         self, mock_db_session, mock_user, auth_headers
     ):
         """创建审批请求应返回201"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 

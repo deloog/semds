@@ -16,8 +16,8 @@ Phase 2: 错误分析验证实验
 
 import sys
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -27,8 +27,8 @@ load_env()
 
 from evolution.code_generator import CodeGenerator
 from evolution.error_analyzer import ErrorAnalyzer
-from evolution.test_runner import TestRunner
 from evolution.self_validator import SelfValidator
+from evolution.test_runner import TestRunner
 
 
 class ErrorAnalysisExperiment:

@@ -1,7 +1,8 @@
 """测试批量任务操作API"""
 
-import pytest  # noqa: F401
 from unittest.mock import MagicMock, patch
+
+import pytest  # noqa: F401
 
 
 @pytest.fixture
@@ -33,9 +34,10 @@ class TestBatchCreateTasks:
 
     def test_batch_create_tasks_success(self, auth_headers, mock_db_session):
         """批量创建任务应成功"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -92,9 +94,10 @@ class TestBatchCreateTasks:
 
     def test_batch_create_tasks_empty_list(self, auth_headers, mock_db_session):
         """批量创建空任务列表应返回错误"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, _ = mock_db_session
         app.dependency_overrides[get_db_session] = lambda: session
@@ -112,9 +115,10 @@ class TestBatchCreateTasks:
 
     def test_batch_create_tasks_validation_error(self, auth_headers, mock_db_session):
         """批量创建包含无效数据应返回验证错误"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         app.dependency_overrides[get_db_session] = lambda: session
@@ -155,11 +159,12 @@ class TestBatchPauseTasks:
 
     def test_batch_pause_tasks_success(self, auth_headers, mock_db_session):
         """批量暂停任务应成功"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
-        from storage.models import Task
+        from api.main import app
         from api.schemas import TaskStatus
+        from storage.models import Task
 
         session, query_mock = mock_db_session
 
@@ -198,9 +203,10 @@ class TestBatchPauseTasks:
 
     def test_batch_pause_empty_list(self, auth_headers, mock_db_session):
         """批量暂停空列表应返回错误"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, _ = mock_db_session
         app.dependency_overrides[get_db_session] = lambda: session
@@ -222,11 +228,12 @@ class TestBatchResumeTasks:
 
     def test_batch_resume_tasks_success(self, auth_headers, mock_db_session):
         """批量恢复任务应成功"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
-        from storage.models import Task
+        from api.main import app
         from api.schemas import TaskStatus
+        from storage.models import Task
 
         session, query_mock = mock_db_session
 
@@ -268,11 +275,12 @@ class TestBatchAbortTasks:
 
     def test_batch_abort_tasks_success(self, auth_headers, mock_db_session):
         """批量中止任务应成功"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
-        from storage.models import Task
+        from api.main import app
         from api.schemas import TaskStatus
+        from storage.models import Task
 
         session, query_mock = mock_db_session
 
@@ -314,11 +322,12 @@ class TestBatchDeleteTasks:
 
     def test_batch_delete_tasks_success(self, auth_headers, mock_db_session):
         """批量删除任务应成功"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
-        from storage.models import Task
+        from api.main import app
         from api.schemas import TaskStatus
+        from storage.models import Task
 
         session, query_mock = mock_db_session
 
@@ -361,9 +370,10 @@ class TestBatchOperationValidation:
 
     def test_batch_operation_requires_auth(self, mock_db_session):
         """批量操作需要认证"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, _ = mock_db_session
         app.dependency_overrides[get_db_session] = lambda: session
@@ -383,9 +393,10 @@ class TestBatchOperationValidation:
 
     def test_batch_operation_task_not_found(self, auth_headers, mock_db_session):
         """批量操作任务不存在应记录在失败列表"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -420,9 +431,10 @@ class TestBatchOperationLimits:
 
     def test_batch_operation_max_limit(self, auth_headers, mock_db_session):
         """批量操作应有最大数量限制"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, _ = mock_db_session
         app.dependency_overrides[get_db_session] = lambda: session
@@ -444,11 +456,12 @@ class TestBatchOperationLimits:
 
     def test_batch_operation_duplicate_task_ids(self, auth_headers, mock_db_session):
         """批量操作中重复的task_id应处理多次（每次独立检查状态）"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
-        from storage.models import Task
+        from api.main import app
         from api.schemas import TaskStatus
+        from storage.models import Task
 
         session, query_mock = mock_db_session
 
@@ -488,9 +501,10 @@ class TestBatchOperationLimits:
 
     def test_batch_operation_empty_task_id(self, auth_headers, mock_db_session):
         """批量操作中空task_id应返回400"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, _ = mock_db_session
         app.dependency_overrides[get_db_session] = lambda: session

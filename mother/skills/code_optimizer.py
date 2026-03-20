@@ -5,8 +5,8 @@ Code Optimizer - 代码优化器
 
 import ast
 import re
-from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
 
 @dataclass

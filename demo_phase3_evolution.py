@@ -18,8 +18,8 @@ Phase 3 Features:
 import os
 import sys
 import tempfile
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent
@@ -34,11 +34,11 @@ from core.env_loader import load_env
 load_env()
 
 from evolution.code_generator import CodeGenerator
-from evolution.test_runner import TestRunner
-from evolution.strategy_optimizer import StrategyOptimizer
 from evolution.dual_evaluator import DualEvaluator
-from evolution.termination_checker import TerminationChecker, TerminationConfig
 from evolution.orchestrator import EvolutionOrchestrator
+from evolution.strategy_optimizer import StrategyOptimizer
+from evolution.termination_checker import TerminationChecker, TerminationConfig
+from evolution.test_runner import TestRunner
 
 # Calculator test code
 CALCULATOR_TEST_CODE = """

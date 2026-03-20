@@ -3,18 +3,18 @@ Iterative Trainer - 迭代训练器
 实现"本地模型生成 -> SEMDS 检查 -> 反馈 -> 改进"的闭环
 """
 
+import json
 import os
 import sys
-import json
 import time
-from typing import List, Dict, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from typing import Dict, List, Optional
 
 sys.path.insert(0, "D:\\semds")
 
 from evolution.code_generator import CodeGenerator
-from mother.skills.code_optimizer import CodeOptimizer
 from mother.llm_tutor.few_shot_optimizer import FewShotOptimizer
+from mother.skills.code_optimizer import CodeOptimizer
 
 
 @dataclass

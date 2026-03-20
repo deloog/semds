@@ -43,6 +43,7 @@ class TestFastAPIApp:
     def test_cors_origins_function_works(self):
         """CORS配置函数应正确解析环境变量"""
         import os
+
         from api.main import get_cors_origins
 
         # 测试默认值

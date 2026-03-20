@@ -1,9 +1,10 @@
 """测试进化历史路由"""
 
+from datetime import datetime, timezone
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
-from datetime import datetime, timezone
 
 
 @pytest.fixture
@@ -56,9 +57,9 @@ class TestGetGenerations:
         self, mock_db_session, mock_user, mock_task, auth_headers
     ):
         """应返回进化历史列表"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -96,9 +97,9 @@ class TestGetGenerations:
         self, mock_db_session, mock_user, mock_task, auth_headers
     ):
         """应支持分页"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.all.return_value = []
@@ -129,9 +130,9 @@ class TestGetGenerationDetail:
         self, mock_db_session, mock_user, mock_task, auth_headers
     ):
         """获取存在的代应返回详情"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -167,9 +168,9 @@ class TestGetGenerationDetail:
         self, mock_db_session, mock_user, mock_task, auth_headers
     ):
         """获取不存在的代应返回404"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.side_effect = [mock_task, None]
@@ -196,9 +197,9 @@ class TestGetBestSolution:
         self, mock_db_session, mock_user, mock_task, auth_headers
     ):
         """应返回最佳实现的代码"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
         from storage.models import Task
 
         session, query_mock = mock_db_session
@@ -243,9 +244,9 @@ class TestRollbackGeneration:
         self, mock_db_session, mock_user, mock_task, auth_headers
     ):
         """回滚应返回成功"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -275,9 +276,9 @@ class TestRollbackGeneration:
         self, mock_db_session, mock_user, mock_task, auth_headers
     ):
         """回滚不存在的代应返回404"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.side_effect = [mock_task, None]

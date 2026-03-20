@@ -12,9 +12,9 @@ Dual Evaluator 模块 - 双轨评估器集成
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from evolution.intrinsic_evaluator import IntrinsicEvaluator
 from evolution.extrinsic_evaluator import ExtrinsicEvaluator
-from evolution.goodhart_detector import GoodhartDetector, GoodhartDetectionResult
+from evolution.goodhart_detector import GoodhartDetectionResult, GoodhartDetector
+from evolution.intrinsic_evaluator import IntrinsicEvaluator
 
 
 @dataclass

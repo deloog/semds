@@ -3,11 +3,11 @@ Tool Generator - 工具生成器
 当发现缺少能力时，自动生成工具代码
 """
 
+import importlib.util
 import os
+import subprocess
 import sys
 import tempfile
-import subprocess
-import importlib.util
 from typing import Optional
 
 # 导入 SEMDS 的代码生成器

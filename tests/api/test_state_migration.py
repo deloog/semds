@@ -1,7 +1,8 @@
 """测试状态迁移工具"""
 
-import pytest  # noqa: F401
 from unittest.mock import MagicMock, patch
+
+import pytest  # noqa: F401
 
 
 class TestStateMigrationInitialization:

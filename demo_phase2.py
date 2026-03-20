@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, ".")
 
-from core.docker_manager import DockerManager, SandboxConfig, ExecutionResult
+from core.docker_manager import DockerManager, ExecutionResult, SandboxConfig
 
 
 def demo_config():

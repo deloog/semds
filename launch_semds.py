@@ -12,8 +12,8 @@ SEMDS 启动脚本 - 体验自我进化系统
     5. 查看进化后的改进效果
 """
 
-import sys
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -63,15 +63,15 @@ def run_with_mock_mode():
     print("\n  Mode: Simulation (no API key required)")
     print("  This demonstrates the self-evolution loop with simulated LLM responses.")
 
-    from mother.core.meta_evolution import (
-        SystemTelemetry,
-        ImprovementGenerator,
-        SafeSelfUpdater,
-        ExperimentResult,
-        ImprovementHypothesis,
-    )
-
     import tempfile
+
+    from mother.core.meta_evolution import (
+        ExperimentResult,
+        ImprovementGenerator,
+        ImprovementHypothesis,
+        SafeSelfUpdater,
+        SystemTelemetry,
+    )
 
     tmpdir = tempfile.mkdtemp()
     os.chdir(tmpdir)

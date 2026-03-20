@@ -52,12 +52,12 @@ class TestRolePermissions:
 
     def test_user_role_has_correct_permissions(self):
         """USER角色应有正确的权限集合"""
+        from api.auth.models import UserRole
         from api.auth.permissions import (
+            ApprovalPermission,
             RolePermissions,
             TaskPermission,
-            ApprovalPermission,
         )
-        from api.auth.models import UserRole
 
         user_perms = RolePermissions.get_permissions(UserRole.USER)
 
@@ -76,12 +76,12 @@ class TestRolePermissions:
 
     def test_admin_role_has_all_permissions(self):
         """ADMIN角色应拥有所有权限"""
+        from api.auth.models import UserRole
         from api.auth.permissions import (
+            ApprovalPermission,
             RolePermissions,
             TaskPermission,
-            ApprovalPermission,
         )
-        from api.auth.models import UserRole
 
         admin_perms = RolePermissions.get_permissions(UserRole.ADMIN)
 
@@ -100,12 +100,12 @@ class TestRolePermissions:
 
     def test_has_permission_check(self):
         """has_permission 方法应正确检查权限"""
+        from api.auth.models import UserRole
         from api.auth.permissions import (
+            ApprovalPermission,
             RolePermissions,
             TaskPermission,
-            ApprovalPermission,
         )
-        from api.auth.models import UserRole
 
         # USER 有 READ 权限
         assert (
@@ -134,8 +134,8 @@ class TestRolePermissions:
 
     def test_get_permissions_returns_set(self):
         """get_permissions 应返回集合类型"""
-        from api.auth.permissions import RolePermissions
         from api.auth.models import UserRole
+        from api.auth.permissions import RolePermissions
 
         perms = RolePermissions.get_permissions(UserRole.USER)
         assert isinstance(perms, set)

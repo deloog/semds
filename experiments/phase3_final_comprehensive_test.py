@@ -15,9 +15,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from evolution.dual_evaluator import DualEvaluator
 from evolution.orchestrator import EvolutionOrchestrator
 from evolution.termination_checker import TerminationConfig
-from evolution.dual_evaluator import DualEvaluator
 
 
 class ComprehensiveCodeGenerator:

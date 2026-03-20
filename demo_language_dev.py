@@ -18,9 +18,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from mother.language_dev.language_learner import LanguageLearner, LanguageSpec
 from mother.language_dev.code_generator_lang import LanguageAwareGenerator
 from mother.language_dev.example_suite import ExampleSuiteGenerator
+from mother.language_dev.language_learner import LanguageLearner, LanguageSpec
 
 
 def demo_create_custom_language():

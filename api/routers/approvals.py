@@ -14,11 +14,11 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from api.dependencies import get_db_session
+from api.auth.decorators import check_permission
 from api.auth.dependencies import get_current_user
 from api.auth.models import User
 from api.auth.permissions import ApprovalPermission
-from api.auth.decorators import check_permission
+from api.dependencies import get_db_session
 from api.schemas import ApprovalCreate, ApprovalResponse, ApprovalReview
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])

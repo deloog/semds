@@ -3,12 +3,12 @@ Web Search Skill - 联网搜索能力
 让 Mother System 能够自主搜索解决方案
 """
 
+import json
 import os
 import sys
-import json
 import time
-from typing import List, Dict, Optional
 from dataclasses import dataclass
+from typing import Dict, List, Optional
 from urllib.parse import quote_plus
 
 sys.path.insert(0, r"D:\semds")

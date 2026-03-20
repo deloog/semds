@@ -18,7 +18,7 @@ from typing import Dict, Optional
 sys.path.insert(0, r"D:\semds")
 
 from mother.core.enhanced_mother import EnhancedMotherSystem
-from mother.lifecycle import LifecycleManager, DeploymentConfig
+from mother.lifecycle import DeploymentConfig, LifecycleManager
 from mother.task_decomposer.recursive_decomposer import RecursiveDecomposer
 
 

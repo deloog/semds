@@ -1,8 +1,9 @@
 """测试审批路由权限"""
 
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi import HTTPException, status
-from unittest.mock import MagicMock
 
 
 class TestApprovalPermissions:
@@ -40,8 +41,8 @@ class TestApprovalPermissions:
 
     def test_verify_approval_permission_allows_user(self):
         """verify_approval_permission应允许普通用户"""
-        from api.routers.approvals import verify_approval_permission
         from api.auth.models import User, UserRole
+        from api.routers.approvals import verify_approval_permission
 
         user = User(
             id="user-123",
@@ -57,8 +58,8 @@ class TestApprovalPermissions:
 
     def test_verify_approval_permission_allows_admin(self):
         """verify_approval_permission应允许管理员"""
-        from api.routers.approvals import verify_approval_permission
         from api.auth.models import User, UserRole
+        from api.routers.approvals import verify_approval_permission
 
         admin = User(
             id="admin-1",
@@ -78,8 +79,8 @@ class TestRequireApprovalPermission:
 
     def test_require_approval_permission_passes_for_authorized(self):
         """有权限的用户应通过检查"""
-        from api.routers.approvals import require_approval_permission
         from api.auth.models import User, UserRole
+        from api.routers.approvals import require_approval_permission
 
         user = User(
             id="user-123",

@@ -16,7 +16,7 @@ def check_status():
     load_env()
 
     from storage.database import get_session_factory
-    from storage.models import Task, Generation
+    from storage.models import Generation, Task
 
     Session = get_session_factory()
     session = Session()

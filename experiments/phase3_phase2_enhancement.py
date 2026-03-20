@@ -9,12 +9,12 @@ Phase 3 - Phase 2 增强方案验证实验
 对比基础评估器 vs 增强评估器的效果差异。
 """
 
+import random
 import sys
 import time
-import random
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
+from typing import Any, Dict, List, Tuple
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 

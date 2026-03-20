@@ -28,12 +28,13 @@ from core.env_loader import load_env
 
 load_env()
 
-# Import SEMDS modules
-from kernel import safe_write, append_audit_log
 from code_generator import CodeGenerator
+from database import close_database, get_session, init_database
+
+# Import SEMDS modules
+from kernel import append_audit_log, safe_write
+from models import Generation, Task
 from test_runner import TestRunner
-from database import init_database, get_session, close_database
-from models import Task, Generation
 
 # Calculator task specification
 CALCULATOR_TASK_SPEC = {

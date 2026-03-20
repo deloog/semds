@@ -31,9 +31,10 @@ class TestCurrentUserDependency:
 
     def test_get_current_user_with_expired_token(self):
         """过期Token应抛出401"""
+        from datetime import timedelta
+
         from api.auth.dependencies import get_current_user
         from api.auth.jwt import create_access_token
-        from datetime import timedelta
 
         # 创建已过期的Token
         expired_token = create_access_token(

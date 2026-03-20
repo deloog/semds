@@ -11,14 +11,14 @@ SEMDS + Consilium 双模型对比实验
 目标: 验证 Consilium 能否让小模型接近大模型的表现
 """
 
+import json
 import os
 import sys
-import json
 import tempfile
 import time
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # 添加项目路径
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -28,16 +28,16 @@ sys.path.insert(0, str(PROJECT_ROOT / "core"))
 sys.path.insert(0, str(PROJECT_ROOT / "consilium/scripts"))
 
 # 加载环境变量
-from env_loader import load_env, check_api_key
+from env_loader import check_api_key, load_env
 
 load_env()
 
-from kernel import safe_write
-from code_generator_v2 import CodeGenerator
-from test_runner import TestRunner
-from database import init_database, get_session, close_database
-from models import Task, Generation
 import consilium_api as consilium
+from code_generator_v2 import CodeGenerator
+from database import close_database, get_session, init_database
+from kernel import safe_write
+from models import Generation, Task
+from test_runner import TestRunner
 
 # 实验配置
 EXPERIMENTS = [

@@ -50,7 +50,7 @@ app.add_middleware(
 )
 
 # 注册路由
-from api.routers import tasks, evolution, monitor, approvals, auth
+from api.routers import approvals, auth, evolution, monitor, tasks
 
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])

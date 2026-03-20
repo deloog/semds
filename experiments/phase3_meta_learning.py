@@ -15,8 +15,8 @@ Phase 3: 元学习验证实验
 
 import sys
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -26,8 +26,8 @@ load_env()
 
 from evolution.code_generator import CodeGenerator
 from evolution.meta_learner import MetaLearner
-from evolution.test_runner import TestRunner
 from evolution.self_validator import SelfValidator
+from evolution.test_runner import TestRunner
 
 
 class MetaLearningExperiment:

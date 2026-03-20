@@ -218,12 +218,12 @@ class TestComponentIntegration:
 
     def test_all_components_work_together(self):
         """测试所有组件协同工作"""
-        from evolution.orchestrator import EvolutionOrchestrator
         from evolution.code_generator import CodeGenerator
-        from evolution.test_runner import TestRunner
         from evolution.dual_evaluator import DualEvaluator
+        from evolution.orchestrator import EvolutionOrchestrator
         from evolution.strategy_optimizer import StrategyOptimizer
         from evolution.termination_checker import TerminationChecker
+        from evolution.test_runner import TestRunner
 
         orchestrator = EvolutionOrchestrator(
             task_id="integration_test",

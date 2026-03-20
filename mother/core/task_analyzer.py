@@ -3,7 +3,7 @@ Task Analyzer - 将自然语言任务转化为执行计划
 MVP 版本：简单的意图识别和步骤拆解
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 class ExecutionStep:

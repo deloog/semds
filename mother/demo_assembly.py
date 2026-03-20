@@ -10,8 +10,8 @@ import sys
 
 sys.path.insert(0, "D:\\semds")
 
-from mother.task_decomposer.decomposer import AtomicTask, TaskType
 from mother.task_decomposer.code_assembler import CodeAssembler
+from mother.task_decomposer.decomposer import AtomicTask, TaskType
 
 
 def demo_without_assembly():

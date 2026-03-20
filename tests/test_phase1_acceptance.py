@@ -14,16 +14,17 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import pytest
+
 from core.kernel import (
-    safe_write,
-    append_audit_log,
-    _validate_python_syntax,
     _pass_static_analysis,
+    _validate_python_syntax,
+    append_audit_log,
+    safe_write,
 )
 from evolution.code_generator import CodeGenerator
 from evolution.test_runner import TestRunner
-from storage.database import init_database, get_session, close_database
-from storage.models import Task, Generation
+from storage.database import close_database, get_session, init_database
+from storage.models import Generation, Task
 
 
 class TestKernelSafeWrite:

@@ -5,21 +5,22 @@
 Phase 5: 已添加用户认证和权限控制，以及真实的进化执行
 """
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from sqlalchemy.orm import Session
 import asyncio
 
-from api.dependencies import get_db_session
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from api.auth.dependencies import get_current_user
 from api.auth.models import User
+from api.dependencies import get_db_session
+from api.routers.tasks import require_task_access
 from api.schemas import TaskStatus
 from api.state import active_evolutions
-from api.routers.tasks import require_task_access
 from storage.models import Task
 
 # 导入进化执行器（新添加）
 try:
-    from api.evolution_runner import start_evolution_task, EvolutionRunner
+    from api.evolution_runner import EvolutionRunner, start_evolution_task
 
     EVOLUTION_RUNNER_AVAILABLE = True
 except ImportError as e:

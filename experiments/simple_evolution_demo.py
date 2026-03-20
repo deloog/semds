@@ -8,12 +8,12 @@
 3. 多代进化能跑通
 """
 
-import sys
 import os
+import sys
 import tempfile
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # 设置项目根目录
 PROJECT_ROOT = Path(__file__).parent.parent

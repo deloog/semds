@@ -6,18 +6,18 @@ SEMDS 启动演示 - 体验自我进化系统
 运行: python start_semds_demo.py
 """
 
-import sys
 import os
+import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 from mother.core.meta_evolution import (
-    SystemTelemetry,
+    ExperimentResult,
     ImprovementGenerator,
     SafeSelfUpdater,
-    ExperimentResult,
+    SystemTelemetry,
 )
 
 

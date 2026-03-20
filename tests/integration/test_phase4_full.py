@@ -8,10 +8,11 @@
 - 监控界面访问
 """
 
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
-from datetime import datetime, timezone
 
 
 @pytest.fixture
@@ -36,9 +37,9 @@ def mock_user():
 @pytest.fixture
 def test_client(mock_user):
     """提供配置好的测试客户端"""
-    from api.main import app
-    from api.dependencies import get_db_session
     from api.auth.dependencies import get_current_user
+    from api.dependencies import get_db_session
+    from api.main import app
 
     # Mock数据库会话
     mock_session = MagicMock()

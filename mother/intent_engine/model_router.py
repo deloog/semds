@@ -3,13 +3,13 @@ Model Router - 模型路由器
 根据意图和上下文，智能路由到合适的模型
 """
 
-from typing import Dict, Optional
 from enum import Enum
+from typing import Dict, Optional
 
 from mother.intent_engine.intent_classifier import (
-    UserIntent,
-    IntentType,
     ComplexityLevel,
+    IntentType,
+    UserIntent,
 )
 
 
@@ -286,8 +286,8 @@ def process_user_input(
     Returns:
         处理结果
     """
-    from mother.intent_engine.intent_classifier import classify_intent
     from mother.intent_engine.context_manager import get_context_manager
+    from mother.intent_engine.intent_classifier import classify_intent
 
     # 1. 识别意图（本地模型/规则）
     intent = classify_intent(text)

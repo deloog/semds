@@ -12,20 +12,20 @@ SEMDS Live - 真正运行、自我进化、为你服务
 启动: python semds_live.py
 """
 
+import json
 import os
 import sys
-import json
-import time
 import tempfile
-from pathlib import Path
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from mother.core.meta_evolution import MetaEvolutionEngine
-from mother.lifecycle import LifecycleManager, DeploymentConfig
 from evolution.code_generator import CodeGenerator
 from evolution.test_runner import TestRunner
+from mother.core.meta_evolution import MetaEvolutionEngine
+from mother.lifecycle import DeploymentConfig, LifecycleManager
 
 
 class SEMDSLive:

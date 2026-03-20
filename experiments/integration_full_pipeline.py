@@ -12,11 +12,11 @@ TaskSpec -> MetaLearner(增强) -> LLM生成 -> SelfValidator验证 -> TestRunne
 2. 类似任务（有历史经验，验证复用）
 """
 
+import json
 import sys
 import time
-import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -26,10 +26,10 @@ from core.env_loader import load_env
 load_env()
 
 from evolution.code_generator import CodeGenerator
-from evolution.constraints_injector import TaskSpec, ConstraintsInjector, Example
+from evolution.constraints_injector import ConstraintsInjector, Example, TaskSpec
+from evolution.error_analyzer import ErrorAnalyzer
 from evolution.meta_learner import MetaLearner
 from evolution.self_validator import SelfValidator
-from evolution.error_analyzer import ErrorAnalyzer
 from evolution.test_runner import TestRunner
 
 

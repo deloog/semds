@@ -1,9 +1,10 @@
 """测试进化控制路由"""
 
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timezone
 
 
 @pytest.fixture
@@ -57,9 +58,9 @@ class TestStartEvolution:
         self, mock_db_session, mock_pending_task, mock_user, auth_headers
     ):
         """启动进化应返回成功"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = mock_pending_task
@@ -87,9 +88,9 @@ class TestStartEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """启动不存在的任务应返回404"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = None
@@ -112,9 +113,9 @@ class TestStartEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """启动已在运行的进化应返回400"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -146,9 +147,9 @@ class TestPauseEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """暂停运行中的进化应成功"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -177,9 +178,9 @@ class TestPauseEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """暂停未运行的进化应返回400"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -209,9 +210,9 @@ class TestResumeEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """恢复暂停的进化应成功"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -240,9 +241,9 @@ class TestResumeEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """恢复不存在的任务应返回404"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = None
@@ -265,9 +266,9 @@ class TestResumeEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """从running状态恢复应返回400"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -295,9 +296,9 @@ class TestResumeEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """从aborted状态恢复应返回400"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -327,9 +328,9 @@ class TestAbortEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """中止进化应返回成功"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -358,9 +359,9 @@ class TestAbortEvolution:
         self, mock_db_session, mock_user, auth_headers
     ):
         """中止不存在的任务应返回404"""
-        from api.main import app
-        from api.dependencies import get_db_session
         from api.auth.dependencies import get_current_user
+        from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = None

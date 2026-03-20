@@ -15,13 +15,13 @@ SEMDS 字符串计算器进化实验 - 验证多代进化能力
 - Gen 13+: 边界情况处理，得分 0.85+
 """
 
+import json
 import os
 import sys
-import json
 import tempfile
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # 添加项目路径
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -32,11 +32,11 @@ from core.env_loader import load_env
 load_env()
 
 from core.kernel import safe_write
-from evolution.orchestrator import EvolutionOrchestrator
 from evolution.code_generator import CodeGenerator
+from evolution.orchestrator import EvolutionOrchestrator
 from evolution.termination_checker import TerminationConfig
-from storage.database import init_database, get_session, close_database
-from storage.models import Task, Generation
+from storage.database import close_database, get_session, init_database
+from storage.models import Generation, Task
 
 # 任务规格
 TASK_SPEC = {
@@ -83,6 +83,7 @@ def check_environment():
 def run_tests(code: str) -> dict:
     """运行测试并返回结果"""
     import shutil
+
     from evolution.test_runner import TestRunner
 
     with tempfile.TemporaryDirectory(prefix="semds_evolution_") as work_dir:

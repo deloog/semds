@@ -11,8 +11,8 @@ Strategy:
 """
 
 import os
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 from evolution.code_generator import CodeGenerator
 

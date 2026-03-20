@@ -5,17 +5,17 @@ SEMDS 核心自我进化演示
 不需要API key，展示核心逻辑。
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
 from mother.core.meta_evolution import (
-    SystemTelemetry,
     ImprovementGenerator,
-    SafeSelfUpdater,
     ImprovementHypothesis,
+    SafeSelfUpdater,
+    SystemTelemetry,
 )
 
 

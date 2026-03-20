@@ -7,8 +7,9 @@ import os
 # 设置JWT密钥（必须在导入模块之前）
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key")
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 
 class TestWebSocketTaskPermission:
@@ -26,8 +27,9 @@ class TestWebSocketTaskPermission:
     def test_admin_can_connect_to_any_task(self, mock_websocket):
         """管理员应能连接任何任务的WebSocket"""
         import asyncio
+
         from api.auth.jwt import create_access_token
-        from api.routers.monitor import evolution_websocket, connections
+        from api.routers.monitor import connections, evolution_websocket
 
         # 创建管理员token
         token = create_access_token(data={"sub": "admin-1", "role": "admin"})
@@ -67,8 +69,9 @@ class TestWebSocketTaskPermission:
     def test_user_can_connect_to_own_task(self, mock_websocket):
         """用户应能连接自己任务的WebSocket"""
         import asyncio
+
         from api.auth.jwt import create_access_token
-        from api.routers.monitor import evolution_websocket, connections
+        from api.routers.monitor import connections, evolution_websocket
 
         # 创建普通用户token
         token = create_access_token(data={"sub": "user-123", "role": "user"})
@@ -102,8 +105,9 @@ class TestWebSocketTaskPermission:
     def test_user_cannot_connect_to_others_task(self, mock_websocket):
         """用户不应能连接他人任务的WebSocket"""
         import asyncio
+
         from api.auth.jwt import create_access_token
-        from api.routers.monitor import evolution_websocket, connections
+        from api.routers.monitor import connections, evolution_websocket
 
         # 创建普通用户token（用户ID为user-123）
         token = create_access_token(data={"sub": "user-123", "role": "user"})

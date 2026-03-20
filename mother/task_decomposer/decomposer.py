@@ -15,9 +15,9 @@ Task Decomposer - 任务分解器
 
 import json
 import re
-from typing import List, Dict, Optional, Set
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Dict, List, Optional, Set
 
 
 class TaskType(Enum):

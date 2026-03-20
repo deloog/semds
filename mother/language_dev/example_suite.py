@@ -312,11 +312,11 @@ Browse the examples by category, or start with `01_basics/hello_world`.
 
 if __name__ == "__main__":
     # 演示
+    from mother.language_dev.code_generator_lang import LanguageAwareGenerator
     from mother.language_dev.language_learner import (
         LanguageLearner,
         create_ai_native_language_spec,
     )
-    from mother.language_dev.code_generator_lang import LanguageAwareGenerator
 
     # 学习语言
     learner = LanguageLearner()

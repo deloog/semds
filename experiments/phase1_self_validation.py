@@ -17,8 +17,8 @@ Phase 1: 基础自验证实验
 import sys
 import tempfile
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -26,10 +26,11 @@ from core.env_loader import load_env
 
 load_env()
 
+import ast
+import re
+
 from evolution.code_generator import CodeGenerator
 from evolution.test_runner import TestRunner
-import re
-import ast
 
 
 class SelfValidator:

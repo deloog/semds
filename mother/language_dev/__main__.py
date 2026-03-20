@@ -13,13 +13,13 @@ import json
 import sys
 from pathlib import Path
 
+from mother.language_dev.code_generator_lang import LanguageAwareGenerator
+from mother.language_dev.example_suite import ExampleSuiteGenerator
 from mother.language_dev.language_learner import (
     LanguageLearner,
     LanguageSpec,
     create_ai_native_language_spec,
 )
-from mother.language_dev.code_generator_lang import LanguageAwareGenerator
-from mother.language_dev.example_suite import ExampleSuiteGenerator
 
 
 def cmd_learn(args):

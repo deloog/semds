@@ -27,9 +27,8 @@ class TestStateManager:
 
     def test_active_evolutions_shared_across_modules(self):
         """active_evolutions应在模块间共享"""
+        from api.routers import evolution, monitor
         from api.state import active_evolutions
-        from api.routers import monitor
-        from api.routers import evolution
 
         # 验证各模块引用的是同一个对象
         assert monitor.active_evolutions is active_evolutions
@@ -37,8 +36,8 @@ class TestStateManager:
 
     def test_connections_shared_across_modules(self):
         """connections应在模块间共享"""
-        from api.state import connections
         from api.routers import monitor
+        from api.state import connections
 
         # 验证monitor模块引用的是同一个connections
         assert monitor.connections is connections

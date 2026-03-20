@@ -9,6 +9,7 @@ from core.env_loader import load_env
 load_env()
 
 import asyncio
+
 from api.evolution_runner import start_evolution_task
 from storage.database import get_session_factory
 from storage.models import Task

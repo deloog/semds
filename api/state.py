@@ -5,7 +5,7 @@
 注意：当前使用内存存储，多Worker部署时需要改用Redis。
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 # WebSocket连接存储
 # key: task_id, value: WebSocket对象

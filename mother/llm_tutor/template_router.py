@@ -3,11 +3,11 @@ Template Router - 模板路由器
 务实的方案：本地模型做选择，模板做生成
 """
 
+import json
 import os
 import re
-import json
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
 
 @dataclass

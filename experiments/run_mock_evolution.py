@@ -7,8 +7,8 @@ This script uses a Mock code generator to simulate the multi-generation
 evolution process without requiring Docker.
 """
 
-import sys
 import io
+import sys
 import time
 from datetime import datetime
 from pathlib import Path

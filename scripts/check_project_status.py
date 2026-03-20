@@ -132,7 +132,7 @@ def main():
 
         print("  [OK] test_runner.py imports")
 
-        from storage.models import Task, Generation
+        from storage.models import Generation, Task
 
         print("  [OK] models.py imports")
 

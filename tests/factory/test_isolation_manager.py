@@ -1,7 +1,8 @@
 """测试隔离管理器"""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 class TestIsolationManagerInitialization:

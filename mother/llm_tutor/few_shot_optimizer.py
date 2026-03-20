@@ -3,10 +3,10 @@ Few-shot Optimizer - Few-shot 示例优化器
 为本地模型生成高质量的 few-shot 学习示例
 """
 
-import os
 import json
-from typing import List, Dict
+import os
 from dataclasses import dataclass
+from typing import Dict, List
 
 
 @dataclass

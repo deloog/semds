@@ -10,9 +10,9 @@ Supported LLM:
 - Ollama (local models like Qwen3.5)
 """
 
+import json
 import os
 import re
-import json
 from typing import Any, Dict, List, Optional, Type, Union
 
 # Optional imports

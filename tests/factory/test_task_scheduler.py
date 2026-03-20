@@ -21,7 +21,7 @@ class TestTaskSchedulerPriority:
 
     def test_set_task_priority(self):
         """应能设置任务优先级"""
-        from factory.task_scheduler import TaskScheduler, Priority
+        from factory.task_scheduler import Priority, TaskScheduler
 
         scheduler = TaskScheduler()
         scheduler.set_task_priority("task-1", Priority.HIGH)
@@ -30,7 +30,7 @@ class TestTaskSchedulerPriority:
 
     def test_get_task_priority(self):
         """应能获取任务优先级"""
-        from factory.task_scheduler import TaskScheduler, Priority
+        from factory.task_scheduler import Priority, TaskScheduler
 
         scheduler = TaskScheduler()
         scheduler.set_task_priority("task-1", Priority.NORMAL)
@@ -41,7 +41,7 @@ class TestTaskSchedulerPriority:
 
     def test_get_default_priority_for_unset_task(self):
         """未设置优先级的任务应返回默认值"""
-        from factory.task_scheduler import TaskScheduler, Priority
+        from factory.task_scheduler import Priority, TaskScheduler
 
         scheduler = TaskScheduler()
 
@@ -75,7 +75,7 @@ class TestTaskSchedulerQueue:
 
     def test_get_next_task_returns_highest_priority(self):
         """应返回优先级最高的任务"""
-        from factory.task_scheduler import TaskScheduler, Priority
+        from factory.task_scheduler import Priority, TaskScheduler
 
         scheduler = TaskScheduler()
         scheduler.set_task_priority("task-2", Priority.HIGH)
@@ -111,7 +111,7 @@ class TestTaskSchedulerQueue:
 
     def test_same_priority_fifo_order(self):
         """相同优先级应按FIFO顺序"""
-        from factory.task_scheduler import TaskScheduler, Priority
+        from factory.task_scheduler import Priority, TaskScheduler
 
         scheduler = TaskScheduler()
         scheduler.add_task("task-1", {"name": "任务1"})

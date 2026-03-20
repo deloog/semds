@@ -118,7 +118,7 @@ KEY3=value3
 
         env_content = """
 KEY_WITH_EQUALS=val=ue=with=equals
-KEY_WITH_SPACES=  value with spaces  
+KEY_WITH_SPACES=  value with spaces
 KEY_EMPTY=
 """
         temp_env = Path(".env.test.special")

@@ -1,7 +1,8 @@
 """测试Pydantic数据模型"""
 
-import pytest
 from datetime import datetime, timezone
+
+import pytest
 from pydantic import ValidationError
 
 

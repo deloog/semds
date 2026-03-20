@@ -1,7 +1,8 @@
 """测试JWT功能"""
 
+from datetime import datetime, timedelta, timezone
+
 import pytest
-from datetime import datetime, timezone, timedelta
 
 
 class TestJWTToken:
@@ -48,8 +49,9 @@ class TestJWTToken:
 
     def test_token_contains_expiry(self):
         """Token应包含过期时间"""
-        from api.auth.jwt import create_access_token, verify_token
         from datetime import datetime
+
+        from api.auth.jwt import create_access_token, verify_token
 
         token = create_access_token(data={"sub": "user-123"})
         payload = verify_token(token)

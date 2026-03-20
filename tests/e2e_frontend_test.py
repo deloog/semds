@@ -12,9 +12,9 @@ Usage:
 
 import asyncio
 import json
+import os
 import sys
 import time
-import os
 from datetime import datetime
 from pathlib import Path
 

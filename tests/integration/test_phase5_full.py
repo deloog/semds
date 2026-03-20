@@ -1,7 +1,8 @@
 """Phase 5 完整集成测试"""
 
-import pytest  # noqa: F401
 from unittest.mock import MagicMock, patch
+
+import pytest  # noqa: F401
 
 
 class TestPhase5Authentication:
@@ -34,8 +35,8 @@ class TestPhase5Authentication:
     def test_permission_check_integration(self):
         """权限检查集成测试"""
         from api.auth.decorators import check_permission
-        from api.auth.permissions import TaskPermission
         from api.auth.models import User, UserRole
+        from api.auth.permissions import TaskPermission
 
         user = User(
             id="user-123",
@@ -98,7 +99,7 @@ class TestPhase5TaskManager:
     def test_task_manager_and_scheduler_integration(self):
         """任务管理器和调度器集成"""
         from factory.task_manager import TaskManager
-        from factory.task_scheduler import TaskScheduler, Priority
+        from factory.task_scheduler import Priority, TaskScheduler
 
         # 创建调度器并添加任务
         scheduler = TaskScheduler()
@@ -116,9 +117,10 @@ class TestPhase5TaskManager:
 
     def test_task_manager_and_isolation_integration(self):
         """任务管理器和隔离管理器集成"""
-        from factory.task_manager import TaskManager
-        from factory.isolation_manager import IsolationManager
         import tempfile
+
+        from factory.isolation_manager import IsolationManager
+        from factory.task_manager import TaskManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # 创建隔离环境
@@ -156,8 +158,8 @@ class TestPhase5RedisState:
 
     def test_state_migration_integration(self):
         """状态迁移工具集成"""
-        from api.state_migration import StateMigration
         from api import state as memory_state
+        from api.state_migration import StateMigration
 
         # 准备内存状态
         memory_state.active_evolutions = {
@@ -189,7 +191,7 @@ class TestPhase5FullWorkflow:
         from api.auth.jwt import create_access_token
         from api.auth.models import User, UserRole
         from factory.task_manager import TaskManager
-        from factory.task_scheduler import TaskScheduler, Priority
+        from factory.task_scheduler import Priority, TaskScheduler
 
         # 1. 用户登录获取token
         user = User(

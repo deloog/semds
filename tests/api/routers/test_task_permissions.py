@@ -1,8 +1,9 @@
 """测试任务路由权限"""
 
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi import HTTPException, status
-from unittest.mock import MagicMock
 
 
 class TestTaskOwnership:
@@ -10,8 +11,8 @@ class TestTaskOwnership:
 
     def test_verify_task_ownership_admin_can_access_any(self):
         """管理员应能访问任何任务"""
-        from api.routers.tasks import verify_task_ownership
         from api.auth.models import User, UserRole
+        from api.routers.tasks import verify_task_ownership
 
         admin = User(
             id="admin-1",
@@ -29,8 +30,8 @@ class TestTaskOwnership:
 
     def test_verify_task_ownership_owner_can_access_own(self):
         """任务所有者应能访问自己的任务"""
-        from api.routers.tasks import verify_task_ownership
         from api.auth.models import User, UserRole
+        from api.routers.tasks import verify_task_ownership
 
         user = User(
             id="user-123",
@@ -48,8 +49,8 @@ class TestTaskOwnership:
 
     def test_verify_task_ownership_other_cannot_access(self):
         """其他用户不应能访问他人的任务"""
-        from api.routers.tasks import verify_task_ownership
         from api.auth.models import User, UserRole
+        from api.routers.tasks import verify_task_ownership
 
         user = User(
             id="user-456",
@@ -67,8 +68,8 @@ class TestTaskOwnership:
 
     def test_verify_task_ownership_no_owner_allow_all(self):
         """无所有者的任务允许所有人访问（向后兼容）"""
-        from api.routers.tasks import verify_task_ownership
         from api.auth.models import User, UserRole
+        from api.routers.tasks import verify_task_ownership
 
         user = User(
             id="user-123",
@@ -90,8 +91,8 @@ class TestRequireTaskAccess:
 
     def test_require_task_access_raises_403_for_unauthorized(self):
         """无权限时应抛出403"""
-        from api.routers.tasks import require_task_access
         from api.auth.models import User, UserRole
+        from api.routers.tasks import require_task_access
 
         user = User(
             id="user-456",
@@ -111,8 +112,8 @@ class TestRequireTaskAccess:
 
     def test_require_task_access_passes_for_owner(self):
         """所有者有权限不应抛出异常"""
-        from api.routers.tasks import require_task_access
         from api.auth.models import User, UserRole
+        from api.routers.tasks import require_task_access
 
         user = User(
             id="user-123",

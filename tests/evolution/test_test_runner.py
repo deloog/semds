@@ -189,8 +189,9 @@ class TestRunTestsWithCode:
     @patch("builtins.open")
     def test_creates_temp_files(self, mock_open, mock_mkdtemp, mock_run_tests):
         """测试创建临时文件"""
-        from evolution.test_runner import TestRunner
         import os
+
+        from evolution.test_runner import TestRunner
 
         mock_mkdtemp.return_value = os.path.normpath("/tmp/test_dir")
         mock_run_tests.return_value = {

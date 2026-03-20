@@ -1,7 +1,8 @@
 """测试认证模型"""
 
-import pytest
 from datetime import datetime, timezone
+
+import pytest
 
 
 class TestUserModel:

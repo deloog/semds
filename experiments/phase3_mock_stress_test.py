@@ -13,11 +13,11 @@ from unittest.mock import MagicMock
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from evolution.orchestrator import EvolutionOrchestrator
-from evolution.test_runner import TestRunner
 from evolution.dual_evaluator import DualEvaluator
+from evolution.orchestrator import EvolutionOrchestrator
 from evolution.strategy_optimizer import StrategyOptimizer
 from evolution.termination_checker import TerminationConfig
+from evolution.test_runner import TestRunner
 
 
 class MockCodeGenerator:

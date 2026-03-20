@@ -1,7 +1,8 @@
 """Test local Qwen 3.5 4B model via Ollama"""
 
-import requests
 import time
+
+import requests
 
 OLLAMA_URL = "http://localhost:11434"
 MODEL = "qwen3.5:4b"

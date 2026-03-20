@@ -6,8 +6,8 @@ Usage: python setup_ollama.py
 """
 
 import os
-import sys
 import subprocess
+import sys
 import time
 
 
@@ -81,8 +81,8 @@ def test_model(model_name="qwen3.5:4b"):
     """Test the model with a simple prompt"""
     print(f"\nTesting {model_name}...")
 
-    import urllib.request
     import json
+    import urllib.request
 
     data = json.dumps(
         {

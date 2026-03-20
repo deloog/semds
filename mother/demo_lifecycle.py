@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pathlib import Path
 
-from mother.lifecycle import LifecycleManager, DeploymentConfig, HealthStatus
+from mother.lifecycle import DeploymentConfig, HealthStatus, LifecycleManager
 
 # Sample FastAPI application
 SAMPLE_APP = """

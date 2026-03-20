@@ -1,9 +1,10 @@
 """测试API依赖注入"""
 
+from unittest.mock import Mock, patch
+
 import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch
 
 
 class TestDatabaseDependency:
@@ -30,8 +31,9 @@ class TestDatabaseDependency:
 
     def test_db_session_closed_after_use(self):
         """数据库会话应在使用后正确关闭"""
+        from unittest.mock import MagicMock, patch
+
         from api.dependencies import get_db_session
-        from unittest.mock import patch, MagicMock
 
         mock_session = MagicMock()
 
@@ -55,8 +57,9 @@ class TestDatabaseDependency:
 
     def test_db_dependency_injection_in_endpoint(self):
         """端点中应能正确注入数据库依赖"""
+        from unittest.mock import MagicMock, patch
+
         from api.dependencies import get_db_session
-        from unittest.mock import patch, MagicMock
 
         app = FastAPI()
 
@@ -82,8 +85,9 @@ class TestDependencyErrorHandling:
 
     def test_db_session_handles_exception(self):
         """数据库会话应正确处理异常"""
+        from unittest.mock import MagicMock, patch
+
         from api.dependencies import get_db_session
-        from unittest.mock import patch, MagicMock
 
         mock_session = MagicMock()
 

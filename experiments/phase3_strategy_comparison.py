@@ -9,13 +9,13 @@ Phase 3 策略对比实验
 使用 Mock 生成器模拟不同策略下的代码质量分布。
 """
 
-import sys
 import random
+import sys
 import time
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from dataclasses import dataclass
-from typing import List, Dict
+from typing import Dict, List
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 

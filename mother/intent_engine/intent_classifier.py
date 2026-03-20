@@ -3,13 +3,13 @@ Intent Classifier - 意图识别器
 本地模型负责理解用户意图，决定后续处理流程
 """
 
-import os
-import sys
 import json
+import os
 import re
-from typing import Dict, List, Optional, Tuple
+import sys
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Optional, Tuple
 
 sys.path.insert(0, "D:\\semds")
 

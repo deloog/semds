@@ -1,8 +1,9 @@
 """测试WebSocket路由"""
 
-import pytest
 import json
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, patch
+
+import pytest
 
 
 class TestWebSocketConnection:
@@ -30,10 +31,12 @@ class TestSystemStats:
 
     def test_get_system_stats_endpoint_exists(self):
         """系统统计端点应存在"""
-        from api.main import app
-        from api.dependencies import get_db_session
-        from fastapi.testclient import TestClient
         from unittest.mock import MagicMock
+
+        from fastapi.testclient import TestClient
+
+        from api.dependencies import get_db_session
+        from api.main import app
 
         # 创建mock数据库会话
         mock_db = MagicMock()
@@ -56,9 +59,10 @@ class TestSystemStats:
 
     def test_get_system_stats_returns_correct_structure(self):
         """系统统计应返回正确结构（使用mock）"""
-        from api.routers.monitor import get_system_stats
-        from unittest.mock import AsyncMock
         import asyncio
+        from unittest.mock import AsyncMock
+
+        from api.routers.monitor import get_system_stats
 
         # 创建mock数据库会话
         mock_db = MagicMock()
@@ -86,8 +90,9 @@ class TestActiveTasks:
 
     def test_get_active_tasks_endpoint_exists(self):
         """活跃任务端点应存在"""
-        from api.main import app
         from fastapi.testclient import TestClient
+
+        from api.main import app
 
         client = TestClient(app)
         response = client.get("/api/active-tasks")

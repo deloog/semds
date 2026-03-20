@@ -26,13 +26,13 @@ class TestEvolutionOrchestratorInitialization:
     @patch("evolution.code_generator.OpenAI")
     def test_initializes_with_all_components(self, mock_openai):
         """测试使用所有组件初始化"""
-        from evolution.orchestrator import EvolutionOrchestrator
+        from core.git_manager import GitManager
         from evolution.code_generator import CodeGenerator
-        from evolution.test_runner import TestRunner
         from evolution.dual_evaluator import DualEvaluator
+        from evolution.orchestrator import EvolutionOrchestrator
         from evolution.strategy_optimizer import StrategyOptimizer
         from evolution.termination_checker import TerminationChecker
-        from core.git_manager import GitManager
+        from evolution.test_runner import TestRunner
 
         mock_client = MagicMock()
         mock_openai.return_value = mock_client
@@ -488,8 +488,9 @@ class TestEvolutionOrchestratorGitIntegration:
     def test_commits_each_generation(self, mock_openai, tmp_path):
         """测试每代都提交到Git"""
         import subprocess
-        from evolution.orchestrator import EvolutionOrchestrator
+
         from core.git_manager import GitManager
+        from evolution.orchestrator import EvolutionOrchestrator
 
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = MagicMock(

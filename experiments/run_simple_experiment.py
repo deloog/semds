@@ -7,13 +7,13 @@ SEMDS + Consilium 简化对比实验 (无数据库依赖)
 - B组: DeepSeek + Consilium - 验证审议效果
 """
 
+import json
 import os
 import sys
-import json
 import tempfile
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # 添加项目路径
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -22,12 +22,12 @@ sys.path.insert(0, str(PROJECT_ROOT / "core"))
 sys.path.insert(0, str(PROJECT_ROOT / "consilium/scripts"))
 
 # 加载环境变量
-from env_loader import load_env, check_api_key
+from env_loader import check_api_key, load_env
 
 load_env()
 
-from code_generator_v2 import CodeGenerator
 import consilium_api as consilium
+from code_generator_v2 import CodeGenerator
 
 # 实验配置
 EXPERIMENTS = [
@@ -85,8 +85,8 @@ RESULTS_DIR = PROJECT_ROOT / "experiments" / "results"
 
 def run_pytest_tests(code: str) -> dict:
     """运行测试 (纯 Python，无需 pytest)。"""
-    import tempfile
     import sys
+    import tempfile
 
     with tempfile.TemporaryDirectory(prefix="semds_test_") as work_dir:
         # 写入 solution.py

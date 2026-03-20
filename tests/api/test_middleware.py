@@ -31,6 +31,7 @@ class TestErrorHandlingMiddleware:
     def test_500_exception_returns_safe_response(self):
         """500异常应返回安全的通用响应（生产环境不泄露敏感信息）"""
         import os
+
         from api.middleware import setup_exception_handlers
 
         # 确保处于生产模式
@@ -56,12 +57,14 @@ class TestErrorHandlingMiddleware:
     def test_500_exception_returns_debug_info_in_debug_mode(self):
         """调试模式下500异常应返回详细信息"""
         import os
+
         from api.middleware import setup_exception_handlers
 
         # 启用调试模式
         os.environ["API_DEBUG"] = "true"
         # 重新加载模块以应用新配置
         from importlib import reload
+
         import api.middleware
 
         reload(api.middleware)

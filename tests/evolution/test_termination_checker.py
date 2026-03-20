@@ -280,7 +280,7 @@ class TestTerminationCheckerPriority:
 
     def test_success_takes_priority_over_stagnation(self):
         """测试成功优先于停滞"""
-        from evolution.termination_checker import TerminationConfig, TerminationChecker
+        from evolution.termination_checker import TerminationChecker, TerminationConfig
 
         config = TerminationConfig(stagnation_generations=2, success_threshold=0.9)
         checker = TerminationChecker(config=config)

@@ -10,15 +10,16 @@
 
 import asyncio
 import logging
-from typing import Optional, Callable
 from datetime import datetime
+from typing import Callable, Optional
+
 from sqlalchemy.orm import Session
 
 from api.state import active_evolutions
 from evolution.orchestrator import EvolutionOrchestrator
 from evolution.termination_checker import TerminationConfig
 from storage.database import get_session_factory
-from storage.models import Task, Generation
+from storage.models import Generation, Task
 
 logger = logging.getLogger(__name__)
 

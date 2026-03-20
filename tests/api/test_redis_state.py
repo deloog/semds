@@ -1,7 +1,8 @@
 """测试Redis状态存储"""
 
-import pytest  # noqa: F401
 from unittest.mock import MagicMock, patch
+
+import pytest  # noqa: F401
 
 
 class TestRedisStateManagerInitialization:

@@ -9,19 +9,19 @@
 5. 中止进化
 """
 
-import pytest
 import asyncio
-from fastapi.testclient import TestClient
-
 import sys
 from pathlib import Path
+
+import pytest
+from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from api.main import app
-from storage.database import init_database, get_session
-from storage.models import Task, Generation
 from api.state import active_evolutions
+from storage.database import get_session, init_database
+from storage.models import Generation, Task
 
 # 简化的测试代码
 CALCULATOR_TEST = """

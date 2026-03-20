@@ -8,8 +8,8 @@ Success criteria:
 """
 
 import random
-import time
 import sys
+import time
 from typing import List
 
 # ============== Test Data Generation ==============
@@ -190,8 +190,8 @@ def evaluate_solution(solution_func) -> dict:
 
 if __name__ == "__main__":
     # Import the solution to test
-    import sys
     import os
+    import sys
 
     # Add parent directory to path
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

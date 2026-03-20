@@ -104,9 +104,9 @@ class TestDualEvaluatorInitialization:
     def test_can_accept_custom_evaluators(self):
         """测试可接受自定义评估器"""
         from evolution.dual_evaluator import DualEvaluator
-        from evolution.intrinsic_evaluator import IntrinsicEvaluator
         from evolution.extrinsic_evaluator import ExtrinsicEvaluator
         from evolution.goodhart_detector import GoodhartDetector
+        from evolution.intrinsic_evaluator import IntrinsicEvaluator
 
         custom_intrinsic = IntrinsicEvaluator()
         custom_extrinsic = ExtrinsicEvaluator()

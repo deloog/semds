@@ -7,9 +7,9 @@
 import ast
 import re
 import tempfile
-from pathlib import Path
 from datetime import datetime
-from typing import Tuple, Dict, List, Optional, Any
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 from evolution.test_runner import TestRunner
 

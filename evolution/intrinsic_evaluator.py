@@ -11,7 +11,7 @@ Intrinsic Evaluator 模块 - 静态代码质量评估
 
 import ast
 from dataclasses import dataclass, field
-from typing import List, Set, Dict
+from typing import Dict, List, Set
 
 
 @dataclass

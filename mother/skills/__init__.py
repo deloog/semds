@@ -3,9 +3,9 @@ Mother System Skills Package
 自主代理技能集合
 """
 
-from mother.skills.web_search import WebSearchSkill, search_solution
 from mother.skills.code_quality import CodeQualityChecker, check_code, fix_code
 from mother.skills.self_reflection import SelfReflection, reflect_on_task
+from mother.skills.web_search import WebSearchSkill, search_solution
 
 __all__ = [
     "WebSearchSkill",

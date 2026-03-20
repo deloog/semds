@@ -12,8 +12,9 @@ Design Principles Applied:
 import sys
 
 sys.path.insert(0, "D:\semds")
-from mother.core.capability_registry import Capability
 import os
+
+from mother.core.capability_registry import Capability
 
 
 class FileReaderTool(Capability):

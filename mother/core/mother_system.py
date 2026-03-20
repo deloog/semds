@@ -8,8 +8,8 @@ import sys
 
 sys.path.insert(0, r"D:\semds")
 
-from mother.core.task_analyzer import TaskAnalyzer, ExecutionPlan
 from mother.core.capability_registry import CapabilityRegistry
+from mother.core.task_analyzer import ExecutionPlan, TaskAnalyzer
 from mother.core.tool_generator import ToolGenerator
 
 

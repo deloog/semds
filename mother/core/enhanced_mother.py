@@ -6,19 +6,19 @@ Enhanced Mother System - 增强版母体系统
 import os
 import sys
 import time
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, r"D:\semds")
 
-from mother.core.mother_system import MotherSystem, ExecutionPlan
-from mother.core.task_analyzer import TaskAnalyzer
 from mother.core.capability_registry import CapabilityRegistry
+from mother.core.mother_system import ExecutionPlan, MotherSystem
+from mother.core.task_analyzer import TaskAnalyzer
 from mother.core.tool_generator import ToolGenerator
+from mother.skills.code_quality import AutoFixer, CodeQualityChecker
+from mother.skills.self_reflection import SelfReflection
 
 # 新技能
-from mother.skills.web_search import WebSearchSkill, KnowledgeBase
-from mother.skills.code_quality import CodeQualityChecker, AutoFixer
-from mother.skills.self_reflection import SelfReflection
+from mother.skills.web_search import KnowledgeBase, WebSearchSkill
 
 
 class EnhancedMotherSystem(MotherSystem):

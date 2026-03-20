@@ -9,8 +9,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from evolution.orchestrator import EvolutionOrchestrator
 from evolution.code_generator import CodeGenerator
+from evolution.orchestrator import EvolutionOrchestrator
 from evolution.termination_checker import TerminationConfig
 
 

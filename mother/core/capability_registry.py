@@ -3,10 +3,10 @@ Capability Registry - 能力注册表
 管理可用工具，检查缺失能力
 """
 
+import importlib.util
 import os
 import sys
-import importlib.util
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class Capability:

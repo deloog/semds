@@ -1,8 +1,9 @@
 """测试登录API"""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
 
 
 class TestLoginAPI:
@@ -32,8 +33,9 @@ class TestLoginAPI:
 
     def test_login_with_invalid_credentials(self):
         """无效凭据应返回401"""
-        from api.main import app
         from unittest.mock import patch
+
+        from api.main import app
 
         with patch("api.routers.auth.authenticate_user") as mock_auth:
             mock_auth.return_value = None

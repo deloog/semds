@@ -1,9 +1,10 @@
 """测试任务管理路由"""
 
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timezone
 
 
 @pytest.fixture
@@ -35,8 +36,8 @@ class TestCreateTask:
 
     def test_create_task_returns_201_and_task_data(self, mock_db_session, auth_headers):
         """创建任务应返回201和任务数据"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, _ = mock_db_session
 
@@ -115,8 +116,8 @@ class TestListTasks:
 
     def test_list_tasks_returns_all_tasks(self, mock_db_session, auth_headers):
         """应返回用户的任务列表"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -150,8 +151,8 @@ class TestListTasks:
 
     def test_list_tasks_with_status_filter(self, mock_db_session, auth_headers):
         """应支持按状态过滤"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.all.return_value = []
@@ -175,8 +176,8 @@ class TestGetTask:
 
     def test_get_existing_task_returns_task(self, mock_db_session, auth_headers):
         """获取存在的任务应返回详情"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -211,8 +212,8 @@ class TestGetTask:
 
     def test_get_nonexistent_task_returns_404(self, mock_db_session, auth_headers):
         """获取不存在的任务应返回404"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = None
@@ -236,8 +237,8 @@ class TestPathTraversalProtection:
 
     def test_task_name_with_path_traversal_is_sanitized(self, mock_db_session):
         """包含路径遍历字符的任务名应被清理"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
         from api.routers.tasks import sanitize_filename
 
         # 测试sanitize_filename函数
@@ -268,8 +269,8 @@ class TestDeleteTask:
         self, mock_db_session, admin_auth_headers
     ):
         """ADMIN删除存在的任务应成功"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -300,8 +301,8 @@ class TestDeleteTask:
 
     def test_delete_task_forbidden_for_user(self, mock_db_session, auth_headers):
         """普通用户删除任务应返回403（USER角色没有DELETE权限）"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
 
@@ -325,8 +326,8 @@ class TestDeleteTask:
 
     def test_delete_nonexistent_task_returns_404(self, mock_db_session, auth_headers):
         """删除不存在的任务应返回404"""
-        from api.main import app
         from api.dependencies import get_db_session
+        from api.main import app
 
         session, query_mock = mock_db_session
         query_mock.first.return_value = None
